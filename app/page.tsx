@@ -6,42 +6,24 @@ import { BookOutlined, CodeOutlined, GlobalOutlined } from "@ant-design/icons";
 import styles from "@/styles/page.module.css";
 
 export default function Home() {
+
   const router = useRouter();
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            <code>app/page.tsx</code>{" "}
-            is the landing page for your application, currently being displayed.
-          </li>
-          <li>
-            <code>app/login/page.tsx</code> is the login page for users.
-          </li>
-          <li>
-            <code>app/users/page.tsx</code>{" "}
-            is the dashboard that shows an overview of all users, fetched from
-            the server.
-          </li>
-          <li>
-            <code>app/users/[id]/page.tsx</code>{" "}
-            is a slug page that shows info of a particular user. Since each user
-            has its own id, each user has its own infopage, dynamically with the
-            use of slugs.
-          </li>
-          <li>
-            To test, modify the current page <code>app/page.tsx</code>{" "}
-            and save to see your changes instantly.
-          </li>
-        </ol>
+<Image
+  className={styles.logo}
+  src="/lendahand.png"
+  alt="Lendahand logo"
+  width={200}
+  height={38}
+  style={{ height: "auto" }}
+  priority
+/>
+
+  <li style={{ fontSize: "24px", fontFamily: "Arial", color: "black" }}>
+    Group 19
+  </li>
 
         <div className={styles.ctas}>
           <Button
@@ -72,13 +54,6 @@ export default function Home() {
             rel="noopener noreferrer"
           >
             Read our docs
-          </Button>
-          <Button
-            type="primary"
-            variant="solid"
-            onClick={() => router.push("/login")}
-          >
-            Go to login
           </Button>
         </div>
       </main>
