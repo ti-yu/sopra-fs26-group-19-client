@@ -34,8 +34,8 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@lisgeh2]** | [27.03]   | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/75e04cda17516e94856f3892a8bf7e7ff9e02b66)] | [Implementing lots of classes that were defined in Class Diagramm] | [Because we can't move on without the basics in tact] |
+|                    | [27.03]   | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/69e08009540896ba7e3eea8113c3397a126345b3)] | [Front End for Registration Page] | [Because it's the gist of my assigned Task and essential to open the app] |
 | **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
