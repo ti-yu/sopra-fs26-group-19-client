@@ -1,7 +1,7 @@
 // your code here for S2 to display a single user profile after having clicked on it
 // each user has their own slug /[id] (/1, /2, /3, ...) and is displayed using this file
 // try to leverage the component library from antd by utilizing "Card" to display the individual user
-// import { Card } from "antd"; // similar to /app/users/page.tsx
+// import { Card } from "antd"; // similar to /app/profile/page.tsx
 
 "use client";
 // For components that need React hooks and browser APIs,
@@ -18,6 +18,7 @@ import {
   UnorderedListOutlined,
   EditOutlined
 } from "@ant-design/icons";
+import { useApi } from "@/hooks/useApi";
  
 interface IconConfig {
   icon: React.ReactNode;
@@ -36,39 +37,35 @@ const CLIENT_ICONS: IconConfig[] = [
   { icon: <EditOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "New Inserat", href: "/feedHandler" },
   { icon: <UnorderedListOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "My Inserat", href: "/inseratHandler" },
 ];
+
  
 const Profile: React.FC = () => {
-  const params = useParams();
-  const id = params?.id;
- 
+  const { id }= useParams();
+  const apiService = useApi()
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
  
   useEffect(() => {
-    if (!id) return;
     const fetchUser = async () => {
       try {
-        const res = await fetch(`/api/users/${id}`);
-        if (!res.ok) throw new Error(`User not found (${res.status})`);
-        const data: User = await res.json();
+        const data = await apiService.get<User>(`/profile/${id}`);
         setUser(data);
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "Failed to load user");
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
       }
     };
+
     fetchUser();
   }, [id]);
  
-  if (loading) {
-    return (
-      <div className="card-container" style={{ textAlign: "center", paddingTop: 80 }}>
-        <Spin size="large" />
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="card-container" style={{ textAlign: "center", paddingTop: 80 }}>
+  //       <Spin size="large" />
+  //     </div>
+  //   );
+  // }
  
   if (error || !user) {
     return (
