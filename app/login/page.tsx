@@ -9,8 +9,8 @@ import { Button, Form, Input } from "antd";
 // import styles from "@/styles/page.module.css";
 
 interface FormFieldProps {
-  label: string;
-  value: string;
+  username: string;
+  password: string;
 }
 
 const Login: React.FC = () => {
@@ -30,15 +30,15 @@ const Login: React.FC = () => {
   const handleLogin = async (values: FormFieldProps) => {
     try {
       // Call the API service and let it handle JSON serialization and error handling
-      const response = await apiService.post<User>("/users", values);
+      const response = await apiService.post<User>("/login", values);
 
       // Use the useLocalStorage hook that returned a setter function (setToken in line 41) to store the token if available
       if (response.token) {
         setToken(response.token);
       }
 
-      // Navigate to the user overview
-      router.push("/users");
+      // Navigate to the user profile screen using their ID
+      router.push(`/profile/${response.id}`);
     } catch (error) {
       if (error instanceof Error) {
         alert(`Something went wrong during the login:\n${error.message}`);
@@ -49,36 +49,126 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="login-container">
-      <Form
-        form={form}
-        name="login"
-        size="large"
-        variant="outlined"
-        onFinish={handleLogin}
-        layout="vertical"
-      >
-        <Form.Item
-          name="username"
-          label="Username"
-          rules={[{ required: true, message: "Please input your username!" }]}
-        >
-          <Input placeholder="Enter username" />
-        </Form.Item>
-        <Form.Item
-          name="name"
-          label="Name"
-          rules={[{ required: true, message: "Please input your name!" }]}
-        >
-          <Input placeholder="Enter name" />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit" className="login-button">
-            Login
-          </Button>
-        </Form.Item>
-      </Form>
-    </div>
+      <div style={{
+        backgroundColor: "#e5e5e5",
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px"
+      }}>
+        <div style={{
+          backgroundColor: "white",
+          width: "100%",
+          maxWidth: "400px",
+          height: "80vh",
+          minHeight: "500px",
+          display: "flex",
+          flexDirection: "column",
+          padding: "40px 20px 30px",
+          borderRadius: "12px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+        }}>
+
+          {/* --- Header Section --- */}
+          <div style={{ position: "relative", textAlign: "center", marginBottom: "40px" }}>
+          <span
+              onClick={() => router.push("/registration")}
+              style={{
+                position: "absolute",
+                left: 0,
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "#d9737d",
+                cursor: "pointer",
+                fontSize: "16px",
+                fontWeight: 500
+              }}
+          >
+            register
+          </span>
+            <h1 style={{ margin: 0, fontSize: "32px", fontWeight: "bold", color: "#000" }}>Login</h1>
+          </div>
+
+          {/* --- Form Section --- */}
+          <Form
+              form={form}
+              name="login"
+              onFinish={handleLogin}
+              layout="vertical"
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column"
+              }}
+          >
+            {/* Username Input */}
+            <Form.Item
+                name="username"
+                rules={[{ required: true, message: "Please input your username!" }]}
+                style={{ marginBottom: "20px" }}
+            >
+              <Input
+                  placeholder="Username"
+                  style={{
+                    backgroundColor: "#f5f5f5",
+                    color: "#000",
+                    border: "none",
+                    padding: "14px 16px",
+                    borderRadius: "10px",
+                    fontSize: "16px"
+                  }}
+              />
+            </Form.Item>
+
+            {/* Password Input */}
+            <Form.Item
+                name="password"
+                rules={[{ required: true, message: "Please input your password!" }]}
+            >
+              <Input.Password
+                  placeholder="Password"
+                  style={{
+                    backgroundColor: "#f5f5f5",
+                    color: "#000",
+                    border: "none",
+                    padding: "14px 16px",
+                    borderRadius: "10px",
+                    fontSize: "16px"
+                  }}
+                  // This swaps the default eye icon for the custom text from your mockup
+                  iconRender={visible => (
+                      <span style={{ color: "#d9737d", fontSize: "14px", fontWeight: 500, cursor: "pointer" }}>
+                  {visible ? "Hide" : "Show"}
+                </span>
+                  )}
+              />
+            </Form.Item>
+
+            {/* This empty div flex-grows to push the button to the bottom */}
+            <div style={{ flex: 1 }}></div>
+
+            {/* Login Button */}
+            <Form.Item style={{ marginBottom: 0 }}>
+              <Button
+                  htmlType="submit"
+                  block
+                  style={{
+                    backgroundColor: "#d9737d",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "30px", // Pill shape
+                    height: "55px",
+                    fontSize: "18px",
+                    fontWeight: "bold"
+                  }}
+              >
+                Login
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
+      </div>
   );
 };
 

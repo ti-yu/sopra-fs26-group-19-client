@@ -54,7 +54,7 @@ const Register: React.FC = () => {
       setToken(loginResponse.token);
 
       // 4) Redirect
-      router.push(`/users/${created.id}`);
+      router.push(`/profile/${created.id}`);
     } catch (error) {
       if (error instanceof Error) {
         alert(`Something went wrong during registration:\n${error.message}`);
