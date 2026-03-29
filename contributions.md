@@ -32,16 +32,16 @@ reason).
 
 ## Contributions Week 1 - [Begin Date] to [End Date]
 
-| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
-| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@lisgeh2]** | [27.03]   | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/75e04cda17516e94856f3892a8bf7e7ff9e02b66)] | [Implementing lots of classes that were defined in Class Diagramm] | [Because we can't move on without the basics in tact] |
-|                    | [27.03]   | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/69e08009540896ba7e3eea8113c3397a126345b3)] | [Front End for Registration Page] | [Because it's the gist of my assigned Task and essential to open the app] |
-| **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **Student**        | **Date** | **Link to Commit** | **Description**                                                    | **Relevance**                                                             |
+|--------------------|----------| ------------------ |--------------------------------------------------------------------|---------------------------------------------------------------------------|
+| **[@lisgeh2]**     | [27.03]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/75e04cda17516e94856f3892a8bf7e7ff9e02b66)] | [Implementing lots of classes that were defined in Class Diagramm] | [Because we can't move on without the basics in tact]                     |
+|                    | [27.03]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/69e08009540896ba7e3eea8113c3397a126345b3)] | [Front End for Registration Page]                                  | [Because it's the gist of my assigned Task and essential to open the app] |
+| **[@romevp]**      | [29.03]  | [https://github.com/ti-yu/sopra-fs26-group-19-client/actions/runs/23706292355] | [login frontend]                                                   | [it needs a login page]                                                   |
+|                    | [29.03]  | [https://github.com/ti-yu/sopra-fs26-group-19-server/actions/runs/23706291362] | [backend changes for login]                                        | [app needs a login to work]                                               |
+| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task]                                    | [Why this contribution is relevant]                                       |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]                                    | [Why this contribution is relevant]                                       |
+| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task]                                    | [Why this contribution is relevant]                                       |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]                                    | [Why this contribution is relevant]                                       |
 
 ---
 
