@@ -14,4 +14,5 @@ export interface User {
   emailAddress: string | null;
   previousInserat: [string] | null;
   reviews: [string] | null;
+  token? : string | null;
 }
