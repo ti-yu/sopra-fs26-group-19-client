@@ -1,7 +1,7 @@
 export interface User {
   id: string | null;
   isVolunteer: boolean | null;
-  username: string | null;
+  username: string;
   givenName: string | null;
   lastName: string | null;
   password: string | null;
