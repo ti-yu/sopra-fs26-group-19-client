@@ -60,3 +60,13 @@ a {
   min-height: 100vh;
   background-color: rgb(41, 44, 59);
 }
+
+.profile-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  padding: 2rem 1 rem;
+  position: relative;
+  z-index: 1;
+}

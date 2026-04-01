@@ -42,7 +42,7 @@ const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
       left: 0,
       right: 0,
       height: 64,
-      backgroundColor: "#ffffff",
+      backgroundColor: "#fafafa",
       borderTop: "1px solid #eeeeee",
       display: "flex",
       justifyContent: "space-around",
