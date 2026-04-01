@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Card } from "antd";
 import {
   HomeFilled,
   GlobalOutlined,
@@ -11,8 +10,8 @@ import {
 
 interface IconConfig {
   icon: React.ReactNode;
-  label: string;
   href: string;
+  label: string;
 }
 
 const getIconConfigs = (id: string, isVolunteer: boolean): IconConfig[] =>
@@ -23,7 +22,7 @@ const getIconConfigs = (id: string, isVolunteer: boolean): IconConfig[] =>
         { icon: <UnorderedListOutlined style={{ fontSize: 28, color: "#53beb3" }} />, label: "My Applications", href: "/inseratHandler" },
       ]
     : [
-        { icon: <HomeFilled style={{ fontSize: 28, color: "#d9737d" }} />, label: "My Profile", href: `/profile/${id}` },
+        { icon: <HomeFilled style={{ fontSize: 28, color: "#d9737d" }} />,label: "My Profile", href: `/profile/${id}` },
         { icon: <EditOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "New Inserat", href: "/feedHandler" },
         { icon: <UnorderedListOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "My Inserat", href: "/inseratHandler" },
       ];
@@ -37,20 +36,28 @@ const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
   const iconConfigs = getIconConfigs(id, isVolunteer);
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+    <nav style={{
+      position: "fixed",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 64,
+      backgroundColor: "#ffffff",
+      borderTop: "1px solid #eeeeee",
+      display: "flex",
+      justifyContent: "space-around",
+      alignItems: "center",
+      zIndex: 1000,
+    }}>
       {iconConfigs.map(({ icon, label, href }) => (
-        <a key={label} href={href} style={{ textDecoration: "none" }}>
-          <Card
-            hoverable
-            style={{ textAlign: "center", padding: "12px 0" }}
-            styles={{ body: { padding: "16px 8px" } }}
-          >
-            {icon}
-            <p style={{ margin: "8px 0 0", fontSize: 12, fontWeight: 500 }}>{label}</p>
-          </Card>
+        <a
+          key={label}
+          href={href}
+        >
+          {icon}
         </a>
       ))}
-    </div>
+    </nav>
   );
 };
 

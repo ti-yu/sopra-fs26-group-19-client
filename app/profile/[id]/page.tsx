@@ -5,8 +5,10 @@ import { useParams } from "next/navigation";
 import { Card, Avatar, Tag, Spin } from "antd";
 import { User } from "@/types/user";
 import Navbar from "../../../components/navbar";
+import { useApi } from "@/hooks/useApi";
 
 const Profile: React.FC = () => {
+  const apiService = useApi();
   const params = useParams();
   const id = params?.id;
 
@@ -18,9 +20,7 @@ const Profile: React.FC = () => {
     if (!id) return;
     const fetchUser = async () => {
       try {
-        const res = await fetch(`/api/profile/${id}`);
-        if (!res.ok) throw new Error(`User not found (${res.status})`);
-        const data: User = await res.json();
+        const data = await apiService.get<User>(`/profile/${id}`);
         setUser(data);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to load user");
@@ -51,7 +51,7 @@ const Profile: React.FC = () => {
   const roleLabel = user.isVolunteer ? "Volunteer" : "Client";
 
   return (
-    <div className="card-container" style={{ maxWidth: 480, margin: "0 auto", padding: "2rem 1rem" }}>
+    <div className="card-container" style={{margin: "0 auto", padding: "2rem 1rem" }}>
       {/* — User profile card — */}
       <Card style={{ marginBottom: 24, textAlign: "center" }}>
         <Avatar size={72} style={{ backgroundColor: user.isVolunteer ? "#53beb3" : "#d9737d", marginBottom: 12 }}>
