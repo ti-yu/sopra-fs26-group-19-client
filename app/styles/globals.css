@@ -3,12 +3,6 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 html,
 body {
@@ -33,12 +27,6 @@ body {
 a {
   color: inherit;
   text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
 }
 
 .login-container {
@@ -69,4 +57,25 @@ a {
   padding: 2rem 1 rem;
   position: relative;
   z-index: 1;
+}
+
+.headerBar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2vh 5vh;
+  position: fixed;
+  z-index: 100;
+  width: 100%;
+
+}
+
+/* When using this, add "style={{ "--role-color": user.isVolunteer ? "#53beb3" : "#d9737d"} as React.CSSProperties}" to the topmost <div> */
+.headerBar a {
+  color: var(--role-color);
+}
+
+.headerBar h1 {
+  color: #ffffff;
 }

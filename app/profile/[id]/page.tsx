@@ -47,22 +47,21 @@ const Profile: React.FC = () => {
     );
   }
 
-  const roleColor = user.isVolunteer ? "green" : "red";
   const roleLabel = user.isVolunteer ? "Volunteer" : "Recipient";
 
   return (
 
-    <div>
-      <div className="" style={{position: "fixed", zIndex: 100, top: 0, width: "100%"}}>
+    <div style={{ "--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black"} as React.CSSProperties}>
+      <div className="headerBar">
 
-        <a href=""> Logout </a>
+        <a href="" style={{color: "white"}}> Logout </a>
         <h1>Profile</h1>
-        <a href=""> Settings </a>
+        <a href="" style={{color: "white"}}> Settings </a>
 
       </div>
 
       <div style={{ 
-        backgroundColor: user.isVolunteer ? "#53beb3" : "#d9737d", 
+        backgroundColor: "var(--role-color)", 
         height: "25vh",
         width: "100%",
         paddingTop: "60px",
@@ -70,8 +69,8 @@ const Profile: React.FC = () => {
       }}> 
       </div>
 
-      <div className="profile-container" style={{marginTop: "-100px"}}>
-          <Avatar size={150} style={{ backgroundColor: user.isVolunteer ? "#3e9188ff" : "#964f56ff"}}>
+      <div className="profile-container" style={{marginTop: "-75px"}}>
+          <Avatar size={120} style={{backgroundColor: user.isVolunteer ? "#3e9188ff" : "#964f56ff"}}>
             {user.username.charAt(0).toUpperCase()}
           </Avatar>
           <h1 style={{ margin: "8px 0 4px" }}>{user.username}</h1>
@@ -80,6 +79,7 @@ const Profile: React.FC = () => {
           <div style={{display: "flex", alignItems: "left", marginTop: "40px", flexDirection: "column", gap: "20px"}}>
             <p><strong>Bio: </strong>{user.bio}</p>
             <p><strong>Age: </strong>Well idk, but they were born {user.dateOfBirth}</p>
+            <p><strong>Gender: </strong>{user.gender}</p>
           </div>
         {/* — Role-based navigation icons — */}
         <Navbar id={id as string} isVolunteer={user.isVolunteer} />
