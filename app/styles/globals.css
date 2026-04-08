@@ -1,8 +1,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #d9737d;
+  --input-bg: #f5f5f5;
 }
-
 
 html,
 body {
@@ -29,12 +30,15 @@ a {
   text-decoration: none;
 }
 
+/* ─── Page Wrappers ─────────────────────────────────── */
+
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: rgb(41, 44, 59);
+  background-color: #e5e5e5;
+  padding: 20px;
 }
 
 .login-button {
@@ -49,12 +53,76 @@ a {
   background-color: rgb(41, 44, 59);
 }
 
+/* ─── Auth Card ─────────────────────────────────────── */
+
+.auth-card {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 400px;
+  height: 80vh;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Auth Card Header ──────────────────────────────── */
+
+.auth-card-header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.auth-card-header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.auth-card-header .header-link {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* ─── Auth Form ─────────────────────────────────────── */
+
+.auth-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form-spacer {
+  flex: 1;
+}
+
+/* ─── Password toggle ───────────────────────────────── */
+
+.password-toggle {
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* ─── Profile & Header ──────────────────────────────── */
+
 .profile-container {
   display: flex;
   justify-content: flex-start;
   align-items: center;
   flex-direction: column;
-  padding: 2rem 1 rem;
+  padding: 2rem 1rem;
   position: relative;
   z-index: 1;
 }
@@ -68,10 +136,9 @@ a {
   position: fixed;
   z-index: 100;
   width: 100%;
-
 }
 
-/* When using this, add "style={{ "--role-color": user.isVolunteer ? "#53beb3" : "#d9737d"} as React.CSSProperties}" to the topmost <div> */
+/* Add style={{ "--role-color": user.isVolunteer ? "#53beb3" : "#d9737d" } as React.CSSProperties} to the topmost <div> */
 .headerBar a {
   color: var(--role-color);
 }
