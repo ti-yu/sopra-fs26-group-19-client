@@ -37,7 +37,7 @@ const Register: React.FC = () => {
           : null,
       };
 
-      const created = await apiService.post<User>("/profile", payload);
+      const created = await apiService.post<User>("/register", payload);
 
       const loginResponse = await apiService.post<User>("/login", {
         username: values.username,
