@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Avatar, Spin } from "antd";
 import { User } from "@/types/user";
-import Navbar from "../../../components/navbar";
+import Navbar from "@/components/navbar"
 import { useApi } from "@/hooks/useApi";
 
 const Profile: React.FC = () => {
