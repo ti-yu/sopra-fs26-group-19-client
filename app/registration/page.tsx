@@ -27,6 +27,8 @@ const Register: React.FC = () => {
   const [form] = Form.useForm();
 
   const { set: setToken } = useLocalStorage<string>("token", "");
+  const { set: setUserId } = useLocalStorage<string>("userId", "");
+
 
   const handleRegister = async (values: RegisterFormValues) => {
     try {
@@ -49,6 +51,7 @@ const Register: React.FC = () => {
       }
 
       setToken(loginResponse.token);
+      setUserId(created.id); 
       router.push(`/profile/${created.id}`);
     } catch (error) {
       if (error instanceof Error) {
