@@ -1,17 +1,17 @@
 export interface User {
-  id: string | null;
-  isVolunteer: boolean | null;
+  id: string;
+  isVolunteer: boolean;
   username: string;
-  givenName: string | null;
-  lastName: string | null;
-  password: string | null;
+  givenName: string;
+  lastName: string;
+  password: string;
   bio: string | null;
   profilePicture: null | null;
   address: string | null;
   dateOfBirth: string | null;
   gender: string | null;
   phoneNumber: string | null;
-  emailAddress: string | null;
+  emailAddress: string;
   previousInserat: [string] | null;
   reviews: [string] | null;
   token? : string | null;

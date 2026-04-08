@@ -1,72 +1,44 @@
-// your code here for S2 to display a single user profile after having clicked on it
-// each user has their own slug /[id] (/1, /2, /3, ...) and is displayed using this file
-// try to leverage the component library from antd by utilizing "Card" to display the individual user
-// import { Card } from "antd"; // similar to /app/profile/page.tsx
-
 "use client";
-// For components that need React hooks and browser APIs,
-// SSR (server side rendering) has to be disabled.
-// Read more here: https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Card, Avatar, Tag, Spin } from "antd";
-import { User } from "@/types/user"
-import {
-  HomeFilled,
-  GlobalOutlined,
-  UnorderedListOutlined,
-  EditOutlined
-} from "@ant-design/icons";
+import { Avatar, Spin } from "antd";
+import { User } from "@/types/user";
+import Navbar from "../../../components/navbar";
 import { useApi } from "@/hooks/useApi";
- 
-interface IconConfig {
-  icon: React.ReactNode;
-  label: string;
-  href: string;
-}
- 
-const VOLUNTEER_ICONS: IconConfig[] = [
-  { icon: <HomeFilled style={{ fontSize: 28, color: "#53beb3" }} />, label: "My Profile", href: "/profile[id]" },
-  { icon: <GlobalOutlined style={{ fontSize: 28, color: "#53beb3" }} />, label: "My Feed", href: "/feedHandler" },
-  { icon: <UnorderedListOutlined style={{ fontSize: 28, color: "#53beb3" }} />, label: "My Applications", href: "/inseratHandler" },
-];
- 
-const CLIENT_ICONS: IconConfig[] = [
-  { icon: <HomeFilled style={{ fontSize: 28, color: "#d9737d" }} />, label: "My Profile", href: "/profile/[id]" },
-  { icon: <EditOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "New Inserat", href: "/feedHandler" },
-  { icon: <UnorderedListOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "My Inserat", href: "/inseratHandler" },
-];
 
- 
 const Profile: React.FC = () => {
-  const { id }= useParams();
-  const apiService = useApi()
+  const apiService = useApi();
+  const params = useParams();
+  const id = params?.id;
+
   const [user, setUser] = useState<User | null>(null);
-  // const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
- 
+
   useEffect(() => {
+    if (!id) return;
     const fetchUser = async () => {
       try {
         const data = await apiService.get<User>(`/profile/${id}`);
         setUser(data);
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Failed to load user");
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchUser();
   }, [id]);
- 
-  // if (loading) {
-  //   return (
-  //     <div className="card-container" style={{ textAlign: "center", paddingTop: 80 }}>
-  //       <Spin size="large" />
-  //     </div>
-  //   );
-  // }
- 
+
+  if (loading) {
+    return (
+      <div className="card-container" style={{ textAlign: "center", paddingTop: 80 }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   if (error || !user) {
     return (
       <div className="card-container">
@@ -74,39 +46,46 @@ const Profile: React.FC = () => {
       </div>
     );
   }
- 
-  const iconConfigs = user.isVolunteer ? VOLUNTEER_ICONS : CLIENT_ICONS;
-  const roleColor    = user.isVolunteer ? "green" : "red";
-  const roleLabel    = user.isVolunteer ? "Volunteer" : "Client";
- 
+
+  const roleLabel = user.isVolunteer ? "Volunteer" : "Recipient";
+
   return (
-    <div className="card-container" style={{ maxWidth: 480, margin: "0 auto", padding: "2rem 1rem" }}>
-      {/* — User profile card — */}
-      <Card style={{ marginBottom: 24, textAlign: "center" }}>
-        <Avatar size={72} style={{ backgroundColor: user.isVolunteer ? "#53beb3" : "#d9737d", marginBottom: 12 }}>
-          {user.username.charAt(0).toUpperCase()}
-        </Avatar>
-        <h2 style={{ margin: "8px 0 4px" }}>{user.username}</h2>
-        <Tag color={roleColor} style={{ marginBottom: 4 }}>{roleLabel}</Tag>
-      </Card>
- 
-      {/* — Role-based navigation icons — */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-        {iconConfigs.map(({ icon, label, href }) => (
-          <a key={label} href={href} style={{ textDecoration: "none" }}>
-            <Card
-              hoverable
-              style={{ textAlign: "center", padding: "12px 0" }}
-              styles={{ body: { padding: "16px 8px" } }}
-            >
-              {icon}
-              <p style={{ margin: "8px 0 0", fontSize: 12, fontWeight: 500 }}>{label}</p>
-            </Card>
-          </a>
-        ))}
+
+    <div style={{ "--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black"} as React.CSSProperties}>
+      <div className="headerBar">
+
+        <a href="" style={{color: "white"}}> Logout </a>
+        <h1>Profile</h1>
+        <a href="" style={{color: "white"}}> Settings </a>
+
+      </div>
+
+      <div style={{ 
+        backgroundColor: "var(--role-color)", 
+        height: "25vh",
+        width: "100%",
+        paddingTop: "60px",
+        boxSizing: "border-box"
+      }}> 
+      </div>
+
+      <div className="profile-container" style={{marginTop: "-75px"}}>
+          <Avatar size={120} style={{backgroundColor: user.isVolunteer ? "#3e9188ff" : "#964f56ff"}}>
+            {user.username.charAt(0).toUpperCase()}
+          </Avatar>
+          <h1 style={{ margin: "8px 0 4px" }}>{user.username}</h1>
+          <p><strong>{roleLabel}</strong></p>
+
+          <div style={{display: "flex", alignItems: "left", marginTop: "40px", flexDirection: "column", gap: "20px"}}>
+            <p><strong>Bio: </strong>{user.bio}</p>
+            <p><strong>Age: </strong>Well idk, but they were born {user.dateOfBirth}</p>
+            <p><strong>Gender: </strong>{user.gender}</p>
+          </div>
+        {/* — Role-based navigation icons — */}
+        <Navbar id={id as string} isVolunteer={user.isVolunteer} />
       </div>
     </div>
   );
 };
- 
+
 export default Profile;
