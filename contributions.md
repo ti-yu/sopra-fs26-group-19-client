@@ -49,8 +49,8 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@lisgeh2]** | [08.04]   | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/c3c608e6d817b8d5a152ca3d4b802ac21a06f91c)] | [All Backend Updates for Inserat things] | [Because Inserat is a core Entity] |
+|                    | [08.04]   | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/pull/88/changes/93a576122befbbc7d940e73ab96e590026ab7ceb)] | [New Global CSS Styling] | [Because it is inefficient if everybody does their own styling on their page, should be automatic. (I have more commits than this (a branch) bu this is the main one)] |
 | **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
