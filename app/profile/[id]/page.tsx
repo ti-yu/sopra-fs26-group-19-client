@@ -6,6 +6,7 @@ import { Avatar, Spin } from "antd";
 import { User } from "@/types/user";
 import Navbar from "@/components/navbar"
 import { useApi } from "@/hooks/useApi";
+import Link from "next/link";
 
 const Profile: React.FC = () => {
   const apiService = useApi();
@@ -52,25 +53,29 @@ const Profile: React.FC = () => {
   return (
 
     <div style={{ "--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black"} as React.CSSProperties}>
-      <div className="headerBar">
+        <div className="headerBar">
+            <Link href="/login" style={{color: "white"}} onClick={() => localStorage.clear()}>
+                Logout
+            </Link>
 
-        <a href="" style={{color: "white"}}> Logout </a>
-        <h1>Profile</h1>
-        <a href="" style={{color: "white"}}> Settings </a>
+            <h1>Profile</h1>
 
-      </div>
+            <Link href="/settings" style={{color: "white"}}>
+                Settings
+            </Link>
+        </div>
 
-      <div style={{ 
-        backgroundColor: "var(--role-color)", 
-        height: "25vh",
-        width: "100%",
-        paddingTop: "60px",
-        boxSizing: "border-box"
-      }}> 
-      </div>
+        <div style={{
+            backgroundColor: "var(--role-color)",
+            height: "25vh",
+            width: "100%",
+            paddingTop: "60px",
+            boxSizing: "border-box"
+        }}>
+        </div>
 
-      <div className="profile-container" style={{marginTop: "-75px"}}>
-          <Avatar size={120} style={{backgroundColor: user.isVolunteer ? "#3e9188ff" : "#964f56ff"}}>
+        <div className="profile-container" style={{marginTop: "-75px"}}>
+            <Avatar size={120} style={{backgroundColor: user.isVolunteer ? "#3e9188ff" : "#964f56ff"}}>
             {user.username.charAt(0).toUpperCase()}
           </Avatar>
           <h1 style={{ margin: "8px 0 4px" }}>{user.username}</h1>

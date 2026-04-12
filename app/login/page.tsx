@@ -23,6 +23,7 @@ const Login: React.FC = () => {
       const response = await apiService.post<User>("/login", values);
       if (response.token) {
         setToken(response.token);
+        localStorage.setItem("userId", response.id)
       }
       router.push(`/profile/${response.id}`);
     } catch (error) {
