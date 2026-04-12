@@ -24,7 +24,7 @@ const getIconConfigs = (id: string, isVolunteer: boolean): IconConfig[] =>
     : [
         { icon: <HomeFilled style={{ fontSize: 28, color: "#d9737d" }} />,label: "My Profile", href: `/profile/${id}` },
         { icon: <EditOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "New Inserat", href: `/profile/${id}/CreateHelpRequest` },
-        { icon: <UnorderedListOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "My Inserat", href: "/inseratHandler" },
+        { icon: <UnorderedListOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "My Requests", href: "/my-requests" },
       ];
 
 interface NavbarProps {
