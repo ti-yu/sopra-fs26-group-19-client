@@ -140,10 +140,10 @@ const Register: React.FC = () => {
               placeholder="Select gender"
               allowClear
               options={[
-                { value: "male", label: "Male" },
-                { value: "female", label: "Female" },
-                { value: "other", label: "Other" },
-                { value: "prefer_not_to_say", label: "Prefer not to say" },
+                { value: "Male", label: "Male" },
+                { value: "Female", label: "Female" },
+                { value: "Other", label: "Other" },
+                { value: "Prefer not to say", label: "Prefer not to say" },
               ]}
             />
           </Form.Item>
