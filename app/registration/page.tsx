@@ -51,7 +51,10 @@ const Register: React.FC = () => {
       }
 
       setToken(loginResponse.token);
-      setUserId(created.id); 
+      setUserId(created.id);
+      // Store isVolunteer so other pages (navbar, etc.) can check role
+      // without needing an extra API call to fetch the user profile.
+      localStorage.setItem("isVolunteer", String(created.isVolunteer));
       router.push(`/profile/${created.id}`);
     } catch (error) {
       if (error instanceof Error) {
