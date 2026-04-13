@@ -15,6 +15,8 @@ const Login: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [form] = Form.useForm();
+  const { set: setUserId } = useLocalStorage<string>("userId", "");
+
 
   const { set: setToken } = useLocalStorage<string>("token", "");
 
@@ -23,7 +25,7 @@ const Login: React.FC = () => {
       const response = await apiService.post<User>("/login", values);
       if (response.token) {
         setToken(response.token);
-        localStorage.setItem("userId", response.id);
+        setUserId(response.id);
         // Store isVolunteer so other pages (navbar, etc.) can check role
         // without needing an extra API call to fetch the user profile.
         localStorage.setItem("isVolunteer", String(response.isVolunteer));
