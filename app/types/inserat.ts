@@ -4,6 +4,8 @@ export interface Inserat {
   recipientUsername: string;
   description: string;
   location: string;
+  latitude: number;
+  longitude: number;
   date: string;
   timeframe: string;
   status: "OPEN" | "ACCEPTED" | "DONE";
