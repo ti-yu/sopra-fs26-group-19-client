@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, Form, Input, DatePicker } from "antd"; // ✅ removed unused List
+import { Button, Form, Input, DatePicker, Select } from "antd"; // ✅ removed unused List
 import dayjs from "dayjs";
 import Navbar from "@/components/navbar";
 import Script from "next/script";
@@ -30,6 +30,7 @@ type HelpRequestFormValues = {
   description: string;
   date: dayjs.Dayjs;
   timeframe: string;
+  workType: string;
 };
 
 const CreateHelpRequest: React.FC = () => {
@@ -84,6 +85,7 @@ const CreateHelpRequest: React.FC = () => {
         location: selectedPlace.formattedAddress,
         latitude: selectedPlace.location.lat(),
         longitude: selectedPlace.location.lng(),
+        workType: values.workType,
       };
 
       await apiService.post("/help-requests", payload);
@@ -133,6 +135,23 @@ const CreateHelpRequest: React.FC = () => {
                 showCount
                 rows={4}
               />
+            </Form.Item>
+
+            <Form.Item
+                name="workType"
+                label="Type of Work"
+                rules={[{ required: true, message: "Please select a category!" }]}
+            >
+              <Select placeholder="Select category">
+                <Select.Option value="GARDENING">🌻 Gardening</Select.Option>
+                <Select.Option value="SHOPPING">🛒 Shopping & Groceries</Select.Option>
+                <Select.Option value="HEAVY_LIFTING">💪 Heavy Lifting</Select.Option>
+                <Select.Option value="IT_SUPPORT">💻 IT Support</Select.Option>
+                <Select.Option value="TUTORING">📚 Tutoring</Select.Option>
+                <Select.Option value="TRANSPORT">🚗 Transport</Select.Option>
+                <Select.Option value="CLEANING">🧹 Cleaning</Select.Option>
+                <Select.Option value="OTHER">✨ Other</Select.Option>
+              </Select>
             </Form.Item>
 
             <Form.Item
