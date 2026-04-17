@@ -6,6 +6,7 @@ import { useApi } from "@/hooks/useApi";
 import Script from "next/script";
 import Navbar from "@/components/navbar"
 import { User } from "@/types/user";
+import { Inserat } from "@/types/inserat"
 import { Spin } from "antd";
 
 const MapPage: React.FC = () => {
@@ -32,6 +33,30 @@ const MapPage: React.FC = () => {
     fetchUser();
   }, [userId]);
 
+    const initMap = async () => {
+    const { Map } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
+    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
+
+    const map = new Map(document.getElementById("map") as HTMLElement, {
+        center: { lat: 47.3769, lng: 8.5417 },
+        zoom: 12,
+        mapId: "DEMO_MAP_ID",
+    });
+
+    try {
+        const inseratData = await apiService.get<Inserat[]>("/help-requests-map");
+        inseratData.forEach(inserat => {
+        new AdvancedMarkerElement({
+            map,
+            position: { lat: inserat.latitude, lng: inserat.longitude },
+            title: inserat.description,
+        });
+        });
+    } catch (err) {
+        console.error("Failed to load inserats:", err);
+    }
+    };
+
   if (loading) {
     return (
       <div className="card-container" style={{ textAlign: "center", paddingTop: 80 }}>
@@ -47,8 +72,6 @@ const MapPage: React.FC = () => {
       </div>
     );
   }
-
-  const roleLabel = user.isVolunteer ? "Volunteer" : "Recipient";
     
 
   return (
@@ -61,19 +84,9 @@ const MapPage: React.FC = () => {
       <Script
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&v=weekly`}
         strategy="afterInteractive"
+        onLoad={initMap}
       />
-      {/* @ts-ignore */}
-      <gmp-map
-        center="47.3769,8.5417"
-        zoom="12"
-        map-id="DEMO_MAP_ID"
-        style={{
-            height: "calc(100vh - 8vh - 64px)",
-            width: "100%",
-            display: "block",
-            marginTop: "8vh",
-        }}
-      />
+      <div id="map" style={{ height: "calc(100vh - 10vh - 64px)", width: "100%" , marginTop: "8vh"}} />
       <Navbar id={userId} isVolunteer={isVolunteer} />
     </>
   );
