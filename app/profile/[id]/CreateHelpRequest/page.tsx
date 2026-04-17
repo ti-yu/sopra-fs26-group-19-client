@@ -3,11 +3,28 @@
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, Form, Input, DatePicker, List } from "antd";
+import { Button, Form, Input, DatePicker } from "antd"; // ✅ removed unused List
 import dayjs from "dayjs";
 import Navbar from "@/components/navbar";
 import Script from "next/script";
-import { useEffect, useState } from "react";
+import { useState } from "react"; // ✅ removed unused useEffect
+
+// ✅ defined types instead of using any
+interface PlaceSuggestion {
+  placePrediction: {
+    text: { text: string };
+    toPlace: () => PlaceResult;
+  };
+}
+
+interface PlaceResult {
+  fetchFields: (options: { fields: string[] }) => Promise<void>;
+  formattedAddress: string;
+  location: {
+    lat: () => number;
+    lng: () => number;
+  };
+}
 
 type HelpRequestFormValues = {
   description: string;
@@ -23,10 +40,9 @@ const CreateHelpRequest: React.FC = () => {
   const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
 
   const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [selectedPlace, setSelectedPlace] = useState<any>(null);
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]); // ✅ typed
+  const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null); // ✅ typed
 
-  // 🔍 Fetch suggestions from Place Autocomplete Data API
   const fetchSuggestions = async (input: string) => {
     if (!input || !window.google) return;
 
@@ -38,11 +54,10 @@ const CreateHelpRequest: React.FC = () => {
       includedRegionCodes: ["ch"],
     });
 
-    setSuggestions(response.suggestions || []);
+    setSuggestions((response.suggestions || []) as unknown as PlaceSuggestion[]);
   };
 
-  // 📍 Handle selection
-  const handleSelect = async (suggestion: any) => {
+  const handleSelect = async (suggestion: PlaceSuggestion) => { // ✅ typed
     const place = suggestion.placePrediction.toPlace();
 
     await place.fetchFields({
@@ -91,7 +106,7 @@ const CreateHelpRequest: React.FC = () => {
 
       <div className="login-container">
         <div className="auth-card" style={{ height: "auto", minHeight: "500px", paddingBottom: "80px" }}>
-          
+
           <div className="auth-card-header">
             <span className="header-link" onClick={() => router.back()}>
               Cancel
@@ -140,7 +155,6 @@ const CreateHelpRequest: React.FC = () => {
               <Input placeholder="Duration (hours)" />
             </Form.Item>
 
-            {/* 📍 Custom Autocomplete Input */}
             <Form.Item label="Location" required>
               <div style={{ position: "relative" }}>
                 <Input
@@ -170,14 +184,11 @@ const CreateHelpRequest: React.FC = () => {
                       boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                     }}
                   >
-                    {suggestions.map((item: any, index: number) => (
+                    {suggestions.map((item, index) => ( // ✅ removed :any, type is inferred
                       <div
                         key={index}
                         onClick={() => handleSelect(item)}
-                        style={{
-                          padding: "8px 12px",
-                          cursor: "pointer",
-                        }}
+                        style={{ padding: "8px 12px", cursor: "pointer" }}
                         onMouseEnter={(e) =>
                           (e.currentTarget.style.background = "#f5f5f5")
                         }
