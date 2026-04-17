@@ -53,6 +53,11 @@ const MapPage: React.FC = () => {
 
   return (
     <>
+    <div className="headerBar" style={{background: "#f5f5f5", height:"8vh", top:"0px"}}> 
+        <p></p>
+        <h1 style={{color:"#000000"}}>Requests Map</h1>
+        <p></p>
+    </div>
       <Script
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&v=weekly`}
         strategy="afterInteractive"
@@ -62,7 +67,12 @@ const MapPage: React.FC = () => {
         center="47.3769,8.5417"
         zoom="12"
         map-id="DEMO_MAP_ID"
-        style={{height: "100vh"}}
+        style={{
+            height: "calc(100vh - 8vh - 64px)",
+            width: "100%",
+            display: "block",
+            marginTop: "8vh",
+        }}
       />
       <Navbar id={userId} isVolunteer={isVolunteer} />
     </>
