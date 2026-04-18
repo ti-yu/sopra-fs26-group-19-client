@@ -91,7 +91,24 @@ const MapPage: React.FC = () => {
                             <p style="margin: 0 0 4px; color: gray; font-size: 12px;">Where: ${inserat.location}</p>
                             <p style="margin: 0 0 4px; font-size: 12px;">📅 ${inserat.date}</p>
                             <p style="margin: 0; font-size: 12px;">🕐 ${inserat.timeframe}</p>
-                            <p style="margin: 0; font-size: 12px;">${formatWorkType(inserat.workType)}</p>
+                            <p style="margin: 0; font-size: 12px;">${formatWorkType(inserat.workType)}</p> <br> <br> 
+                                    <button
+                                    onclick="console.log('offer help clicked')"
+                                    style="
+                                        background-color: #d9737d;
+                                        color: white;
+                                        border: none;
+                                        border-radius: 8px;
+                                        padding: 8px 16px;
+                                        width: 100%;
+                                        cursor: pointer;
+                                        font-size: 13px;
+                                        font-weight: bold;
+                                    "
+                                >
+                                    🤝 Offer Help
+                                </button>
+                        
                         </div>
                     `);
                     infoWindow.open(map, marker);
