@@ -33,29 +33,47 @@ const MapPage: React.FC = () => {
     fetchUser();
   }, [userId]);
 
-    const initMap = async () => {
+const initMap = async () => {
     const { Map } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
     const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
     const map = new Map(document.getElementById("map") as HTMLElement, {
         center: { lat: 47.3769, lng: 8.5417 },
         zoom: 12,
-        mapId: "DEMO_MAP_ID",
+        mapId: "687f31f6db63e48236a75a4a",
+        styles: [
+            {
+                featureType: "poi",
+                stylers: [{ visibility: "off" }],
+            },
+            {
+                featureType: "transit",
+                stylers: [{ visibility: "off" }],
+            },
+        ],
     });
 
     try {
         const inseratData = await apiService.get<Inserat[]>("/help-requests-map");
         inseratData.forEach(inserat => {
-        new AdvancedMarkerElement({
-            map,
-            position: { lat: inserat.latitude, lng: inserat.longitude },
-            title: inserat.description,
-        });
+            const pin = document.createElement("img");
+            pin.src = "/pin.png"; // path relative to your /public folder
+            pin.style.cssText = `
+                width: 44px;
+                height: 55px;
+                cursor: pointer;
+            `;
+
+            new AdvancedMarkerElement({
+                map,
+                position: { lat: inserat.latitude, lng: inserat.longitude },
+                content: pin,
+            });
         });
     } catch (err) {
         console.error("Failed to load inserats:", err);
     }
-    };
+};
 
   if (loading) {
     return (
