@@ -14,5 +14,3 @@ Dockerfile
 .gitignore
 logs
 .vscode-test
-.xcode.env.local
-.env.local
