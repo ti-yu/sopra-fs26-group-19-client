@@ -44,7 +44,7 @@ export default function SettingsPage() {
     useEffect(() => {
         async function fetchUserData() {
             try {
-                const rawUserId = localStorage.getItem('userId');
+                const rawUserId = sessionStorage.getItem('userId');
                 if (!rawUserId) return;
                 const cleanUserId = rawUserId.replace(/"/g, '');
                 const data = await api.get<UserProfileData>(`/profile/${cleanUserId}`);
@@ -84,7 +84,7 @@ export default function SettingsPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const rawUserId = localStorage.getItem('userId');
+            const rawUserId = sessionStorage.getItem('userId');
             if (!rawUserId) {
                 alert("You must be logged in!");
                 return;

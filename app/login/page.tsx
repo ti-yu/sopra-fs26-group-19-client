@@ -28,7 +28,7 @@ const Login: React.FC = () => {
         setUserId(response.id);
         // Store isVolunteer so other pages (navbar, etc.) can check role
         // without needing an extra API call to fetch the user profile.
-        localStorage.setItem("isVolunteer", String(response.isVolunteer));
+        sessionStorage.setItem("isVolunteer", String(response.isVolunteer));
       }
       router.push(`/profile/${response.id}`);
     } catch (error) {

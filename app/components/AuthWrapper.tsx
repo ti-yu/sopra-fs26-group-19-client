@@ -8,7 +8,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     const [isAuthorized, setIsAuthorized] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
 
         if (!token || token === '""' || token === "") {
             router.push("/login");

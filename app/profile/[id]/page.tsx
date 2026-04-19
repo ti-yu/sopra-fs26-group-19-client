@@ -35,6 +35,7 @@ const Profile: React.FC = () => {
       try {
         const data = await apiService.get<User>(`/profile/${id}`);
         setUser(data);
+        sessionStorage.setItem("isVolunteer", String(data.isVolunteer));
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to load user");
       } finally {
@@ -66,7 +67,7 @@ const Profile: React.FC = () => {
       <AuthWrapper>
     <div style={{ "--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black"} as React.CSSProperties}>
         <div className="headerBar">
-            <Link href="/login" style={{color: "white"}} onClick={() => localStorage.clear()}>
+            <Link href="/login" style={{color: "white"}} onClick={() => sessionStorage.clear()}>
                 Logout
             </Link>
 

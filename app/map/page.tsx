@@ -75,12 +75,14 @@ const MapPage: React.FC = () => {
                 return types[workType] ?? workType;
             };
                 marker.addListener("click", () => {
+                    const showOfferButton = isVolunteer && inserat.status === "OPEN";
+                    const buttonId = `offer-help-${inserat.id}`;
                     infoWindow.setContent(`
                         <div style="
                             padding: 12px;
                             min-width: 180px;
                             max-width: 250px;
-                            max-height: 200px;
+                            max-height: 260px;
                             overflow-y: auto;
                             word-wrap: break-word;
                             border-radius: 8px;
@@ -91,10 +93,43 @@ const MapPage: React.FC = () => {
                             <p style="margin: 0 0 4px; color: gray; font-size: 12px;">Where: ${inserat.location}</p>
                             <p style="margin: 0 0 4px; font-size: 12px;">📅 ${inserat.date}</p>
                             <p style="margin: 0; font-size: 12px;">🕐 ${inserat.timeframe}</p>
-                            <p style="margin: 0; font-size: 12px;">${formatWorkType(inserat.workType ?? "")}</p>
+                            <p style="margin: 0 0 8px; font-size: 12px;">${formatWorkType(inserat.workType ?? "")}</p>
+                            ${showOfferButton ? `
+                              <button id="${buttonId}" style="
+                                margin-top: 8px;
+                                width: 100%;
+                                background-color: #53beb3;
+                                color: #fff;
+                                border: none;
+                                border-radius: 20px;
+                                padding: 8px 16px;
+                                font-size: 14px;
+                                font-weight: 600;
+                                cursor: pointer;
+                              ">offer help</button>
+                            ` : ""}
                         </div>
                     `);
                     infoWindow.open(map, marker);
+
+                    if (showOfferButton) {
+                        google.maps.event.addListenerOnce(infoWindow, "domready", () => {
+                            const btn = document.getElementById(buttonId);
+                            if (!btn) return;
+                            btn.addEventListener("click", async () => {
+                                try {
+                                    await apiService.post(`/help-requests/${inserat.id}/apply/${userId}`, {});
+                                    btn.textContent = "applied ✓";
+                                    btn.setAttribute("disabled", "true");
+                                    (btn as HTMLButtonElement).style.backgroundColor = "#888";
+                                    (btn as HTMLButtonElement).style.cursor = "default";
+                                } catch (err) {
+                                    const msg = err instanceof Error ? err.message : "Failed to apply";
+                                    alert(msg);
+                                }
+                            });
+                        });
+                    }
                 });
             });
         } catch (err) {

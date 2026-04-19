@@ -92,7 +92,7 @@ const CreateHelpRequest: React.FC = () => {
       };
 
       await apiService.post("/help-requests", payload);
-      router.push(`/profile/${userId}`);
+      router.push(`/my-requests`);
     } catch (error) {
       if (error instanceof Error) {
         alert(`Something went wrong:\n${error.message}`);

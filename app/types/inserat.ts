@@ -17,7 +17,10 @@ export interface Inserat {
   recipientSurname?: string;
   recipientLastname?: string;
   recipientAge?: number;
+  recipientPhone?: string | null;
+  recipientEmail?: string | null;
   workType?: string;
+  time?: string | null;
 }
 
 export interface Applicant {

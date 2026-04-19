@@ -2,13 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { Spin, Empty } from "antd";
+import Link from "next/link";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "@/components/navbar";
+import AuthWrapper from "@/components/AuthWrapper";
 import { Inserat, Applicant } from "@/types/inserat";
 
 const formatDate = (dateStr: string) => {
-  const [year, month, day] = dateStr.split("-");
+  const [, month, day] = dateStr.split("-");
   return `${day}.${month}`;
 };
 
@@ -103,13 +105,16 @@ const MyRequests: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", paddingTop: 80 }}>
-        <Spin size="large" />
-      </div>
+      <AuthWrapper>
+        <div style={{ textAlign: "center", paddingTop: 80 }}>
+          <Spin size="large" />
+        </div>
+      </AuthWrapper>
     );
   }
 
   return (
+    <AuthWrapper>
     <div>
       <h1 style={{
         textAlign: "center",
@@ -151,10 +156,13 @@ const MyRequests: React.FC = () => {
                       {inserat.description}
                     </span>
                   </div>
-                  {!isDone && (
-                    <span style={{ color: "#bbb", fontSize: 14, whiteSpace: "nowrap", marginLeft: 8 }}>
+                  {!isDone && isOpen && (
+                    <Link
+                      href={`/my-requests/${inserat.id}/edit`}
+                      style={{ color: "#d9737d", fontSize: 14, whiteSpace: "nowrap", marginLeft: 8, fontWeight: 500 }}
+                    >
                       edit request
-                    </span>
+                    </Link>
                   )}
                 </div>
 
@@ -235,6 +243,7 @@ const MyRequests: React.FC = () => {
 
       <Navbar id={userId} isVolunteer={isVolunteer} />
     </div>
+    </AuthWrapper>
   );
 };
 

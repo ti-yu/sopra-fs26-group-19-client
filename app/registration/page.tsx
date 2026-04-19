@@ -57,7 +57,7 @@ const Register: React.FC = () => {
 
       setToken(loginResponse.token);
       setUserId(created.id);
-      localStorage.setItem("isVolunteer", String(created.isVolunteer));
+      sessionStorage.setItem("isVolunteer", String(created.isVolunteer));
 
       router.push(`/profile/${created.id}`);
     } catch (error) {
