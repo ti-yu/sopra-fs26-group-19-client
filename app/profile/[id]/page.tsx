@@ -7,7 +7,7 @@ import { User } from "@/types/user";
 import Navbar from "@/components/navbar"
 import { useApi } from "@/hooks/useApi";
 import Link from "next/link";
-
+import AuthWrapper from "@/components/AuthWrapper";
 
 const calculateAge = (dateOfBirth: string): number => {
   const today = new Date();
@@ -63,7 +63,7 @@ const Profile: React.FC = () => {
   const roleLabel = user.isVolunteer ? "Volunteer" : "Recipient";
 
   return (
-
+      <AuthWrapper>
     <div style={{ "--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black"} as React.CSSProperties}>
         <div className="headerBar">
             <Link href="/login" style={{color: "white"}} onClick={() => localStorage.clear()}>
@@ -102,6 +102,7 @@ const Profile: React.FC = () => {
         <Navbar id={id as string} isVolunteer={user.isVolunteer} />
       </div>
     </div>
+      </AuthWrapper>
   );
 };
 

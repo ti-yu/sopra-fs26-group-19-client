@@ -7,7 +7,8 @@ import { Button, Form, Input, DatePicker, Select, TimePicker } from "antd"; // �
 import dayjs from "dayjs";
 import Navbar from "@/components/navbar";
 import Script from "next/script";
-import { useState } from "react"; // ✅ removed unused useEffect
+import { useState } from "react";// ✅ removed unused useEffect
+import AuthWrapper from "@/components/AuthWrapper";
 
 // ✅ defined types instead of using any
 interface PlaceSuggestion {
@@ -102,6 +103,7 @@ const CreateHelpRequest: React.FC = () => {
   };
 
   return (
+      <AuthWrapper>
     <>
       <Script
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=beta`}
@@ -248,6 +250,7 @@ const CreateHelpRequest: React.FC = () => {
         <Navbar id={userId} isVolunteer={isVolunteer} />
       </div>
     </>
+        </AuthWrapper>
   );
 };
 
