@@ -35,7 +35,7 @@ const Register: React.FC = () => {
       const cleanedValues = Object.entries(values).reduce((acc, [key, value]) => {
         acc[key] = (value === "" || value === undefined) ? null : value;
         return acc;
-      }, {} as any);
+      }, {} as Record<string, unknown>);
 
       const payload = {
         ...cleanedValues,

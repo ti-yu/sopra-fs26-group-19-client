@@ -9,6 +9,17 @@ import { useApi } from "@/hooks/useApi";
 import Link from "next/link";
 
 
+const calculateAge = (dateOfBirth: string): number => {
+  const today = new Date();
+  const birth = new Date(dateOfBirth);
+  let age = today.getFullYear() - birth.getFullYear();
+  const hasHadBirthdayThisYear =
+    today.getMonth() > birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
+  if (!hasHadBirthdayThisYear) age--;
+  return age;
+};
+
 const Profile: React.FC = () => {
   const apiService = useApi();
   const params = useParams();
@@ -84,7 +95,7 @@ const Profile: React.FC = () => {
 
           <div style={{display: "flex", alignItems: "left", marginTop: "40px", flexDirection: "column", gap: "20px"}}>
             <p><strong>Bio: </strong>{user.bio}</p>
-            <p><strong>Age: </strong>{user.dateOfBirth ? user.age : "Unknown"}</p>
+            <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
             <p><strong>Gender: </strong>{user.gender}</p>
           </div>
         {/* — Role-based navigation icons — */}
