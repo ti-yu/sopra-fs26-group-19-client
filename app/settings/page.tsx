@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ApiService } from '@/api/apiService';
+import AuthWrapper from "@/components/AuthWrapper";
 
 interface UserProfileData {
     surname?: string;
@@ -126,6 +127,7 @@ export default function SettingsPage() {
         };
 
         return (
+            <AuthWrapper>
             <div className="login-container">
                 <div className="auth-card"
                      style={{height: 'auto', minHeight: 'auto', padding: '30px 20px', maxWidth: '450px'}}>
@@ -242,5 +244,6 @@ export default function SettingsPage() {
 
                 </div>
             </div>
+                </AuthWrapper>
         );
 }
