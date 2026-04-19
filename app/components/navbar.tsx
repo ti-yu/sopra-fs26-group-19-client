@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   HomeFilled,
   GlobalOutlined,
@@ -34,6 +35,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
   const iconConfigs = getIconConfigs(id, isVolunteer);
+  const safeId = id || "";
 
   return (
     <nav style={{
@@ -49,14 +51,15 @@ const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
       alignItems: "center",
       zIndex: 1000,
     }}>
-      {iconConfigs.map(({ icon, label, href }) => (
-        <a
-          key={label}
-          href={href}
-        >
-          {icon}
-        </a>
-      ))}
+        {iconConfigs.map(({ icon, label, href }) => (
+            <Link
+                key={label}
+                href={href}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+                {icon}
+            </Link>
+        ))}
     </nav>
   );
 };
