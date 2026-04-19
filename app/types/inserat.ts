@@ -14,6 +14,10 @@ export interface Inserat {
   volunteerAcceptedUsername: string | null;
   volunteerAcceptedPhone: string | null;
   volunteerAcceptedEmail: string | null;
+  recipientSurname?: string;
+  recipientLastname?: string;
+  recipientAge?: number;
+  workType?: string;
 }
 
 export interface Applicant {

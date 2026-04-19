@@ -91,7 +91,7 @@ const MapPage: React.FC = () => {
                             <p style="margin: 0 0 4px; color: gray; font-size: 12px;">Where: ${inserat.location}</p>
                             <p style="margin: 0 0 4px; font-size: 12px;">📅 ${inserat.date}</p>
                             <p style="margin: 0; font-size: 12px;">🕐 ${inserat.timeframe}</p>
-                            <p style="margin: 0; font-size: 12px;">${formatWorkType(inserat.workType)}</p>
+                            <p style="margin: 0; font-size: 12px;">${formatWorkType(inserat.workType ?? "")}</p>
                         </div>
                     `);
                     infoWindow.open(map, marker);
