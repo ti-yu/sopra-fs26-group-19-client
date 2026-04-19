@@ -32,11 +32,16 @@ const Register: React.FC = () => {
 
   const handleRegister = async (values: RegisterFormValues) => {
     try {
+      const cleanedValues = Object.entries(values).reduce((acc, [key, value]) => {
+        acc[key] = (value === "" || value === undefined) ? null : value;
+        return acc;
+      }, {} as any);
+
       const payload = {
-        ...values,
+        ...cleanedValues,
         dateOfBirth: values.dateOfBirth
-          ? values.dateOfBirth.format("YYYY-MM-DD")
-          : null,
+            ? values.dateOfBirth.format("YYYY-MM-DD")
+            : null,
       };
 
       const created = await apiService.post<User>("/register", payload);
@@ -52,9 +57,8 @@ const Register: React.FC = () => {
 
       setToken(loginResponse.token);
       setUserId(created.id);
-      // Store isVolunteer so other pages (navbar, etc.) can check role
-      // without needing an extra API call to fetch the user profile.
       localStorage.setItem("isVolunteer", String(created.isVolunteer));
+
       router.push(`/profile/${created.id}`);
     } catch (error) {
       if (error instanceof Error) {
