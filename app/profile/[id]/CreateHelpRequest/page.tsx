@@ -3,11 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, Form, Input, DatePicker, Select } from "antd"; // ✅ removed unused List
+import { Button, Form, Input, DatePicker, Select, TimePicker } from "antd"; // ✅ removed unused List
 import dayjs from "dayjs";
 import Navbar from "@/components/navbar";
 import Script from "next/script";
-import { useState } from "react"; // ✅ removed unused useEffect
+import { useState } from "react";// ✅ removed unused useEffect
+import AuthWrapper from "@/components/AuthWrapper";
 
 // ✅ defined types instead of using any
 interface PlaceSuggestion {
@@ -29,6 +30,7 @@ interface PlaceResult {
 type HelpRequestFormValues = {
   description: string;
   date: dayjs.Dayjs;
+  time: dayjs.Dayjs;
   timeframe: string;
   workType: string;
 };
@@ -81,6 +83,7 @@ const CreateHelpRequest: React.FC = () => {
         recipientId: userId,
         description: values.description,
         date: values.date ? values.date.format("YYYY-MM-DD") : null,
+        time: values.time ? values.time.format("HH:mm") : null,
         timeframe: values.timeframe,
         location: selectedPlace.formattedAddress,
         latitude: selectedPlace.location.lat(),
@@ -89,7 +92,7 @@ const CreateHelpRequest: React.FC = () => {
       };
 
       await apiService.post("/help-requests", payload);
-      router.push(`/profile/${userId}`);
+      router.push(`/my-requests`);
     } catch (error) {
       if (error instanceof Error) {
         alert(`Something went wrong:\n${error.message}`);
@@ -100,6 +103,7 @@ const CreateHelpRequest: React.FC = () => {
   };
 
   return (
+      <AuthWrapper>
     <>
       <Script
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=beta`}
@@ -163,6 +167,18 @@ const CreateHelpRequest: React.FC = () => {
                 style={{ width: "100%" }}
                 format="DD.MM.YYYY"
                 placeholder="Date: DD.MM.YYYY"
+              />
+            </Form.Item>
+
+            <Form.Item
+                name="time"
+                label="Time of Day"
+                rules={[{ required: true, message: "Please select a time!" }]}
+            >
+              <TimePicker
+                  format="HH:mm"
+                  style={{ width: "100%" }}
+                  placeholder="Select time (HH:mm)"
               />
             </Form.Item>
 
@@ -234,6 +250,7 @@ const CreateHelpRequest: React.FC = () => {
         <Navbar id={userId} isVolunteer={isVolunteer} />
       </div>
     </>
+        </AuthWrapper>
   );
 };
 

@@ -7,7 +7,18 @@ import { User } from "@/types/user";
 import Navbar from "@/components/navbar"
 import { useApi } from "@/hooks/useApi";
 import Link from "next/link";
+import AuthWrapper from "@/components/AuthWrapper";
 
+const calculateAge = (dateOfBirth: string): number => {
+  const today = new Date();
+  const birth = new Date(dateOfBirth);
+  let age = today.getFullYear() - birth.getFullYear();
+  const hasHadBirthdayThisYear =
+    today.getMonth() > birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
+  if (!hasHadBirthdayThisYear) age--;
+  return age;
+};
 
 const Profile: React.FC = () => {
   const apiService = useApi();
@@ -24,6 +35,7 @@ const Profile: React.FC = () => {
       try {
         const data = await apiService.get<User>(`/profile/${id}`);
         setUser(data);
+        sessionStorage.setItem("isVolunteer", String(data.isVolunteer));
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to load user");
       } finally {
@@ -52,10 +64,10 @@ const Profile: React.FC = () => {
   const roleLabel = user.isVolunteer ? "Volunteer" : "Recipient";
 
   return (
-
+      <AuthWrapper>
     <div style={{ "--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black"} as React.CSSProperties}>
         <div className="headerBar">
-            <Link href="/login" style={{color: "white"}} onClick={() => localStorage.clear()}>
+            <Link href="/login" style={{color: "white"}} onClick={() => sessionStorage.clear()}>
                 Logout
             </Link>
 
@@ -84,13 +96,14 @@ const Profile: React.FC = () => {
 
           <div style={{display: "flex", alignItems: "left", marginTop: "40px", flexDirection: "column", gap: "20px"}}>
             <p><strong>Bio: </strong>{user.bio}</p>
-            <p><strong>Age: </strong>{user.dateOfBirth ? user.age : "Unknown"}</p>
+            <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
             <p><strong>Gender: </strong>{user.gender}</p>
           </div>
         {/* — Role-based navigation icons — */}
         <Navbar id={id as string} isVolunteer={user.isVolunteer} />
       </div>
     </div>
+      </AuthWrapper>
   );
 };
 
