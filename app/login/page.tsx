@@ -31,11 +31,13 @@ const Login: React.FC = () => {
         sessionStorage.setItem("isVolunteer", String(response.isVolunteer));
       }
       router.push(`/profile/${response.id}`);
-    } catch (error: any) {
-      if (error.response?.status === 401 || error.status === 401) {
+    } catch (error) {
+      const err = error as { response?: { status?: number }; status?: number; message?: string };
+
+      if (err.response?.status === 401 || err.status === 401) {
         message.error("Incorrect password.");
       }
-      else if (error.response?.status === 404 || error.status === 404) {
+      else if (err.response?.status === 404 || err.status === 404) {
         message.error("User not found. Please create an account.");
       }
       else if (error instanceof Error) {
