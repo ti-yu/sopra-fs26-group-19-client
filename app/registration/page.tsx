@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Form, Input, DatePicker, Select, Switch } from "antd";
+import { Button, Form, Input, DatePicker, Select, Switch, message } from "antd";
 import dayjs from "dayjs";
 
 type RegisterFormValues = {
@@ -61,12 +61,41 @@ const Register: React.FC = () => {
 
       router.push(`/profile/${created.id}`);
     } catch (error) {
-      if (error instanceof Error) {
-        alert(`Something went wrong during registration:\n${error.message}`);
-      } else {
-        console.error("An unknown error occurred during registration.");
+      const err = error as {
+        response?: { status?: number; data?: { message?: string } };
+        status?: number;
+        message?: string
+      };
+
+      const backendMessage = (err.response?.data?.message || err.message || "").toLowerCase();
+
+      if (err.response?.status === 409 || err.status === 409) {
+
+        if (backendMessage.includes("username and email")) {
+          message.error("Both this username and email are already taken.");
+        } else if (backendMessage.includes("username")) {
+          message.error("This username is already taken. Please choose another.");
+        } else if (backendMessage.includes("email")) {
+          message.error("This email address is already in use.");
+        } else {
+          // Absolute fallback just in case
+          message.error("This username or email is already taken.");
+        }
+      }
+      else if (err.response?.status === 400 || err.status === 400) {
+        message.error("Please make sure all mandatory fields are filled out correctly.");
+      }
+      else if (backendMessage.includes("missing") || backendMessage.includes("required")) {
+        message.error("Please make sure all mandatory fields are filled out correctly.");
+      }
+      else {
+        message.error("An unknown error occurred. Please try again later.");
       }
     }
+  };
+
+  const handleFailedSubmit = () => {
+    message.error("Please fill out all required fields.");
   };
 
   return (
@@ -88,6 +117,8 @@ const Register: React.FC = () => {
           size="large"
           variant="outlined"
           onFinish={handleRegister}
+          onFinishFailed={handleFailedSubmit}
+          scrollToFirstError
           layout="vertical"
           initialValues={{ isVolunteer: false }}
         >
