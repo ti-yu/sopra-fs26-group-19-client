@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, message } from "antd";
 
 interface FormFieldProps {
   username: string;
@@ -31,11 +31,26 @@ const Login: React.FC = () => {
         sessionStorage.setItem("isVolunteer", String(response.isVolunteer));
       }
       router.push(`/profile/${response.id}`);
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(`Something went wrong during the login:\n${error.message}`);
-      } else {
-        console.error("An unknown error occurred during login.");
+    } catch (error: any) {
+      if (error.response?.status === 401 || error.status === 401) {
+        message.error("Incorrect password.");
+      }
+      else if (error.response?.status === 404 || error.status === 404) {
+        message.error("User not found. Please create an account.");
+      }
+      else if (error instanceof Error) {
+        const backendMessage = error.message.toLowerCase();
+
+        if (backendMessage.includes("password") || backendMessage.includes("credentials")) {
+          message.error("Incorrect password.");
+        } else if (backendMessage.includes("not found") || backendMessage.includes("user")) {
+          message.error("User not found. Please create an account.");
+        } else {
+          message.error("An unknown error occurred during login.");
+        }
+      }
+      else {
+        message.error("An unknown error occurred.");
       }
     }
   };
