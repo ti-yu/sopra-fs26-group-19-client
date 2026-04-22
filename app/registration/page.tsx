@@ -95,7 +95,7 @@ const Register: React.FC = () => {
   };
 
   const handleFailedSubmit = () => {
-    message.error("Please fill out all required fields.");
+    message.error("Please fill out all required fields correctly.");
   };
 
   return (

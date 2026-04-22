@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, Form, Input, DatePicker, Select, TimePicker } from "antd"; // ✅ removed unused List
+import { Button, Form, Input, DatePicker, Select, TimePicker, message } from "antd"; // ✅ removed unused List
 import dayjs from "dayjs";
 import Navbar from "@/components/navbar";
 import Script from "next/script";
@@ -69,13 +69,14 @@ const CreateHelpRequest: React.FC = () => {
 
     setSelectedPlace(place);
     setQuery(place.formattedAddress);
+    form.setFieldValue("location", place.formattedAddress);
     setSuggestions([]);
   };
 
   const handleSubmit = async (values: HelpRequestFormValues) => {
     try {
       if (!selectedPlace || !selectedPlace.location) {
-        alert("Please select a valid address!");
+        message.error("Please select a valid address from the dropdown!");
         return;
       }
 
@@ -94,13 +95,19 @@ const CreateHelpRequest: React.FC = () => {
       await apiService.post("/help-requests", payload);
       router.push(`/my-requests`);
     } catch (error) {
-      if (error instanceof Error) {
-        alert(`Something went wrong:\n${error.message}`);
+      const err = error as { response?: { status?: number; data?: { message?: string } }; status?: number; message?: string };
+
+      if (err.response?.status === 400 || err.status === 400) {
+        message.error("Please make sure all fields are filled out correctly.");
       } else {
-        console.error("An unknown error occurred.");
+        message.error("Failed to post request. Please try again later.");
       }
     }
   };
+
+  const handleFailedSubmit = () => {
+    message.error("Please fill out all required Fields")
+  }
 
   return (
       <AuthWrapper>
@@ -126,6 +133,8 @@ const CreateHelpRequest: React.FC = () => {
             size="large"
             variant="outlined"
             onFinish={handleSubmit}
+            onFinishFailed={handleFailedSubmit}
+            scrollToFirstError
             layout="vertical"
           >
             <Form.Item
@@ -190,13 +199,18 @@ const CreateHelpRequest: React.FC = () => {
               <Input placeholder="Duration (hours)" />
             </Form.Item>
 
-            <Form.Item label="Location" required>
+            <Form.Item
+                name="location"
+                label="Location"
+                rules={[{ required: true, message: "Please select an address from the dropdown!" }]}
+            >
               <div style={{ position: "relative" }}>
                 <Input
                   value={query}
                   onChange={(e) => {
                     const value = e.target.value;
                     setQuery(value);
+                    form.setFieldValue("location", value);
                     fetchSuggestions(value);
                   }}
                   placeholder="Enter address"
