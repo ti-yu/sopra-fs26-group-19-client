@@ -88,11 +88,11 @@ const MapPage: React.FC = () => {
                             border-radius: 8px;
                         ">
                             <h3 style="margin: 0 0 8px; word-break: break-word;">${inserat.description}</h3>
-                            <p style="margin: 0 0 4px; word-break: break-word;">With: ${inserat.recipientSurname} ${inserat.recipientLastname}</p>
+                            <p style="margin: 0 0 4px; word-break: break-word;">With: ${inserat.recipientUsername}</p>
                             <p style="margin: 0 0 4px; font-size: 12px;">Age: ${inserat.recipientAge}</p>
                             <p style="margin: 0 0 4px; color: gray; font-size: 12px;">Where: ${inserat.location}</p>
                             <p style="margin: 0 0 4px; font-size: 12px;">📅 ${inserat.date}</p>
-                            <p style="margin: 0; font-size: 12px;">🕐 ${inserat.timeframe}</p>
+                            <p style="margin: 0; font-size: 12px;">🕐 ${inserat.timeframe}h</p>
                             <p style="margin: 0 0 8px; font-size: 12px;">${formatWorkType(inserat.workType ?? "")}</p>
                             ${showOfferButton ? `
                               <button id="${buttonId}" style="

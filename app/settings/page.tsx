@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ApiService } from '@/api/apiService';
 import AuthWrapper from "@/components/AuthWrapper";
+import { message, Form, Input, Button, Radio } from "antd";
 
 interface UserProfileData {
     surname?: string;
@@ -19,28 +20,26 @@ interface UserProfileData {
     isVolunteer?: boolean;
 }
 
+type SettingsFormValues = {
+    surname?: string;
+    lastname?: string;
+    username?: string;
+    emailAddress?: string;
+    phoneNumber?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    address?: string;
+    bio?: string;
+    password?: string;
+    isVolunteer: boolean;
+};
+
 const api = new ApiService();
 
 export default function SettingsPage() {
     const router = useRouter();
+    const [form] = Form.useForm();
 
-    const [showPassword, setShowPassword] = useState(false);
-
-    const [formData, setFormData] = useState({
-        surname: '',
-        lastname: '',
-        username: '',
-        emailAddress: '',
-        phoneNumber: '',
-        dateOfBirth: '',
-        gender: '',
-        address: '',
-        bio: '',
-        password: '',
-        isVolunteer: false
-    });
-
-    //userdata holen und denn ihfülle
     useEffect(() => {
         async function fetchUserData() {
             try {
@@ -49,7 +48,7 @@ export default function SettingsPage() {
                 const cleanUserId = rawUserId.replace(/"/g, '');
                 const data = await api.get<UserProfileData>(`/profile/${cleanUserId}`);
 
-                setFormData({
+                form.setFieldsValue({
                     surname: data.surname || '',
                     lastname: data.lastname || '',
                     username: data.username || '',
@@ -70,180 +69,135 @@ export default function SettingsPage() {
         }
 
         fetchUserData();
-    }, []);
+    }, [form]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const {name, value} = e.target;
-        setFormData((prev) => ({...prev, [name]: value}));
-    };
-
-    const handleRoleChange = (isVolunteer: boolean) => {
-        setFormData((prev) => ({...prev, isVolunteer}));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleFinish = async (values: SettingsFormValues) => {
         try {
             const rawUserId = sessionStorage.getItem('userId');
             if (!rawUserId) {
-                alert("You must be logged in!");
+                message.error("You must be logged in to update your profile!");
                 return;
             }
 
             const cleanUserId = rawUserId.replace(/"/g, '');
 
-            await api.put(`/profile/${cleanUserId}`, formData);
+            await api.put(`/profile/${cleanUserId}`, values);
 
-            alert("Profile updated successfully!");
+            message.success("Profile updated successfully!");
             router.push(`/profile/${cleanUserId}`);
 
         } catch (error) {
-            if (error instanceof Error) {
-                alert(`Failed to update profile: \n${error.message}`);
+            const err = error as { response?: { status?: number; data?: { message?: string } }; status?: number; message?: string };
+            const backendMessage = (err.response?.data?.message || err.message || "").toLowerCase();
+
+            if (err.response?.status === 409 || err.status === 409) {
+                if (backendMessage.includes("username")) {
+                    message.error("This username is already taken. Please choose another.");
+                } else if (backendMessage.includes("email")) {
+                    message.error("This email address is already in use.");
+                } else {
+                    message.error("This username or email is already taken.");
+                }
+            } else if (err.response?.status === 400 || err.status === 400) {
+                message.error("Please make sure all fields are filled out correctly.");
+            } else {
+                message.error("Failed to update profile. Please try again later.");
             }
         }
     };
 
-        const inputStyle: React.CSSProperties = {
-            backgroundColor: 'var(--input-bg, #f5f5f5)',
-            border: 'none',
-            borderRadius: '8px',
-            padding: '14px 16px',
-            fontSize: '16px',
-            width: '100%',
-            marginBottom: '12px',
-            color: 'var(--foreground, #171717)',
-            fontFamily: 'inherit'
-        };
-
-        const radioContainerStyle: React.CSSProperties = {
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '12px 0',
-            fontSize: '15px',
-            fontWeight: 500,
-            color: '#666'
-        };
-
-        return (
-            <AuthWrapper>
+    return (
+        <AuthWrapper>
             <div className="login-container">
-                <div className="auth-card"
-                     style={{height: 'auto', minHeight: 'auto', padding: '30px 20px', maxWidth: '450px'}}>
+                <div className="auth-card" style={{height: 'auto', minHeight: 'auto', padding: '30px 20px', maxWidth: '450px'}}>
 
-                    {/* Header */}
-                    <div className="auth-card-header"
-                         style={{marginBottom: '20px', display: 'flex', justifyContent: 'center'}}>
-                    <span
-                        className="header-link"
-                        style={{color: 'var(--primary)', left: 0, position: 'absolute', cursor: 'pointer'}}
-                        onClick={() => router.back()}
-                    >
-                        Cancel
-                    </span>
+                    <div className="auth-card-header" style={{marginBottom: '20px', display: 'flex', justifyContent: 'center'}}>
+                        <span
+                            className="header-link"
+                            style={{color: 'var(--primary)', left: 0, position: 'absolute', cursor: 'pointer'}}
+                            onClick={() => router.back()}
+                        >
+                            Cancel
+                        </span>
                         <h1 style={{fontSize: '28px', lineHeight: '1.2', maxWidth: '200px', textAlign: 'center'}}>
                             Update user profile details
                         </h1>
                     </div>
 
-                    {/* The Form */}
-                    <form onSubmit={handleSubmit} className="auth-form">
-                        <input style={inputStyle} type="text" name="surname" placeholder="First Name"
-                               value={formData.surname} onChange={handleInputChange}/>
-                        <input style={inputStyle} type="text" name="lastname" placeholder="Last Name"
-                               value={formData.lastname} onChange={handleInputChange}/>
-                        <input style={inputStyle} type="text" name="username" placeholder="Username"
-                               value={formData.username} onChange={handleInputChange}/>
-                        <input style={inputStyle} type="email" name="emailAddress" placeholder="Email Address"
-                               value={formData.emailAddress} onChange={handleInputChange}/>
-                        <input style={inputStyle} type="text" name="phoneNumber" placeholder="Phone Number"
-                               value={formData.phoneNumber} onChange={handleInputChange}/>
-                        <input style={inputStyle} type="date" name="dateOfBirth" value={formData.dateOfBirth}
-                               onChange={handleInputChange}/>
-                        <input style={inputStyle} type="text" name="gender" placeholder="Gender (e.g., f, m, other)"
-                               value={formData.gender} onChange={handleInputChange}/>
-                        <input style={inputStyle} type="text" name="address"
-                               placeholder="Address (e.g., Zürichstrasse 248)" value={formData.address}
-                               onChange={handleInputChange}/>
+                    <Form
+                        form={form}
+                        layout="vertical"
+                        onFinish={handleFinish}
+                        size="large"
+                        className="auth-form"
+                    >
+                        <Form.Item name="surname" label="First Name">
+                            <Input placeholder="First Name" />
+                        </Form.Item>
 
-                        <textarea
-                            style={{...inputStyle, resize: 'none', height: '100px'}}
-                            name="bio"
-                            placeholder="Introduce yourself!"
-                            value={formData.bio}
-                            onChange={handleInputChange}
-                        />
+                        <Form.Item name="lastname" label="Last Name">
+                            <Input placeholder="Last Name" />
+                        </Form.Item>
 
-                        {/* Password with Show/Hide Toggle */}
-                        <div style={{position: 'relative'}}>
-                            <input
-                                style={inputStyle}
-                                type={showPassword ? "text" : "password"}
-                                name="password"
-                                placeholder="......"
-                                value={formData.password}
-                                onChange={handleInputChange}
-                            />
-                            <span
+                        <Form.Item name="username" label="Username">
+                            <Input placeholder="Username" />
+                        </Form.Item>
+
+                        <Form.Item name="emailAddress" label="Email Address">
+                            <Input type="email" placeholder="Email Address" />
+                        </Form.Item>
+
+                        <Form.Item name="phoneNumber" label="Phone Number">
+                            <Input placeholder="Phone Number" />
+                        </Form.Item>
+
+                        <Form.Item name="dateOfBirth" label="Date of Birth">
+                            <Input type="date" />
+                        </Form.Item>
+
+                        <Form.Item name="gender" label="Gender">
+                            <Input placeholder="Gender (e.g., f, m, other)" />
+                        </Form.Item>
+
+                        <Form.Item name="address" label="Address">
+                            <Input placeholder="Address (e.g., Zürichstrasse 248)" />
+                        </Form.Item>
+
+                        <Form.Item name="bio" label="Bio">
+                            <Input.TextArea placeholder="Introduce yourself!" rows={4} style={{ resize: 'none' }} />
+                        </Form.Item>
+
+                        <Form.Item name="password" label="Password">
+                            <Input.Password placeholder="......" />
+                        </Form.Item>
+
+                        <Form.Item name="isVolunteer" label="Account Role">
+                            <Radio.Group style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <Radio value={false}>I want to receive help (client)</Radio>
+                                <Radio value={true}>I want to lend help (volunteer)</Radio>
+                            </Radio.Group>
+                        </Form.Item>
+
+                        <Form.Item style={{ marginBottom: 0, marginTop: '20px' }}>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                block
                                 style={{
-                                    position: 'absolute',
-                                    right: '16px',
-                                    top: '14px',
-                                    color: 'var(--primary)',
-                                    cursor: 'pointer',
-                                    fontWeight: 500
+                                    backgroundColor: 'var(--primary)',
+                                    borderRadius: '25px',
+                                    height: '54px',
+                                    fontSize: '18px',
+                                    fontWeight: 'bold'
                                 }}
-                                onClick={() => setShowPassword(!showPassword)}
                             >
-                            {showPassword ? "Hide" : "Show"}
-                        </span>
-                        </div>
-
-                        {/* Role Selectors (Radios) */}
-                        <div style={{marginTop: '10px', marginBottom: '20px'}}>
-                            <label style={radioContainerStyle}>
-                                I want to receive help (client)
-                                <input
-                                    type="radio"
-                                    checked={!formData.isVolunteer}
-                                    onChange={() => handleRoleChange(false)}
-                                    style={{accentColor: 'var(--primary)', transform: 'scale(1.2)'}}
-                                />
-                            </label>
-                            <label style={radioContainerStyle}>
-                                I want to lend help (volunteer)
-                                <input
-                                    type="radio"
-                                    checked={formData.isVolunteer}
-                                    onChange={() => handleRoleChange(true)}
-                                    style={{accentColor: 'var(--primary)', transform: 'scale(1.2)'}}
-                                />
-                            </label>
-                        </div>
-
-                        {/* Update Button */}
-                        <button
-                            type="submit"
-                            style={{
-                                width: '100%',
-                                backgroundColor: 'var(--primary)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '25px',
-                                padding: '16px',
-                                fontSize: '18px',
-                                fontWeight: 'bold',
-                                cursor: 'pointer',
-                                marginTop: '10px'
-                            }}
-                        >
-                            Update Data
-                        </button>
-                    </form>
+                                Update Data
+                            </Button>
+                        </Form.Item>
+                    </Form>
 
                 </div>
             </div>
-                </AuthWrapper>
-        );
+        </AuthWrapper>
+    );
 }
