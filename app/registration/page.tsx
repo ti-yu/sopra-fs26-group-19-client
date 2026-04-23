@@ -104,9 +104,9 @@ const Register: React.FC = () => {
 
         {/* --- Header Section --- */}
         <div className="auth-card-header">
-          <span className="header-link" onClick={() => router.push("/login")}>
+          <button type="button" className="header-link" onClick={() => router.push("/login")}>
             login
-          </span>
+          </button>
           <h1>Registration</h1>
         </div>
 
