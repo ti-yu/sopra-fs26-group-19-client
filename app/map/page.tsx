@@ -34,10 +34,10 @@ const MapPage: React.FC = () => {
     }, [userId]);
 
     const initMap = async () => {
-        const { Map, InfoWindow } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
+        const { Map: GoogleMap, InfoWindow } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
         const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
-        const map = new Map(document.getElementById("map") as HTMLElement, {
+        const map = new GoogleMap(document.getElementById("map") as HTMLElement, {
             center: { lat: 47.3769, lng: 8.5417 },
             zoom: 12,
             mapId: "687f31f6db63e48236a75a4a",

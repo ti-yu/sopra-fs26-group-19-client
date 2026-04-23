@@ -121,9 +121,9 @@ const CreateHelpRequest: React.FC = () => {
         <div className="auth-card" style={{ height: "auto", minHeight: "500px", paddingBottom: "80px" }}>
 
           <div className="auth-card-header">
-            <span className="header-link" onClick={() => router.back()}>
+            <button type="button" className="header-link" onClick={() => router.back()}>
               Cancel
-            </span>
+            </button>
             <h1>Get Help!</h1>
           </div>
 
@@ -233,10 +233,19 @@ const CreateHelpRequest: React.FC = () => {
                       boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                     }}
                   >
-                    {suggestions.map((item, index) => ( // ✅ removed :any, type is inferred
+                    {suggestions.map((item, index) => (
                       <div
                         key={index}
+                        role="option"
+                        aria-selected={false}
+                        tabIndex={0}
                         onClick={() => handleSelect(item)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleSelect(item);
+                          }
+                        }}
                         style={{ padding: "8px 12px", cursor: "pointer" }}
                         onMouseEnter={(e) =>
                           (e.currentTarget.style.background = "#f5f5f5")

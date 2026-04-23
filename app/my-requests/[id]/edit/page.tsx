@@ -157,9 +157,9 @@ const EditHelpRequest: React.FC = () => {
         <div className="login-container">
           <div className="auth-card" style={{ height: "auto", minHeight: "500px", paddingBottom: "80px" }}>
             <div className="auth-card-header">
-              <span className="header-link" onClick={() => router.back()}>
+              <button type="button" className="header-link" onClick={() => router.back()}>
                 Cancel
-              </span>
+              </button>
               <h1>Edit Request</h1>
             </div>
 
@@ -265,7 +265,16 @@ const EditHelpRequest: React.FC = () => {
                       {suggestions.map((item, index) => (
                         <div
                           key={index}
+                          role="option"
+                          aria-selected={false}
+                          tabIndex={0}
                           onClick={() => handleSelect(item)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              handleSelect(item);
+                            }
+                          }}
                           style={{ padding: "8px 12px", cursor: "pointer" }}
                           onMouseEnter={(e) =>
                             (e.currentTarget.style.background = "#f5f5f5")

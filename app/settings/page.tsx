@@ -112,13 +112,14 @@ export default function SettingsPage() {
                 <div className="auth-card" style={{height: 'auto', minHeight: 'auto', padding: '30px 20px', maxWidth: '450px'}}>
 
                     <div className="auth-card-header" style={{marginBottom: '20px', display: 'flex', justifyContent: 'center'}}>
-                        <span
+                        <button
+                            type="button"
                             className="header-link"
                             style={{color: 'var(--primary)', left: 0, position: 'absolute', cursor: 'pointer'}}
                             onClick={() => router.back()}
                         >
                             Cancel
-                        </span>
+                        </button>
                         <h1 style={{fontSize: '28px', lineHeight: '1.2', maxWidth: '200px', textAlign: 'center'}}>
                             Update user profile details
                         </h1>
