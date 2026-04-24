@@ -87,8 +87,8 @@ reason).
 |                    | [22.04]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/c3d3490401de5bd4833743236e1cf8faa26a9c06)] | [Bug fixing and adding more error messages] | [It is good for the usability]                         |
 | **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task]             | [Why this contribution is relevant]                    |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task]             | [Why this contribution is relevant]                    |
-| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task]             | [Why this contribution is relevant]                    |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task]             | [Why this contribution is relevant]                    |
+| **[@jonathanboggia]** | [24.04]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/91f18b25e1c66dcdc4b88bec943aaa0422ed17c4), [Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/48e23b10b19030abafa34d4bac731f69ff596f40)] | [Fixed the failing server build, wired JaCoCo coverage into SonarCloud, and added service and controller tests for the help request feature to reach the required coverage] | [The build had to pass and we needed real tests on the core logic to meet the 50% coverage requirement for M3] |
+|                    | [24.04]  | [[Link to Commit 3](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/606c207d56b7d608f247ba5c4d35f5e9162a2753)] | [Fixed the Sonar source path on the client, made clickable header links and address suggestions usable with the keyboard, and renamed the Google Maps Map import so it stops shadowing the built in Map] | [Client Sonar analysis was looking at the wrong folder, the accessibility issues were blocking the quality gate, and the shadowed name was causing warnings] |
 
 ---
 
