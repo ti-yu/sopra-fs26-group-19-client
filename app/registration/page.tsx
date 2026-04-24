@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Form, Input, DatePicker, Select, Switch, message } from "antd";
+import { Button, Form, Radio, Input, DatePicker, Select, Switch, message } from "antd";
 import dayjs from "dayjs";
 
 type RegisterFormValues = {
@@ -194,12 +194,11 @@ const Register: React.FC = () => {
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item
-            name="isVolunteer"
-            label="Are you a volunteer?"
-            valuePropName="checked"
-          >
-            <Switch />
+          <Form.Item name="isVolunteer" label="Account Role">
+              <Radio.Group style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <Radio value={false}>I want to receive help (client)</Radio>
+                  <Radio value={true}>I want to lend help (volunteer)</Radio>
+              </Radio.Group>
           </Form.Item>
 
           <Form.Item>
