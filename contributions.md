@@ -76,7 +76,7 @@ reason).
 |                    | [19.04]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/12107504acd38914dd1bfd882a502711cf71edd2)] | [My Applications page, edit request page, offer help button on map, redirect fix after posting] | [So both roles have working overview pages and the map is actually useful for volunteers] |
 ---
 
-## Contributions Week 4 - [Begin Date] to [End Date]
+## Contributions Week 4 - [20.04.2026] to [24.04.2026]
 
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                             | **Relevance**                                          |
@@ -85,8 +85,8 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task]             | [Why this contribution is relevant]                    |
 | **[@romevp]**      | [20.04]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/c964f00e6670a57a82022c67e848a168dc76b32b)] | [Added error messages to registration page] | [It is important for the user to know what went wrong] |
 |                    | [22.04]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/c3d3490401de5bd4833743236e1cf8faa26a9c06)] | [Bug fixing and adding more error messages] | [It is good for the usability]                         |
-| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task]             | [Why this contribution is relevant]                    |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task]             | [Why this contribution is relevant]                    |
+| **[@ti-yu]** | [22.04.2026]   | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/98cfc6ebd36cc3ac25d4541eb9cf2b6363bba873)] | [Refactored the DTO files to bring down code duplication]             | [Code duplication needed to be brought down so that the sonarcloud code quality checks could pass]                    |
+|                    | [24.04.2026]   | [[Link to Commit 2](https://github.com/users/ti-yu/projects/2)] | [Edited the User Stories project so that each task was linked to a commit, had a priority indicator and were tagged/labelled properly]             | [This is a requirement for M3, and a better plan makes us more productive for M4]                    |
 | **[@jonathanboggia]** | [24.04]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/91f18b25e1c66dcdc4b88bec943aaa0422ed17c4), [Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/48e23b10b19030abafa34d4bac731f69ff596f40)] | [Fixed the failing server build, wired JaCoCo coverage into SonarCloud, and added service and controller tests for the help request feature to reach the required coverage] | [The build had to pass and we needed real tests on the core logic to meet the 50% coverage requirement for M3] |
 |                    | [24.04]  | [[Link to Commit 3](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/606c207d56b7d608f247ba5c4d35f5e9162a2753)] | [Fixed the Sonar source path on the client, made clickable header links and address suggestions usable with the keyboard, and renamed the Google Maps Map import so it stops shadowing the built in Map] | [Client Sonar analysis was looking at the wrong folder, the accessibility issues were blocking the quality gate, and the shadowed name was causing warnings] |
 
