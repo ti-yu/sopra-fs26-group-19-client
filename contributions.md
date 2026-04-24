@@ -79,16 +79,16 @@ reason).
 ## Contributions Week 4 - [Begin Date] to [End Date]
 
 
-| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
-| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **Student**        | **Date** | **Link to Commit** | **Description**                             | **Relevance**                                          |
+|--------------------|----------| ------------------ |---------------------------------------------|--------------------------------------------------------|
+| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task]             | [Why this contribution is relevant]                    |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]             | [Why this contribution is relevant]                    |
+| **[@romevp]**      | [20.04]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/c964f00e6670a57a82022c67e848a168dc76b32b)] | [Added error messages to registration page] | [It is important for the user to know what went wrong] |
+|                    | [22.04]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/c3d3490401de5bd4833743236e1cf8faa26a9c06)] | [Bug fixing and adding more error messages] | [It is good for the usability]                         |
+| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task]             | [Why this contribution is relevant]                    |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]             | [Why this contribution is relevant]                    |
+| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task]             | [Why this contribution is relevant]                    |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]             | [Why this contribution is relevant]                    |
 
 ---
 
