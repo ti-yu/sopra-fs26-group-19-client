@@ -166,7 +166,6 @@ const MapPage: React.FC = () => {
                 <h1> Help Requests </h1>
                 {/* ✅ toggle buttons */}
                 <div style={{ display: "flex", gap: 8 }}>
-                    <div style={{ display: "flex", gap: 8 }}>
                     <button
                         className={`toggle-button ${view === "map" ? "active" : ""}`}
                         onClick={() => setView("map")}
@@ -179,9 +178,9 @@ const MapPage: React.FC = () => {
                     >
                         Feed
                     </button>
-                    </div>
                 </div>
             </div>
+            
  
             <Script
                 src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&v=weekly`}
