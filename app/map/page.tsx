@@ -7,16 +7,34 @@ import Script from "next/script";
 import Navbar from "@/components/navbar"
 import { User } from "@/types/user";
 import { Inserat } from "@/types/inserat"
-import { Spin } from "antd";
+import { Spin, Card } from "antd";
+
+const formatWorkType = (workType: string): string => {
+    const types: Record<string, string> = {
+        GARDENING: "🌻 Gardening",
+        SHOPPING: "🛒 Shopping & Groceries",
+        HEAVY_LIFTING: "💪 Heavy Lifting",
+        IT_SUPPORT: "💻 IT Support",
+        TUTORING: "📚 Tutoring",
+        TRANSPORT: "🚗 Transport",
+        CLEANING: "🧹 Cleaning",
+        OTHER: "✨ Other",
+    };
+    return types[workType] ?? workType;
+};
 
 const MapPage: React.FC = () => {
     const apiService = useApi();
+    const offerButtonText = "Lend a Hand";
     const { value: userId } = useLocalStorage<string>("userId", "");
     const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
     
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [inserats, setInserats] = useState<Inserat[]>([]); // ✅ shared between both views
+    const [view, setView] = useState<"map" | "feed">("map"); // ✅ toggle state
+
 
     useEffect(() => {
         if (!userId) return;
@@ -33,6 +51,8 @@ const MapPage: React.FC = () => {
         fetchUser();
     }, [userId]);
 
+    
+
     const initMap = async () => {
         const { Map: GoogleMap, InfoWindow } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
         const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
@@ -47,6 +67,8 @@ const MapPage: React.FC = () => {
 
         try {
             const inseratData = await apiService.get<Inserat[]>("/help-requests-map");
+            setInserats(inseratData);
+
             inseratData.forEach(inserat => {
                 const pin = document.createElement("img");
                 pin.src = "/pin.png";
@@ -61,19 +83,7 @@ const MapPage: React.FC = () => {
                     position: { lat: inserat.latitude, lng: inserat.longitude },
                     content: pin,
                 });
-                const formatWorkType = (workType: string): string => {
-                const types: Record<string, string> = {
-                    GARDENING: "🌻 Gardening",
-                    SHOPPING: "🛒 Shopping & Groceries",
-                    HEAVY_LIFTING: "💪 Heavy Lifting",
-                    IT_SUPPORT: "💻 IT Support",
-                    TUTORING: "📚 Tutoring",
-                    TRANSPORT: "🚗 Transport",
-                    CLEANING: "🧹 Cleaning",
-                    OTHER: "✨ Other",
-                };
-                return types[workType] ?? workType;
-            };
+                
                 marker.addListener("click", () => {
                     const showOfferButton = isVolunteer && inserat.status === "OPEN";
                     const buttonId = `offer-help-${inserat.id}`;
@@ -94,20 +104,7 @@ const MapPage: React.FC = () => {
                             <p style="margin: 0 0 4px; font-size: 12px;">📅 ${inserat.date}</p>
                             <p style="margin: 0; font-size: 12px;">🕐 ${inserat.timeframe}h</p>
                             <p style="margin: 0 0 8px; font-size: 12px;">${formatWorkType(inserat.workType ?? "")}</p>
-                            ${showOfferButton ? `
-                              <button id="${buttonId}" style="
-                                margin-top: 8px;
-                                width: 100%;
-                                background-color: #53beb3;
-                                color: #fff;
-                                border: none;
-                                border-radius: 20px;
-                                padding: 8px 16px;
-                                font-size: 14px;
-                                font-weight: 600;
-                                cursor: pointer;
-                              ">offer help</button>
-                            ` : ""}
+                            ${showOfferButton ? `<button id="${buttonId}" class="offer-button">${offerButtonText}</button>` : ""}
                         </div>
                     `);
                     infoWindow.open(map, marker);
@@ -153,22 +150,96 @@ const MapPage: React.FC = () => {
         );
     }
 
+    const contentHeight = "calc(100vh - 8vh - 64px)";
+ 
     return (
         <>
+            {/* Header with view toggle */}
             <div className="headerBar" style={{ background: "#f5f5f5", height: "8vh", top: "0px" }}>
                 <p></p>
-                <h1 style={{ color: "#000000" }}>Requests Map</h1>
-                <p></p>
+                <h1> Help Requests </h1>
+                {/* ✅ toggle buttons */}
+                <div style={{ display: "flex", gap: 8 }}>
+                    <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                        className={`toggle-button ${view === "map" ? "active" : ""}`}
+                        onClick={() => setView("map")}
+                    >
+                        Map
+                    </button>
+                    <button
+                        className={`toggle-button ${view === "feed" ? "active" : ""}`}
+                        onClick={() => setView("feed")}
+                    >
+                        Feed
+                    </button>
+                    </div>
+                </div>
             </div>
+ 
             <Script
                 src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&v=weekly`}
                 strategy="afterInteractive"
                 onLoad={initMap}
             />
-            <div id="map" style={{ height: "calc(100vh - 10vh - 64px)", width: "100%", marginTop: "8vh" }} />
+ 
+            {/* Map view — always rendered but hidden when list is active, so the map doesn't re-initialise on toggle */}
+            <div
+                id="map"
+                style={{
+                    height: contentHeight,
+                    width: "100%",
+                    marginTop: "8vh",
+                    display: view === "map" ? "block" : "none", // ✅ hide/show instead of unmount
+                }}
+            />
+ 
+            {/* Feed view */}
+            {view === "feed" && (
+                <div style={{
+                    height: contentHeight,
+                    marginTop: "8vh",
+                    overflowY: "auto",
+                    padding: "1rem",
+                }}>
+                    {inserats.length === 0 ? (
+                        <p style={{ textAlign: "center", color: "#888" }}>No requests found.</p>
+                    ) : (
+                        inserats.map(inserat => (
+                            <Card key={inserat.id} style={{ marginBottom: 12, borderRadius: 12 }}>
+                                <p style={{ fontWeight: 600, marginBottom: 4 }}>{inserat.description}</p>
+                                <p style={{ fontSize: 12, color: "#666", marginBottom: 2 }}>With: {inserat.recipientUsername}, age {inserat.recipientAge}</p>
+                                <p style={{ fontSize: 12, color: "gray", marginBottom: 2 }}>📍 {inserat.location}</p>
+                                <p style={{ fontSize: 12, marginBottom: 2 }}>📅 {inserat.date} · 🕐 {inserat.timeframe}h</p>
+                                <p style={{ fontSize: 12, marginBottom: isVolunteer && inserat.status === "OPEN" ? 8 : 0 }}>
+                                    {formatWorkType(inserat.workType ?? "")}
+                                </p>
+                                {isVolunteer && inserat.status === "OPEN" && (
+                                    <button 
+                                        className="offer-button" 
+                                        style={{maxWidth: "400px"}}
+                                        onClick={async () => {
+                                            try {
+                                                await apiService.post(`/help-requests/${inserat.id}/apply/${userId}`, {});
+                                                alert("Applied successfully!");
+                                            } catch (err) {
+                                                const msg = err instanceof Error ? err.message : "Failed to apply";
+                                                alert(msg);
+                                            }
+                                        }}
+                                    >
+                                    {offerButtonText}
+                                    </button>
+                                )}
+                            </Card>
+                        ))
+                    )}
+                </div>
+            )}
+ 
             <Navbar id={userId} isVolunteer={isVolunteer} />
         </>
     );
 };
-
+ 
 export default MapPage;

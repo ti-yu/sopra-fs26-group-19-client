@@ -146,6 +146,20 @@ a {
   position: fixed;
   z-index: 100;
   width: 100%;
+  color: "#000000";
+}
+
+.headerBar > * {
+  flex: 1;
+}
+
+.headerBar > *:nth-child(2) {
+  text-align: center;
+}
+
+.headerBar > *:last-child {
+  display: flex;
+  justify-content: flex-end;
 }
 /* ─── Google Maps InfoWindow ────────────────────────── */
 
@@ -186,4 +200,38 @@ a {
 .gm-style .gm-style-iw-c h3,
 .gm-style .gm-style-iw-c p {
   color: white !important;
+}
+
+/* ─── Toggle Buttons ────────────────────────────────── */
+
+.toggle-button {
+  border: none;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  background-color: #e5e5e5;
+  color: #555;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.toggle-button.active {
+  background-color: #53beb3;
+  color: #ffffff;
+}
+
+/* ─── Offer Help Button ─────────────────────────────── */
+.offer-button {
+  margin-top: 8px;
+  width: 100%;
+  background-color: #53beb3;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }
