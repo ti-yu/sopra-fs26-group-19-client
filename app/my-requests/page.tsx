@@ -116,16 +116,13 @@ const MyRequests: React.FC = () => {
   return (
     <AuthWrapper>
     <div>
-      <h1 style={{
-        textAlign: "center",
-        fontSize: 28,
-        fontWeight: 700,
-        padding: "40px 0 20px",
-      }}>
-        My Requests
-      </h1>
+      <div className="headerBar" style={{ background: "#f5f5f5", height: "8vh", top: "0px" }}>
+          <p></p>
+          <h1 style={{ color: "#000000" }}>My Requests</h1>
+          <p></p>
+        </div>
 
-      <div style={{ padding: "0 16px 100px", maxWidth: 600, margin: "0 auto" }}>
+      <div style={{ padding: "16vh 16px 100px", maxWidth: 600, margin: "0 auto" }}>
         {inserats.length === 0 ? (
           <Empty description="No help requests yet" style={{ marginTop: 40 }} />
         ) : (
