@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 import Script from "next/script";
@@ -53,7 +53,7 @@ const MapPage: React.FC = () => {
 
     
 
-    const initMap = async () => {
+    const initMap = useCallback(async () => {
         const { Map: GoogleMap, InfoWindow } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
         const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
@@ -132,7 +132,13 @@ const MapPage: React.FC = () => {
         } catch (err) {
             console.error("Failed to load inserats:", err);
         }
-    };
+    }, [apiService, isVolunteer, userId]);
+
+    useEffect(() => {
+        if (typeof google === "undefined") return;
+        if (loading) return;
+        initMap();
+    }, [initMap, loading]);
 
     if (loading) {
         return (
