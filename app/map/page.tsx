@@ -33,7 +33,7 @@ const MapPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [inserats, setInserats] = useState<Inserat[]>([]); // ✅ shared between both views
-    const [view, setView] = useState<"map" | "feed">("map"); // ✅ toggle state
+    const { value: view, set: setView } = useLocalStorage<"map" | "feed">("mapView", "map");
 
 
     useEffect(() => {
