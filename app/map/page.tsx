@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 import Script from "next/script";
@@ -25,16 +25,25 @@ const formatWorkType = (workType: string): string => {
 
 const MapPage: React.FC = () => {
     const apiService = useApi();
-    const offerButtonText = "Lend a Hand";
     const { value: userId } = useLocalStorage<string>("userId", "");
     const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
-    
+
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [inserats, setInserats] = useState<Inserat[]>([]); // ✅ shared between both views
+    const [inserats, setInserats] = useState<Inserat[]>([]);
     const { value: view, set: setView } = useLocalStorage<"map" | "feed">("mapView", "map");
 
+    // Tracks which inserats the current volunteer has applied to.
+    // appliedSetRef is used inside map marker closures (always current).
+    // appliedSet is React state used to re-render the feed view.
+    const [appliedSet, setAppliedSet] = useState<Set<string>>(new Set());
+    const appliedSetRef = useRef<Set<string>>(new Set());
+
+    const updateApplied = (newSet: Set<string>) => {
+        appliedSetRef.current = newSet;
+        setAppliedSet(new Set(newSet));
+    };
 
     useEffect(() => {
         if (!userId) return;
@@ -50,8 +59,6 @@ const MapPage: React.FC = () => {
         };
         fetchUser();
     }, [userId]);
-
-    
 
     const initMap = useCallback(async () => {
         const { Map: GoogleMap, InfoWindow } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
@@ -69,6 +76,14 @@ const MapPage: React.FC = () => {
             const inseratData = await apiService.get<Inserat[]>("/help-requests-map");
             setInserats(inseratData);
 
+            // Initialise which inserats the current user has already applied to
+            const initialApplied = new Set(
+                inseratData
+                    .filter(i => i.volunteerAppliedIds?.includes(userId))
+                    .map(i => i.id)
+            );
+            updateApplied(initialApplied);
+
             inseratData.forEach(inserat => {
                 const pin = document.createElement("img");
                 pin.src = "/pin.png";
@@ -83,10 +98,13 @@ const MapPage: React.FC = () => {
                     position: { lat: inserat.latitude, lng: inserat.longitude },
                     content: pin,
                 });
-                
+
                 marker.addListener("click", () => {
                     const showOfferButton = isVolunteer && inserat.status === "OPEN";
+                    const alreadyApplied = appliedSetRef.current.has(inserat.id);
                     const buttonId = `offer-help-${inserat.id}`;
+                    const buttonLabel = alreadyApplied ? "Withdraw" : "Lend a Hand";
+
                     infoWindow.setContent(`
                         <div style="
                             padding: 12px;
@@ -104,7 +122,7 @@ const MapPage: React.FC = () => {
                             <p style="margin: 0 0 4px; font-size: 12px;">📅 ${inserat.date}</p>
                             <p style="margin: 0; font-size: 12px;">🕐 ${inserat.timeframe}h</p>
                             <p style="margin: 0 0 8px; font-size: 12px;">${formatWorkType(inserat.workType ?? "")}</p>
-                            ${showOfferButton ? `<button id="${buttonId}" class="offer-button">${offerButtonText}</button>` : ""}
+                            ${showOfferButton ? `<button id="${buttonId}" class="offer-button" style="${alreadyApplied ? "background-color:#888;" : ""}">${buttonLabel}</button>` : ""}
                         </div>
                     `);
                     infoWindow.open(map, marker);
@@ -114,15 +132,31 @@ const MapPage: React.FC = () => {
                             const btn = document.getElementById(buttonId);
                             if (!btn) return;
                             btn.addEventListener("click", async () => {
-                                try {
-                                    await apiService.post(`/help-requests/${inserat.id}/apply/${userId}`, {});
-                                    btn.textContent = "applied ✓";
-                                    btn.setAttribute("disabled", "true");
-                                    (btn as HTMLButtonElement).style.backgroundColor = "#888";
-                                    (btn as HTMLButtonElement).style.cursor = "default";
-                                } catch (err) {
-                                    const msg = err instanceof Error ? err.message : "Failed to apply";
-                                    alert(msg);
+                                const isApplied = appliedSetRef.current.has(inserat.id);
+                                if (isApplied) {
+                                    try {
+                                        await apiService.delete(`/help-requests/${inserat.id}/apply/${userId}`);
+                                        const next = new Set(appliedSetRef.current);
+                                        next.delete(inserat.id);
+                                        updateApplied(next);
+                                        btn.textContent = "Lend a Hand";
+                                        (btn as HTMLButtonElement).style.backgroundColor = "";
+                                    } catch (err) {
+                                        const msg = err instanceof Error ? err.message : "Failed to withdraw";
+                                        alert(msg);
+                                    }
+                                } else {
+                                    try {
+                                        await apiService.post(`/help-requests/${inserat.id}/apply/${userId}`, {});
+                                        const next = new Set(appliedSetRef.current);
+                                        next.add(inserat.id);
+                                        updateApplied(next);
+                                        btn.textContent = "Withdraw";
+                                        (btn as HTMLButtonElement).style.backgroundColor = "#888";
+                                    } catch (err) {
+                                        const msg = err instanceof Error ? err.message : "Failed to apply";
+                                        alert(msg);
+                                    }
                                 }
                             });
                         });
@@ -157,14 +191,13 @@ const MapPage: React.FC = () => {
     }
 
     const contentHeight = "calc(100vh - 8vh - 64px)";
- 
+
     return (
         <>
             {/* Header with view toggle */}
             <div className="headerBar" style={{ background: "#f5f5f5", height: "8vh", top: "0px" }}>
                 <p></p>
                 <h1> Help Requests </h1>
-                {/* ✅ toggle buttons */}
                 <div style={{ display: "flex", gap: 8 }}>
                     <button
                         className={`toggle-button ${view === "map" ? "active" : ""}`}
@@ -180,25 +213,24 @@ const MapPage: React.FC = () => {
                     </button>
                 </div>
             </div>
-            
- 
+
             <Script
                 src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&v=weekly`}
                 strategy="afterInteractive"
                 onLoad={initMap}
             />
- 
-            {/* Map view — always rendered but hidden when list is active, so the map doesn't re-initialise on toggle */}
+
+            {/* Map view — always rendered but hidden when feed is active */}
             <div
                 id="map"
                 style={{
                     height: contentHeight,
                     width: "100%",
                     marginTop: "8vh",
-                    display: view === "map" ? "block" : "none", // ✅ hide/show instead of unmount
+                    display: view === "map" ? "block" : "none",
                 }}
             />
- 
+
             {/* Feed view */}
             {view === "feed" && (
                 <div style={{
@@ -210,41 +242,63 @@ const MapPage: React.FC = () => {
                     {inserats.length === 0 ? (
                         <p style={{ textAlign: "center", color: "#888" }}>No requests found.</p>
                     ) : (
-                        inserats.map(inserat => (
-                            <Card key={inserat.id} style={{ marginBottom: 12, borderRadius: 12 }}>
-                                <p style={{ fontWeight: 600, marginBottom: 4 }}>{inserat.description}</p>
-                                <p style={{ fontSize: 12, color: "#666", marginBottom: 2 }}>With: {inserat.recipientUsername}, age {inserat.recipientAge}</p>
-                                <p style={{ fontSize: 12, color: "gray", marginBottom: 2 }}>📍 {inserat.location}</p>
-                                <p style={{ fontSize: 12, marginBottom: 2 }}>📅 {inserat.date} · 🕐 {inserat.timeframe}h</p>
-                                <p style={{ fontSize: 12, marginBottom: isVolunteer && inserat.status === "OPEN" ? 8 : 0 }}>
-                                    {formatWorkType(inserat.workType ?? "")}
-                                </p>
-                                {isVolunteer && inserat.status === "OPEN" && (
-                                    <button 
-                                        className="offer-button" 
-                                        style={{maxWidth: "400px"}}
-                                        onClick={async () => {
-                                            try {
-                                                await apiService.post(`/help-requests/${inserat.id}/apply/${userId}`, {});
-                                                alert("Applied successfully!");
-                                            } catch (err) {
-                                                const msg = err instanceof Error ? err.message : "Failed to apply";
-                                                alert(msg);
-                                            }
-                                        }}
-                                    >
-                                    {offerButtonText}
-                                    </button>
-                                )}
-                            </Card>
-                        ))
+                        inserats.map(inserat => {
+                            const alreadyApplied = appliedSet.has(inserat.id);
+                            const showButton = isVolunteer && inserat.status === "OPEN";
+
+                            return (
+                                <Card key={inserat.id} style={{ marginBottom: 12, borderRadius: 12 }}>
+                                    <p style={{ fontWeight: 600, marginBottom: 4 }}>{inserat.description}</p>
+                                    <p style={{ fontSize: 12, color: "#666", marginBottom: 2 }}>With: {inserat.recipientUsername}, age {inserat.recipientAge}</p>
+                                    <p style={{ fontSize: 12, color: "gray", marginBottom: 2 }}>📍 {inserat.location}</p>
+                                    <p style={{ fontSize: 12, marginBottom: 2 }}>📅 {inserat.date} · 🕐 {inserat.timeframe}h</p>
+                                    <p style={{ fontSize: 12, marginBottom: showButton ? 8 : 0 }}>
+                                        {formatWorkType(inserat.workType ?? "")}
+                                    </p>
+                                    {showButton && (
+                                        <button
+                                            className="offer-button"
+                                            style={{
+                                                maxWidth: "400px",
+                                                backgroundColor: alreadyApplied ? "#888" : undefined,
+                                            }}
+                                            onClick={async () => {
+                                                if (alreadyApplied) {
+                                                    try {
+                                                        await apiService.delete(`/help-requests/${inserat.id}/apply/${userId}`);
+                                                        const next = new Set(appliedSetRef.current);
+                                                        next.delete(inserat.id);
+                                                        updateApplied(next);
+                                                    } catch (err) {
+                                                        const msg = err instanceof Error ? err.message : "Failed to withdraw";
+                                                        alert(msg);
+                                                    }
+                                                } else {
+                                                    try {
+                                                        await apiService.post(`/help-requests/${inserat.id}/apply/${userId}`, {});
+                                                        const next = new Set(appliedSetRef.current);
+                                                        next.add(inserat.id);
+                                                        updateApplied(next);
+                                                    } catch (err) {
+                                                        const msg = err instanceof Error ? err.message : "Failed to apply";
+                                                        alert(msg);
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            {alreadyApplied ? "Withdraw" : "Lend a Hand"}
+                                        </button>
+                                    )}
+                                </Card>
+                            );
+                        })
                     )}
                 </div>
             )}
- 
+
             <Navbar id={userId} isVolunteer={isVolunteer} />
         </>
     );
 };
- 
+
 export default MapPage;

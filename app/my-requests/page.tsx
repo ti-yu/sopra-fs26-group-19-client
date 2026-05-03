@@ -154,12 +154,21 @@ const MyRequests: React.FC = () => {
                     </span>
                   </div>
                   {!isDone && isOpen && (
-                    <Link
-                      href={`/my-requests/${inserat.id}/edit`}
-                      style={{ color: "#d9737d", fontSize: 14, whiteSpace: "nowrap", marginLeft: 8, fontWeight: 500 }}
-                    >
-                      edit request
-                    </Link>
+                    inserat.volunteerAppliedCount === 0 ? (
+                      <Link
+                        href={`/my-requests/${inserat.id}/edit`}
+                        style={{ color: "#d9737d", fontSize: 14, whiteSpace: "nowrap", marginLeft: 8, fontWeight: 500 }}
+                      >
+                        edit request
+                      </Link>
+                    ) : (
+                      <span
+                        title="Cannot edit once someone has applied"
+                        style={{ color: "#bbb", fontSize: 14, whiteSpace: "nowrap", marginLeft: 8, fontWeight: 500, cursor: "not-allowed", userSelect: "none" }}
+                      >
+                        edit request
+                      </span>
+                    )
                   )}
                 </div>
 

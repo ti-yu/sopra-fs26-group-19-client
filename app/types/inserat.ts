@@ -11,6 +11,7 @@ export interface Inserat {
   status: "OPEN" | "ACCEPTED" | "DONE";
   creationDate: string;
   volunteerAppliedCount: number;
+  volunteerAppliedIds?: string[];
   volunteerAcceptedUsername: string | null;
   volunteerAcceptedPhone: string | null;
   volunteerAcceptedEmail: string | null;
