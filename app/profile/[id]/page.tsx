@@ -2,12 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Avatar, Spin } from "antd";
+import { Avatar, Spin, Card, Tag, Empty, Typography } from "antd";
 import { User } from "@/types/user";
 import Navbar from "@/components/navbar"
 import { useApi } from "@/hooks/useApi";
 import Link from "next/link";
 import AuthWrapper from "@/components/AuthWrapper";
+import ReviewModal from '@/components/ReviewModal';
 
 const calculateAge = (dateOfBirth: string): number => {
   const today = new Date();
@@ -20,6 +21,14 @@ const calculateAge = (dateOfBirth: string): number => {
   return age;
 };
 
+interface ReviewDTO {
+    id: string;
+    senderUsername: string;
+    text: string;
+    creationDate: string;
+    inseratDescription: string;
+}
+
 const Profile: React.FC = () => {
   const apiService = useApi();
   const params = useParams();
@@ -29,21 +38,29 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchUser = async () => {
-      try {
-        const data = await apiService.get<User>(`/profile/${id}`);
-        setUser(data);
-        sessionStorage.setItem("isVolunteer", String(data.isVolunteer));
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "Failed to load user");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, [id]);
+    const [receivedReviews, setReceivedReviews] = useState<ReviewDTO[]>([]);
+
+    useEffect(() => {
+        if (!id) return;
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const [userData, reviewsData] = await Promise.all([
+                    apiService.get<User>(`/profile/${id}`),
+                    apiService.get<ReviewDTO[]>(`/profile/${id}/reviews/received`)
+                ]);
+
+                setUser(userData);
+                setReceivedReviews(reviewsData || []); // Store the reviews
+                sessionStorage.setItem("isVolunteer", String(userData.isVolunteer));
+            } catch (err: unknown) {
+                setError(err instanceof Error ? err.message : "Failed to load user");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [id]);
 
   if (loading) {
     return (
@@ -89,19 +106,64 @@ const Profile: React.FC = () => {
 
         <div className="profile-container" style={{marginTop: "-75px"}}>
             <Avatar size={120} style={{backgroundColor: user.isVolunteer ? "#3e9188ff" : "#964f56ff"}}>
-            {user.username.charAt(0).toUpperCase()}
-          </Avatar>
-          <h1 style={{ margin: "8px 0 4px" }}>{user.username}</h1>
-          <p><strong>{roleLabel}</strong></p>
+                {user.username.charAt(0).toUpperCase()}
+            </Avatar>
+            <h1 style={{margin: "8px 0 4px"}}>{user.username}</h1>
+            <p><strong>{roleLabel}</strong></p>
 
-          <div style={{display: "flex", alignItems: "left", marginTop: "40px", flexDirection: "column", gap: "20px"}}>
-            <p><strong>Bio: </strong>{user.bio}</p>
-            <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
-            <p><strong>Gender: </strong>{user.gender}</p>
-          </div>
-        {/* — Role-based navigation icons — */}
-        <Navbar id={id as string} isVolunteer={user.isVolunteer} />
-      </div>
+            <div style={{display: "flex", alignItems: "left", marginTop: "40px", flexDirection: "column", gap: "20px"}}>
+                <p><strong>Bio: </strong>{user.bio}</p>
+                <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
+                <p><strong>Gender: </strong>{user.gender}</p>
+                <div style={{marginTop: '20px', textAlign: 'left', paddingBottom: '100px'}}>
+                    <h3 style={{borderBottom: '1px solid #eee', paddingBottom: '10px'}}>
+                        Reviews from the Community
+                    </h3>
+
+                    {receivedReviews.length > 0 ? (
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px'}}>
+                            {receivedReviews.map((review) => (
+                                <Card
+                                    key={review.id}
+                                    size="small"
+                                    style={{
+                                        borderRadius: '12px',
+                                        backgroundColor: '#fafafa',
+                                        borderLeft: `5px solid var(--role-color)`
+                                    }}
+                                >
+                                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                        <Typography.Text strong>@{review.senderUsername}</Typography.Text>
+                                        <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
+                                            {review.creationDate}
+                                        </Typography.Text>
+                                    </div>
+
+                                    <div style={{ margin: '8px 0' }}>
+                                        <Typography.Text italic>&quot;{review.text}&quot;</Typography.Text>
+                                    </div>
+                                    <Tag color="blue" style={{fontSize: '10px'}}>
+                                        Task: {review.inseratDescription}
+                                    </Tag>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <Empty
+                            description="No reviews yet."
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            style={{marginTop: '20px'}}
+                        />
+                    )}
+                </div>
+            </div>
+
+
+            <ReviewModal/>
+
+            {/* — Role-based navigation icons — */}
+            <Navbar id={id as string} isVolunteer={user.isVolunteer}/>
+        </div>
     </div>
       </AuthWrapper>
   );
