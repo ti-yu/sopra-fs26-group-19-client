@@ -97,8 +97,8 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                           | **Relevance**                       |
 |--------------------|----------| ------------------ |-------------------------------------------|-------------------------------------|
-| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task]           | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task]           | [Why this contribution is relevant] |
+| **[@lisgeh2]** | [date]   | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/17491ce8bd9152e4f1b27aba3a36ef83138ce454) https://github.com/ti-yu/sopra-fs26-group-19-server/commit/c01036cb8ec9fd232b497c8e5202648c9541f19c] | [Add Review-Service Logic (and finish up entity)]           | [Because its backend basics for Review functionality] |
+|                    | [date]   | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/b5d046de79000cfe314a33cebe14d280a630dd24), https://github.com/ti-yu/sopra-fs26-group-19-server/commit/91eafa0379f6713732b64569be2a18c15211cdfc#diff-4d5228ed318a41128060fe395abe2f30b6fee51ac7c44a2eb9717e5b4248176e] | [Add Review DTOs, add Review controller / Endpoint things]           | [So the frontend can get the Data] |
 | **[@romevp]**      | [03.05]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/30d33537e468d7f15fba18763b0927ebb95a93d1)] | [Created frontend for reviewx]            | [To display reviews]                |
 |                    | [03.05]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/09dbbc8113702c32167d74e4c88c8b40e372ca1d)] | [Updated backend to get received reviews] | [Important to see received reviews] |
 | **[@ti-yu]**       | [02.05]   | [Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/07dfb2f791ce8b9b69c4e149186ed2c69154b0e4) | [Fixed the bug where the data on the map page didn't load]           | [When navigating to the map, the user expects it to work] |
