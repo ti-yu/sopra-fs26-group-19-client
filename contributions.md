@@ -103,8 +103,8 @@ reason).
 |                    | [03.05]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/09dbbc8113702c32167d74e4c88c8b40e372ca1d)] | [Updated backend to get received reviews] | [Important to see received reviews] |
 | **[@ti-yu]**       | [02.05]   | [Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/07dfb2f791ce8b9b69c4e149186ed2c69154b0e4) | [Fixed the bug where the data on the map page didn't load]           | [When navigating to the map, the user expects it to work] |
 |                    | [02.05]   | [Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/c8ffe86589f8227ac49183ed00e0cd2c0f041343) | [Added the feed view to the map page]           | [A feed gives a better overview over all help requests and an alternative to users who are more familiar with this kind of layout] |
-| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task]           | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task]           | [Why this contribution is relevant] |
+| **[@jonathanboggia]** | [03.05]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/968ef6ffe939a15e66837cbeb98eb5c841692bec)] | [Added unapply endpoint, exposed time and applied volunteer IDs in the inserat response, and fixed missing mocks in tests] | [Volunteers need to be able to withdraw applications, and the server was not returning the time field so the edit form always reset it] |
+|                    | [03.05]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/5a9cdd3c7c08725716bfd1e49abcfc3f7a27aa96)] | [Apply and withdraw toggle on map and feed, disabled edit button when someone has applied, fixed time pre-fill on edit form, navbar outline home icon and active page indicator] | [Volunteers could apply multiple times (an error message was shown) with no way to undo it, the time field never loaded correctly on edit, and the navbar gave no visual feedback for the current page] |
 
 ---
 
