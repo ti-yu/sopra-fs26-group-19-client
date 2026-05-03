@@ -6,7 +6,8 @@ import {
   HomeFilled,
   GlobalOutlined,
   UnorderedListOutlined,
-  EditOutlined
+  EditOutlined,
+    StarOutlined
 } from "@ant-design/icons";
 
 interface IconConfig {
@@ -21,11 +22,14 @@ const getIconConfigs = (id: string, isVolunteer: boolean): IconConfig[] =>
         { icon: <HomeFilled style={{ fontSize: 28, color: "#53beb3" }} />, label: "My Profile", href: `/profile/${id}` },
         { icon: <GlobalOutlined style={{ fontSize: 28, color: "#53beb3" }} />, label: "My Feed", href: "/map" },
         { icon: <UnorderedListOutlined style={{ fontSize: 28, color: "#53beb3" }} />, label: "My Applications", href: "/my-applications" },
+          { icon: <StarOutlined style={{ fontSize: 28, color: "#53beb3" }} />, label: "Reviews", href: "/reviews" },
+
       ]
     : [
         { icon: <HomeFilled style={{ fontSize: 28, color: "#d9737d" }} />,label: "My Profile", href: `/profile/${id}` },
         { icon: <EditOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "New Inserat", href: `/profile/${id}/CreateHelpRequest` },
         { icon: <UnorderedListOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "My Requests", href: "/my-requests" },
+          { icon: <StarOutlined style={{ fontSize: 28, color: "#d9737d" }} />, label: "Reviews", href: "/reviews" },
       ];
 
 interface NavbarProps {
