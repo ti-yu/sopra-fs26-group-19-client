@@ -92,7 +92,7 @@ reason).
 
 ---
 
-## Contributions Week 5 - [Begin Date] to [End Date]
+## Contributions Week 5 - [27.04.2026] to [04.05.2026]
 
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                           | **Relevance**                       |
@@ -101,14 +101,14 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task]           | [Why this contribution is relevant] |
 | **[@romevp]**      | [03.05]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/30d33537e468d7f15fba18763b0927ebb95a93d1)] | [Created frontend for reviewx]            | [To display reviews]                |
 |                    | [03.05]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/09dbbc8113702c32167d74e4c88c8b40e372ca1d)] | [Updated backend to get received reviews] | [Important to see received reviews] |
-| **[@ti-yu]**       | [date]   | [Link to Commit 1] | [Brief description of the task]           | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task]           | [Why this contribution is relevant] |
+| **[@ti-yu]**       | [02.05]   | [Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/07dfb2f791ce8b9b69c4e149186ed2c69154b0e4) | [Fixed the bug where the data on the map page didn't load]           | [When navigating to the map, the user expects it to work] |
+|                    | [02.05]   | [Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/c8ffe86589f8227ac49183ed00e0cd2c0f041343) | [Added the feed view to the map page]           | [A feed gives a better overview over all help requests and an alternative to users who are more familiar with this kind of layout] |
 | **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task]           | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task]           | [Why this contribution is relevant] |
 
 ---
 
-## Contributions Week 6 - [Begin Date] to [End Date]
+## Contributions Week 6 - [04.05.2026] to [11.05.2026 Date]
 
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
@@ -121,3 +121,35 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+
+
+## Contributions Week 7 - [11.05.2026] to [18.05.2026]
+
+
+| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
+| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
+| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+
+
+
+## Contributions Week 8 - [18.05.2026] to [22.06.2025]
+
+
+| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
+| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
+| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+
