@@ -95,16 +95,16 @@ reason).
 ## Contributions Week 5 - [Begin Date] to [End Date]
 
 
-| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
-| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@ti-yu]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **Student**        | **Date** | **Link to Commit** | **Description**                           | **Relevance**                       |
+|--------------------|----------| ------------------ |-------------------------------------------|-------------------------------------|
+| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task]           | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]           | [Why this contribution is relevant] |
+| **[@romevp]**      | [03.05]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/30d33537e468d7f15fba18763b0927ebb95a93d1)] | [Created frontend for reviewx]            | [To display reviews]                |
+|                    | [03.05]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/09dbbc8113702c32167d74e4c88c8b40e372ca1d)] | [Updated backend to get received reviews] | [Important to see received reviews] |
+| **[@ti-yu]**       | [date]   | [Link to Commit 1] | [Brief description of the task]           | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]           | [Why this contribution is relevant] |
+| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task]           | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]           | [Why this contribution is relevant] |
 
 ---
 
