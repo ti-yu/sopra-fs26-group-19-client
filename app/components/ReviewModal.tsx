@@ -21,7 +21,7 @@ export default function ReviewModal() {
     useEffect(() => {
         async function checkForPendingReviews() {
             try {
-                const rawUserId = sessionStorage.getItem('userId');
+                const rawUserId = localStorage.getItem('userId');
                 if (!rawUserId) return;
                 const cleanUserId = rawUserId.replace(/"/g, '');
 
@@ -58,7 +58,7 @@ export default function ReviewModal() {
 
         setIsSubmitting(true);
         try {
-            const rawUserId = sessionStorage.getItem('userId')?.replace(/"/g, '');
+            const rawUserId = localStorage.getItem('userId')?.replace(/"/g, '');
             await api.post(`/profile/${rawUserId}/reviews/${pendingReview?.id}/write`, { text: reviewText });
 
             message.success("Review posted successfully!");
@@ -74,7 +74,7 @@ export default function ReviewModal() {
     const ignoreReview = async () => {
         setIsSubmitting(true);
         try {
-            const rawUserId = sessionStorage.getItem('userId')?.replace(/"/g, '');
+            const rawUserId = localStorage.getItem('userId')?.replace(/"/g, '');
             await api.post(`/profile/${rawUserId}/reviews/${pendingReview?.id}/ignore`, {});
 
             setIsModalOpen(false);
