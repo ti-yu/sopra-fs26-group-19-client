@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,6 +10,7 @@ import {
   EditOutlined,
   StarOutlined,
 } from "@ant-design/icons";
+import { ApiService } from "@/api/apiService";
 
 interface IconConfig {
   icon: React.ReactNode;
@@ -39,17 +40,39 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
   const pathname = usePathname();
-  const iconConfigs = getIconConfigs(id, isVolunteer);
   const safeId = id || "";
   const roleColor = isVolunteer ? "#53beb3" : "#d9737d";
+  const iconConfigs = getIconConfigs(safeId, isVolunteer);
+
+  const [hasPendingReview, setHasPendingReview] = useState(false);
+
+  const profileHref = `/profile/${safeId}`;
+  const onProfilePage = pathname === profileHref;
 
   const isActive = (href: string): boolean => {
-    // Profile page: exact match on /profile/<id>
-    if (href === `/profile/${safeId}`) {
-      return pathname === href;
-    }
+    if (href === profileHref) return pathname === href;
     return pathname === href || pathname.startsWith(href + "/");
   };
+
+  // Check for pending review whenever the path changes.
+  // When on the profile page the ReviewModal handles the popup, so we clear the dot.
+  useEffect(() => {
+    if (!safeId) return;
+
+    if (onProfilePage) {
+      setHasPendingReview(false);
+      return;
+    }
+
+    const api = new ApiService();
+    api.get<{ id?: string }>(`/profile/${safeId}/pendingReview`)
+      .then((res) => {
+        setHasPendingReview(!!(res as { id?: string })?.id);
+      })
+      .catch(() => {
+        setHasPendingReview(false);
+      });
+  }, [safeId, pathname]);
 
   return (
     <nav style={{
@@ -67,13 +90,17 @@ const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
     }}>
       {iconConfigs.map(({ icon, label, href }) => {
         const active = isActive(href);
+        const isHome = href === profileHref;
+        const showDot = isHome && hasPendingReview && !onProfilePage;
+
         return (
           <Link
             key={label}
             href={href}
             style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
           >
-            {active ? (
+            {/* Fixed-size wrapper prevents layout shift when circle appears/disappears */}
+            <span style={{ position: "relative", display: "inline-flex" }}>
               <span style={{
                 display: "flex",
                 alignItems: "center",
@@ -81,17 +108,26 @@ const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
                 width: 44,
                 height: 44,
                 borderRadius: "50%",
-                backgroundColor: roleColor,
-                color: "#fff",
+                backgroundColor: active ? roleColor : "transparent",
+                color: active ? "#fff" : roleColor,
                 fontSize: 28,
+                flexShrink: 0,
               }}>
                 {icon}
               </span>
-            ) : (
-              <span style={{ color: roleColor, fontSize: 28, display: "flex", alignItems: "center" }}>
-                {icon}
-              </span>
-            )}
+              {showDot && (
+                <span style={{
+                  position: "absolute",
+                  top: 4,
+                  right: 4,
+                  width: 9,
+                  height: 9,
+                  borderRadius: "50%",
+                  backgroundColor: "#e53935",
+                  border: "1.5px solid #fafafa",
+                }} />
+              )}
+            </span>
           </Link>
         );
       })}
