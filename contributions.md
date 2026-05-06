@@ -117,8 +117,8 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@ti-yu]** | [06.05]   | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/adcbbf47a595452a62948678624b441fb5b55def)] | [When two Help Requests share the same coordinate, they are now paginated] | [Before, only the newest help request would be displayed] |
+|                    | [06.05]   | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/7e46a7234953fce9a2a7aa2e8877854584111561)] | [Only inserat with the status OPEN are displayed on the map/feed] | [This avoids clutter on the map/feed] |
 | **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 

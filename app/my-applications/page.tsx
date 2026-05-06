@@ -128,7 +128,7 @@ const MyApplications: React.FC = () => {
                     {inserat.timeframe && (
                       <>
                         <br />
-                        🕐 {inserat.timeframe}
+                        🕐 {inserat.timeframe}h
                       </>
                     )}
                   </div>
