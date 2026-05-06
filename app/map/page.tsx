@@ -115,85 +115,106 @@ const MapPage: React.FC = () => {
                     .map(i => i.id)
             );
             updateApplied(initialApplied);
-
+            
+            // Group inserats by coordinates
+            const groups = new Map<string, Inserat[]>();
             inseratData.forEach(inserat => {
-                const pin = document.createElement("img");
-                pin.src = "/pin.png";
-                pin.style.cssText = `
-                    width: 44px;
-                    height: 57px;
-                    cursor: pointer;
-                `;
+            const key = `${inserat.latitude},${inserat.longitude}`;
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key)!.push(inserat);
+            });
 
-                const marker = new AdvancedMarkerElement({
-                    map,
-                    position: { lat: inserat.latitude, lng: inserat.longitude },
-                    content: pin,
-                });
+            // Sort each group by date (soonest first)
+            groups.forEach(group => {
+            group.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            });
 
-                marker.addListener("click", () => {
-                    const showOfferButton = isVolunteer && inserat.status === "OPEN";
-                    const alreadyApplied = appliedSetRef.current.has(inserat.id);
-                    const buttonId = `offer-help-${inserat.id}`;
-                    const buttonLabel = alreadyApplied ? "Withdraw" : "Lend a Hand";
+            // Place one marker per unique coordinate
+            groups.forEach((groupInserats, key) => {
+            const [lat, lng] = key.split(",").map(Number);
 
-                    infoWindow.setContent(`
-                        <div style="
-                            padding: 12px;
-                            min-width: 180px;
-                            max-width: 250px;
-                            max-height: 260px;
-                            overflow-y: auto;
-                            word-wrap: break-word;
-                            border-radius: 8px;
-                        ">
-                            <h3 style="margin: 0 0 8px; word-break: break-word;">${inserat.description}</h3>
-                            <p style="margin: 0 0 4px; word-break: break-word;">With: ${inserat.recipientUsername}</p>
-                            <p style="margin: 0 0 4px; font-size: 12px;">Age: ${inserat.recipientAge}</p>
-                            <p style="margin: 0 0 4px; color: gray; font-size: 12px;">Where: ${inserat.location}</p>
-                            <p style="margin: 0 0 4px; font-size: 12px;">📅 ${inserat.date}</p>
-                            <p style="margin: 0; font-size: 12px;">🕐 ${inserat.timeframe}h</p>
-                            <p style="margin: 0 0 8px; font-size: 12px;">${formatWorkType(inserat.workType ?? "")}</p>
-                            ${showOfferButton ? `<button id="${buttonId}" class="offer-button" style="${alreadyApplied ? "background-color:#888;" : ""}">${buttonLabel}</button>` : ""}
+            const pin = document.createElement("img");
+            pin.src = "/pin.png";
+            pin.style.cssText = `width: 44px; height: 57px; cursor: pointer;`;
+
+            const marker = new AdvancedMarkerElement({
+                map,
+                position: { lat, lng },
+                content: pin,
+            });
+
+            marker.addListener("click", () => {
+                let currentPage = 0;
+
+                const renderPage = () => {
+                const inserat = groupInserats[currentPage];
+                const total = groupInserats.length;
+                const showOfferButton = isVolunteer && inserat.status === "OPEN";
+                const buttonId = `offer-help-${inserat.id}`;
+
+                infoWindow.setContent(`
+                    <div style="padding: 12px; min-width: 180px; max-width: 250px; border-radius: 8px;">
+                    ${total > 1 ? `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <button id="prev-${inserat.id}" style="background: none; border: none; cursor: pointer; font-size: 24px; color: white; ${currentPage === 0 ? "opacity: 1; cursor: default;" : ""}"><strong>‹</strong></button>
+                        <span style="font-size: 16px; color: white;">${currentPage + 1} / ${total}</span>
+                        <button id="next-${inserat.id}" style="background: none; border: none; cursor: pointer; font-size: 24px; color: white; ${currentPage === total - 1 ? "opacity: 1; cursor: default;" : ""}"><strong>›</strong></button>
                         </div>
-                    `);
-                    infoWindow.open(map, marker);
+                    ` : ""}
+                    <h3 style="margin: 0 0 8px; font-size: 20px; word-break: break-word;">${inserat.description}</h3>
+                    <p style="margin: 0 0 4px; font-size: 20px; word-break: break-word;">With: ${inserat.recipientUsername}</p>
+                    <p style="margin: 0 0 4px; font-size: 16px;">Age: ${inserat.recipientAge}</p>
+                    <p style="margin: 0 0 4px; color: gray; font-size: 16px;">Where: ${inserat.location}</p>
+                    <p style="margin: 0 0 4px; font-size: 16px;">📅 ${inserat.date}</p>
+                    <p style="margin: 0; font-size: 16px;">🕐 ${inserat.timeframe}h</p>
+                    <p style="margin: 0 0 8px; font-size: 16px;">${formatWorkType(inserat.workType ?? "")}</p>
+                    ${showOfferButton ? `<button id="${buttonId}" class="offer-button">offer help</button>` : ""}
+                    </div>
+                `);
 
+                infoWindow.open(map, marker);
+
+                google.maps.event.addListenerOnce(infoWindow, "domready", () => {
+                    // Pagination listeners
+                    const prevBtn = document.getElementById(`prev-${inserat.id}`);
+                    const nextBtn = document.getElementById(`next-${inserat.id}`);
+
+                    if (prevBtn && currentPage > 0) {
+                    prevBtn.addEventListener("click", () => {
+                        currentPage--;
+                        renderPage();
+                    });
+                    }
+
+                    if (nextBtn && currentPage < total - 1) {
+                    nextBtn.addEventListener("click", () => {
+                        currentPage++;
+                        renderPage();
+                    });
+                    }
+
+                    // Offer help listener
                     if (showOfferButton) {
-                        google.maps.event.addListenerOnce(infoWindow, "domready", () => {
-                            const btn = document.getElementById(buttonId);
-                            if (!btn) return;
-                            btn.addEventListener("click", async () => {
-                                const isApplied = appliedSetRef.current.has(inserat.id);
-                                if (isApplied) {
-                                    try {
-                                        await apiService.delete(`/help-requests/${inserat.id}/apply/${userId}`);
-                                        const next = new Set(appliedSetRef.current);
-                                        next.delete(inserat.id);
-                                        updateApplied(next);
-                                        btn.textContent = "Lend a Hand";
-                                        (btn as HTMLButtonElement).style.backgroundColor = "";
-                                    } catch (err) {
-                                        const msg = err instanceof Error ? err.message : "Failed to withdraw";
-                                        alert(msg);
-                                    }
-                                } else {
-                                    try {
-                                        await apiService.post(`/help-requests/${inserat.id}/apply/${userId}`, {});
-                                        const next = new Set(appliedSetRef.current);
-                                        next.add(inserat.id);
-                                        updateApplied(next);
-                                        btn.textContent = "Withdraw";
-                                        (btn as HTMLButtonElement).style.backgroundColor = "#888";
-                                    } catch (err) {
-                                        const msg = err instanceof Error ? err.message : "Failed to apply";
-                                        alert(msg);
-                                    }
-                                }
-                            });
-                        });
+                    const btn = document.getElementById(buttonId);
+                    if (!btn) return;
+                    btn.addEventListener("click", async () => {
+                        try {
+                        await apiService.post(`/help-requests/${inserat.id}/apply/${userId}`, {});
+                        btn.textContent = "applied ✓";
+                        btn.setAttribute("disabled", "true");
+                        (btn as HTMLButtonElement).style.backgroundColor = "#888";
+                        (btn as HTMLButtonElement).style.cursor = "default";
+                        } catch (err) {
+                        const msg = err instanceof Error ? err.message : "Failed to apply";
+                        alert(msg);
+                        }
+                    });
                     }
                 });
+                };
+
+                renderPage();
+            });
             });
         } catch (err) {
             console.error("Failed to load inserats:", err);
