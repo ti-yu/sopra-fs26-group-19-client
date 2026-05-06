@@ -150,7 +150,9 @@ const MapPage: React.FC = () => {
                 const inserat = groupInserats[currentPage];
                 const total = groupInserats.length;
                 const showOfferButton = isVolunteer && inserat.status === "OPEN";
+                const alreadyApplied = appliedSetRef.current.has(inserat.id);
                 const buttonId = `offer-help-${inserat.id}`;
+                const buttonLabel = alreadyApplied ? "Withdraw" : "Lend a Hand";
 
                 infoWindow.setContent(`
                     <div style="padding: 12px; min-width: 180px; max-width: 250px; border-radius: 8px;">
@@ -168,7 +170,7 @@ const MapPage: React.FC = () => {
                     <p style="margin: 0 0 4px; font-size: 16px;">📅 ${inserat.date}</p>
                     <p style="margin: 0; font-size: 16px;">🕐 ${inserat.timeframe}h</p>
                     <p style="margin: 0 0 8px; font-size: 16px;">${formatWorkType(inserat.workType ?? "")}</p>
-                    ${showOfferButton ? `<button id="${buttonId}" class="offer-button">offer help</button>` : ""}
+                    ${showOfferButton ? `<button id="${buttonId}" class="offer-button" style="${alreadyApplied ? "background-color:#888;" : ""}">${buttonLabel}</button>` : ""}
                     </div>
                 `);
 
@@ -198,16 +200,32 @@ const MapPage: React.FC = () => {
                     const btn = document.getElementById(buttonId);
                     if (!btn) return;
                     btn.addEventListener("click", async () => {
-                        try {
-                        await apiService.post(`/help-requests/${inserat.id}/apply/${userId}`, {});
-                        btn.textContent = "applied ✓";
-                        btn.setAttribute("disabled", "true");
-                        (btn as HTMLButtonElement).style.backgroundColor = "#888";
-                        (btn as HTMLButtonElement).style.cursor = "default";
-                        } catch (err) {
-                        const msg = err instanceof Error ? err.message : "Failed to apply";
-                        alert(msg);
-                        }
+                        const isApplied = appliedSetRef.current.has(inserat.id);
+                                if (isApplied) {
+                                    try {
+                                        await apiService.delete(`/help-requests/${inserat.id}/apply/${userId}`);
+                                        const next = new Set(appliedSetRef.current);
+                                        next.delete(inserat.id);
+                                        updateApplied(next);
+                                        btn.textContent = "Lend a Hand";
+                                        (btn as HTMLButtonElement).style.backgroundColor = "";
+                                    } catch (err) {
+                                        const msg = err instanceof Error ? err.message : "Failed to withdraw";
+                                        alert(msg);
+                                    }
+                                } else {
+                                    try {
+                                        await apiService.post(`/help-requests/${inserat.id}/apply/${userId}`, {});
+                                        const next = new Set(appliedSetRef.current);
+                                        next.add(inserat.id);
+                                        updateApplied(next);
+                                        btn.textContent = "Withdraw";
+                                        (btn as HTMLButtonElement).style.backgroundColor = "#888";
+                                    } catch (err) {
+                                        const msg = err instanceof Error ? err.message : "Failed to apply";
+                                        alert(msg);
+                                    }
+                                }
                     });
                     }
                 });
