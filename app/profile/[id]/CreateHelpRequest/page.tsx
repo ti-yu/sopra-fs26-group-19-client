@@ -182,7 +182,7 @@ const CreateHelpRequest: React.FC = () => {
             <Form.Item
                 name="time"
                 label="Time of Day"
-                rules={[{ required: true, message: "Please select a time!" }]}
+                
             >
               <TimePicker
                   format="HH:mm"
@@ -192,11 +192,17 @@ const CreateHelpRequest: React.FC = () => {
             </Form.Item>
 
             <Form.Item
-              name="timeframe"
-              label="Duration (hours)"
-              rules={[{ required: true, message: "Please enter the duration!" }]}
-            >
-              <Input placeholder="Duration (hours)" />
+            name="timeframe"
+            label="Duration (hours)"
+            rules={[{ required: true, message: "Please select a duration!" }]}
+          >
+              <Select placeholder="Select duration">
+                {Array.from({ length: 17 }, (_, i) => (i+1) * 0.5).map(value => (
+                  <Select.Option key={value} value={String(value)}>
+                    {value === 0.5 ? "30 min" : value === 8.5 ? ">8 hours" : `${value} hour${value !== 1 ? "s" : ""}`}
+                  </Select.Option>
+                ))}
+              </Select>
             </Form.Item>
 
             <Form.Item
