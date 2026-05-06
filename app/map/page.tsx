@@ -72,6 +72,38 @@ const MapPage: React.FC = () => {
 
         const infoWindow = new InfoWindow();
 
+        map.addListener("click", async (event: google.maps.MapMouseEvent & { placeId?: string }) => {
+            if (!event.placeId) return;
+
+            event.stop();
+
+            const { Place } = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
+
+            const place = new Place({
+                id: event.placeId,
+                requestedLanguage: "en",
+            });
+
+            await place.fetchFields({
+                fields: ["displayName", "formattedAddress", "googleMapsURI"],
+            });
+
+            infoWindow.setContent(`
+                <div style="padding: 12px; min-width: 180px; max-width: 250px; border-radius: 8px;">
+                <h3 style="margin: 0 0 8px; word-break: break-word;">${place.displayName ?? ""}</h3>
+                <p style="margin: 0 0 4px; font-size: 12px;">${place.formattedAddress ?? ""}</p>
+                ${place.googleMapsURI ? `
+                    <a href="${place.googleMapsURI}" target="_blank" style="font-size: 12px; color: #53beb3; font-weight: 600;">
+                        View on Google Maps
+                    </a>
+                    ` : ""}
+                </div>
+            `);
+            
+            infoWindow.setPosition(event.latLng);
+            infoWindow.open(map);
+            });
+
         try {
             const inseratData = await apiService.get<Inserat[]>("/help-requests-map");
             setInserats(inseratData);
@@ -215,7 +247,7 @@ const MapPage: React.FC = () => {
             </div>
 
             <Script
-                src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&v=weekly`}
+                src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=weekly`}
                 strategy="afterInteractive"
                 onLoad={initMap}
             />
