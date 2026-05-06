@@ -144,7 +144,7 @@ const CreateHelpRequest: React.FC = () => {
             >
               <Input.TextArea
                 placeholder="short description and requirements"
-                maxLength={500}
+                maxLength={255}
                 showCount
                 rows={4}
               />
