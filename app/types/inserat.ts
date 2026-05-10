@@ -12,6 +12,7 @@ export interface Inserat {
   creationDate: string;
   volunteerAppliedCount: number;
   volunteerAppliedIds?: string[];
+  volunteerAcceptedId: string | null;
   volunteerAcceptedUsername: string | null;
   volunteerAcceptedPhone: string | null;
   volunteerAcceptedEmail: string | null;

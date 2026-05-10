@@ -226,7 +226,7 @@ const MyRequests: React.FC = () => {
                 {/* ACCEPTED: show accepted volunteer with contact info */}
                 {isAccepted && inserat.volunteerAcceptedUsername && (
                   <div style={{ marginTop: 12, fontSize: 14 }}>
-                    You have accepted <strong>{inserat.volunteerAcceptedUsername}</strong> to help you.
+                    You have accepted <strong><Link href={`/profile/${inserat.volunteerAcceptedId}`} style={{ color: "inherit", textDecoration: "underline" }}>{inserat.volunteerAcceptedUsername}</Link></strong> to help you.
                     {inserat.volunteerAcceptedPhone && (
                       <>
                         <br />
