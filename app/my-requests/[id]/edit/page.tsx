@@ -210,6 +210,7 @@ const EditHelpRequest: React.FC = () => {
                   style={{ width: "100%" }}
                   format="DD.MM.YYYY"
                   placeholder="Date: DD.MM.YYYY"
+                  disabledDate={(current) => current && current < dayjs().startOf("day")}
                 />
               </Form.Item>
 
@@ -221,6 +222,18 @@ const EditHelpRequest: React.FC = () => {
                   format="HH:mm"
                   style={{ width: "100%" }}
                   placeholder="Select time (HH:mm)"
+                  disabledTime={() => {
+                    const sel = form.getFieldValue("date") as dayjs.Dayjs | undefined;
+                    if (!sel || !sel.isSame(dayjs(), "day")) return {};
+                    const now = dayjs();
+                    return {
+                      disabledHours: () => Array.from({ length: now.hour() }, (_, i) => i),
+                      disabledMinutes: (h: number) =>
+                        h === now.hour()
+                          ? Array.from({ length: now.minute() }, (_, i) => i)
+                          : [],
+                    };
+                  }}
                 />
               </Form.Item>
 
