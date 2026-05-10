@@ -8,6 +8,7 @@ import Navbar from "@/components/navbar"
 import { User } from "@/types/user";
 import { Inserat } from "@/types/inserat"
 import { Spin, Card } from "antd";
+import Link from "next/link";
 
 const formatWorkType = (workType: string): string => {
     const types: Record<string, string> = {
@@ -164,7 +165,7 @@ const MapPage: React.FC = () => {
                         </div>
                     ` : ""}
                     <h3 style="margin: 0 0 8px; font-size: 20px; word-break: break-word;">${inserat.description}</h3>
-                    <p style="margin: 0 0 4px; font-size: 20px; word-break: break-word;">With: ${inserat.recipientUsername}</p>
+                    <p style="margin: 0 0 4px; font-size: 16px; word-break: break-word;">With: <a href="/profile/${inserat.recipientId}" style="color: inherit; text-decoration: underline;">${inserat.recipientUsername}</a></p>
                     <p style="margin: 0 0 4px; font-size: 16px;">Age: ${inserat.recipientAge}</p>
                     <p style="margin: 0 0 4px; color: gray; font-size: 16px;">Where: ${inserat.location}</p>
                     <p style="margin: 0 0 4px; font-size: 16px;">📅 ${inserat.date}</p>
@@ -320,7 +321,9 @@ const MapPage: React.FC = () => {
                             return (
                                 <Card key={inserat.id} style={{ marginBottom: 12, borderRadius: 12 }}>
                                     <p style={{ fontWeight: 600, marginBottom: 4 }}>{inserat.description}</p>
-                                    <p style={{ fontSize: 12, color: "#666", marginBottom: 2 }}>With: {inserat.recipientUsername}, age {inserat.recipientAge}</p>
+                                    <p style={{ fontSize: 12, color: "#666", marginBottom: 2 }}>
+                                        With: <Link href={`/profile/${inserat.recipientId}`} style={{ color: "inherit", textDecoration: "underline", fontSize: 12 }}>{inserat.recipientUsername}</Link>, age {inserat.recipientAge}
+                                    </p>
                                     <p style={{ fontSize: 12, color: "gray", marginBottom: 2 }}>📍 {inserat.location}</p>
                                     <p style={{ fontSize: 12, marginBottom: 2 }}>📅 {inserat.date} · 🕐 {inserat.timeframe}h</p>
                                     <p style={{ fontSize: 12, marginBottom: showButton ? 8 : 0 }}>

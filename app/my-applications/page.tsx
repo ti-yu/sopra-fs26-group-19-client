@@ -7,6 +7,7 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "@/components/navbar";
 import AuthWrapper from "@/components/AuthWrapper";
 import { Application } from "@/types/application";
+import Link from "next/link";
 
 const formatDate = (dateStr: string) => {
   const [, month, day] = dateStr.split("-");
@@ -118,7 +119,9 @@ const MyApplications: React.FC = () => {
                   </div>
 
                   <div style={{ marginTop: 10, fontSize: 14, color: "#555" }}>
-                    Posted by <strong>{inserat.recipientUsername}</strong>
+                    Posted by <Link href={`/profile/${inserat.recipientId}`} style={{ color: "inherit", textDecoration: "underline" }}>
+                      <strong>{inserat.recipientUsername}</strong>
+                    </Link>
                     {inserat.location && (
                       <>
                         <br />

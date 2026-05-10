@@ -6,6 +6,7 @@ import { ApiService } from '@/api/apiService';
 import AuthWrapper from "@/components/AuthWrapper";
 import { message, Card, List, Button, Input, Typography, Tag, } from "antd";
 import Navbar from "@/components/navbar";
+import Link from "next/link";
 
 const { Title, Text } = Typography;
 const api = new ApiService();
@@ -127,8 +128,15 @@ export default function ReviewsPage() {
                                 <p style={{margin: '0 0 8px 0'}}>The
                                     task <strong>{pendingReview.inseratDescription}</strong> has finished!</p>
                                 <Text type="secondary">
-                                    Review your experience with @{pendingReview.receiverUsername} to help build trust in
-                                    our community:
+                                    Review your experience with{" "}
+                                    {pendingReview.receiverId ? (
+                                        <Link href={`/profile/${pendingReview.receiverId}`} style={{ color: "inherit", textDecoration: "underline" }}>
+                                            @{pendingReview.receiverUsername}
+                                        </Link>
+                                    ) : (
+                                        <span>@{pendingReview.receiverUsername}</span>
+                                    )}
+                                    {" "}to help build trust in our community:
                                 </Text>
                             </div>
 
@@ -174,7 +182,13 @@ export default function ReviewsPage() {
                                     <List.Item.Meta
                                         title={
                                             <span>
-                                            @{review.receiverUsername || 'User'}
+                                            {review.receiverId ? (
+                                                <Link href={`/profile/${review.receiverId}`} style={{ color: "inherit", textDecoration: "underline" }}>
+                                                    @{review.receiverUsername || 'User'}
+                                                </Link>
+                                            ) : (
+                                                <span>@{review.receiverUsername || 'User'}</span>
+                                            )}
                                                 {review.reviewStatus === 'IGNORED' ? (
                                                     <Tag color="default" style={{marginLeft: '8px'}}>Ignored</Tag>
                                                 ) : (

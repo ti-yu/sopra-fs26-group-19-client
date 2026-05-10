@@ -9,6 +9,7 @@ import { useApi } from "@/hooks/useApi";
 import Link from "next/link";
 import AuthWrapper from "@/components/AuthWrapper";
 import ReviewModal from '@/components/ReviewModal';
+import useLocalStorage from "@/hooks/useLocalStorage";
 
 const calculateAge = (dateOfBirth: string): number => {
   const today = new Date();
@@ -33,6 +34,8 @@ const Profile: React.FC = () => {
   const apiService = useApi();
   const params = useParams();
   const id = params?.id;
+  const { value: userIdLocalStorage } = useLocalStorage<string>("userId", "");
+  const { value: isVolunteerLocalStorage } = useLocalStorage<boolean>("isVolunteer", false);
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,8 +54,7 @@ const Profile: React.FC = () => {
                 ]);
 
                 setUser(userData);
-                setReceivedReviews(reviewsData || []); // Store the reviews
-                sessionStorage.setItem("isVolunteer", String(userData.isVolunteer));
+                setReceivedReviews(reviewsData || []);
             } catch (err: unknown) {
                 setError(err instanceof Error ? err.message : "Failed to load user");
             } finally {
@@ -162,7 +164,7 @@ const Profile: React.FC = () => {
             <ReviewModal userId={id as string} />
 
             {/* — Role-based navigation icons — */}
-            <Navbar id={id as string} isVolunteer={user.isVolunteer}/>
+            <Navbar id={userIdLocalStorage} isVolunteer={isVolunteerLocalStorage}/>
         </div>
     </div>
       </AuthWrapper>
