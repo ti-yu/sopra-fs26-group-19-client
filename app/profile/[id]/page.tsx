@@ -165,7 +165,7 @@ const Profile: React.FC = () => {
             </div>
 
 
-            <ReviewModal userId={id as string} />
+            <ReviewModal userId={userIdLocalStorage} />
 
             {/* — Role-based navigation icons — */}
             <Navbar id={userIdLocalStorage} isVolunteer={isVolunteerLocalStorage}/>
