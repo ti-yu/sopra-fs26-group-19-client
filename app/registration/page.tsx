@@ -1,11 +1,25 @@
 "use client";
 
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
 import { Button, Form, Radio, Input, DatePicker, Select, Switch, message } from "antd";
 import dayjs from "dayjs";
+import Script from "next/script";
+
+interface PlaceSuggestion {
+  placePrediction: {
+    text: { text: string };
+    toPlace: () => PlaceResult;
+  };
+}
+
+interface PlaceResult {
+  fetchFields: (options: { fields: string[] }) => Promise<void>;
+  formattedAddress: string;
+}
 
 type RegisterFormValues = {
   username: string;
@@ -28,6 +42,30 @@ const Register: React.FC = () => {
 
   const { set: setToken } = useLocalStorage<string>("token", "");
   const { set: setUserId } = useLocalStorage<string>("userId", "");
+
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+
+  const fetchSuggestions = async (input: string) => {
+    if (!input || !window.google) return;
+    const { AutocompleteSuggestion } =
+        (await google.maps.importLibrary("places")) as google.maps.PlacesLibrary;
+
+    const response = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+      input,
+      includedRegionCodes: ["ch"],
+    });
+    setSuggestions((response.suggestions || []) as unknown as PlaceSuggestion[]);
+  };
+
+  const handleSelectAddress = async (suggestion: PlaceSuggestion) => {
+    const place = suggestion.placePrediction.toPlace();
+    await place.fetchFields({ fields: ["formattedAddress"] });
+
+    setQuery(place.formattedAddress);
+    form.setFieldValue("address", place.formattedAddress);
+    setSuggestions([]);
+  };
 
 
   const handleRegister = async (values: RegisterFormValues) => {
@@ -99,6 +137,11 @@ const Register: React.FC = () => {
   };
 
   return (
+      <>
+        <Script
+            src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=beta`}
+            strategy="afterInteractive"
+        />
     <div className="login-container">
       <div className="auth-card" style={{ height: "auto", minHeight: "500px" }}>
 
@@ -170,7 +213,51 @@ const Register: React.FC = () => {
           </Form.Item>
 
           <Form.Item name="address" label="Address">
-            <Input placeholder="Enter address" />
+            <div style={{ position: "relative" }}>
+              <Input
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    form.setFieldValue("address", e.target.value);
+                    fetchSuggestions(e.target.value);
+                  }}
+                  placeholder="Enter address"
+              />
+              {suggestions.length > 0 && (
+                  <div
+                      style={{
+                        position: "absolute",
+                        top: "100%",
+                        left: 0,
+                        right: 0,
+                        background: "#fff",
+                        border: "1px solid #d9d9d9",
+                        borderRadius: "6px",
+                        zIndex: 1000,
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                        marginTop: "4px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      }}
+                  >
+                    {suggestions.map((item, index) => (
+                        <div
+                            key={index}
+                            style={{ padding: "8px 12px", cursor: "pointer" }}
+                            onClick={() => handleSelectAddress(item)}
+                            onMouseEnter={(e) =>
+                                (e.currentTarget.style.background = "#f5f5f5")
+                            }
+                            onMouseLeave={(e) =>
+                                (e.currentTarget.style.background = "transparent")
+                            }
+                        >
+                          {item.placePrediction.text.text}
+                        </div>
+                    ))}
+                  </div>
+              )}
+            </div>
           </Form.Item>
 
           <Form.Item name="gender" label="Gender">
@@ -215,6 +302,7 @@ const Register: React.FC = () => {
         </Form>
       </div>
     </div>
+      </>
   );
 };
 
