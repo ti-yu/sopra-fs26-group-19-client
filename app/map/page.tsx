@@ -116,92 +116,61 @@ const MapPage: React.FC = () => {
                     .map(i => i.id)
             );
             updateApplied(initialApplied);
-            
-            // Group inserats by coordinates
-            const groups = new Map<string, Inserat[]>();
-            inseratData.forEach(inserat => {
-            const key = `${inserat.latitude},${inserat.longitude}`;
-            if (!groups.has(key)) groups.set(key, []);
-            groups.get(key)!.push(inserat);
-            });
 
-            // Sort each group by date (soonest first)
-            groups.forEach(group => {
-            group.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-            });
+            // Shared info window renderer for both individual markers and clusters.
+            // Accepts an array of inserats (length ≥ 1) and the position to open at.
+            type TaggedMarker = google.maps.marker.AdvancedMarkerElement & { _inserat: Inserat };
 
-            // Place one marker per unique coordinate
-            groups.forEach((groupInserats, key) => {
-            const [lat, lng] = key.split(",").map(Number);
-
-            const pin = document.createElement("img");
-            pin.src = "/pin.png";
-            pin.style.cssText = `width: 44px; height: 57px; cursor: pointer;`;
-
-            const marker = new AdvancedMarkerElement({
-                map,
-                position: { lat, lng },
-                content: pin,
-            });
-
-            marker.addListener("click", () => {
+            const openInfoWindow = (windowInserats: Inserat[], position: google.maps.LatLngLiteral) => {
                 let currentPage = 0;
 
                 const renderPage = () => {
-                const inserat = groupInserats[currentPage];
-                const total = groupInserats.length;
-                const showOfferButton = isVolunteer && inserat.status === "OPEN";
-                const alreadyApplied = appliedSetRef.current.has(inserat.id);
-                const buttonId = `offer-help-${inserat.id}`;
-                const buttonLabel = alreadyApplied ? "Withdraw" : "Lend a Hand";
+                    const inserat = windowInserats[currentPage];
+                    const total = windowInserats.length;
+                    const showOfferButton = isVolunteer && inserat.status === "OPEN";
+                    const alreadyApplied = appliedSetRef.current.has(inserat.id);
+                    const buttonId = `offer-help-${inserat.id}`;
+                    const buttonLabel = alreadyApplied ? "Withdraw" : "Lend a Hand";
 
-                infoWindow.setContent(`
-                    <div style="padding: 12px; min-width: 180px; max-width: 250px; border-radius: 8px;">
-                    ${total > 1 ? `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <button id="prev-${inserat.id}" style="background: none; border: none; cursor: pointer; font-size: 24px; color: white; ${currentPage === 0 ? "opacity: 1; cursor: default;" : ""}"><strong>‹</strong></button>
-                        <span style="font-size: 16px; color: white;">${currentPage + 1} / ${total}</span>
-                        <button id="next-${inserat.id}" style="background: none; border: none; cursor: pointer; font-size: 24px; color: white; ${currentPage === total - 1 ? "opacity: 1; cursor: default;" : ""}"><strong>›</strong></button>
+                    infoWindow.setContent(`
+                        <div style="padding: 12px; min-width: 180px; max-width: 250px; border-radius: 8px;">
+                        ${total > 1 ? `
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <button id="prev-${inserat.id}" style="background:none;border:none;cursor:pointer;font-size:28px;color:white;padding:0 6px;${currentPage === 0 ? "opacity:0.3;cursor:default;" : ""}">&#8249;</button>
+                            <span style="font-size:17px;color:white;font-weight:600;">${currentPage + 1}&thinsp;/&thinsp;${total}</span>
+                            <button id="next-${inserat.id}" style="background:none;border:none;cursor:pointer;font-size:28px;color:white;padding:0 6px;${currentPage === total - 1 ? "opacity:0.3;cursor:default;" : ""}">&#8250;</button>
+                            </div>
+                        ` : ""}
+                        <h3 style="margin:0 0 8px;font-size:20px;word-break:break-word;">${inserat.description}</h3>
+                        <p style="margin:0 0 4px;font-size:16px;word-break:break-word;">With: <a href="/profile/${inserat.recipientId}" style="color:inherit;text-decoration:underline;">${inserat.recipientUsername}</a></p>
+                        <p style="margin:0 0 4px;font-size:16px;">Age: ${inserat.recipientAge}</p>
+                        <p style="margin:0 0 4px;color:gray;font-size:16px;">Where: ${inserat.location}</p>
+                        <p style="margin:0 0 4px;font-size:16px;">📅 ${inserat.date}</p>
+                        <p style="margin:0;font-size:16px;">🕐 ${inserat.timeframe}h</p>
+                        <p style="margin:0 0 8px;font-size:16px;">${formatWorkType(inserat.workType ?? "")}</p>
+                        ${showOfferButton ? `<button id="${buttonId}" class="offer-button" style="${alreadyApplied ? "background-color:#888;" : ""}">${buttonLabel}</button>` : ""}
                         </div>
-                    ` : ""}
-                    <h3 style="margin: 0 0 8px; font-size: 20px; word-break: break-word;">${inserat.description}</h3>
-                    <p style="margin: 0 0 4px; font-size: 16px; word-break: break-word;">With: <a href="/profile/${inserat.recipientId}" style="color: inherit; text-decoration: underline;">${inserat.recipientUsername}</a></p>
-                    <p style="margin: 0 0 4px; font-size: 16px;">Age: ${inserat.recipientAge}</p>
-                    <p style="margin: 0 0 4px; color: gray; font-size: 16px;">Where: ${inserat.location}</p>
-                    <p style="margin: 0 0 4px; font-size: 16px;">📅 ${inserat.date}</p>
-                    <p style="margin: 0; font-size: 16px;">🕐 ${inserat.timeframe}h</p>
-                    <p style="margin: 0 0 8px; font-size: 16px;">${formatWorkType(inserat.workType ?? "")}</p>
-                    ${showOfferButton ? `<button id="${buttonId}" class="offer-button" style="${alreadyApplied ? "background-color:#888;" : ""}">${buttonLabel}</button>` : ""}
-                    </div>
-                `);
+                    `);
 
-                infoWindow.open(map, marker);
+                    infoWindow.setPosition(position);
+                    infoWindow.open(map);
 
-                google.maps.event.addListenerOnce(infoWindow, "domready", () => {
-                    // Pagination listeners
-                    const prevBtn = document.getElementById(`prev-${inserat.id}`);
-                    const nextBtn = document.getElementById(`next-${inserat.id}`);
+                    google.maps.event.addListenerOnce(infoWindow, "domready", () => {
+                        const prevBtn = document.getElementById(`prev-${inserat.id}`);
+                        const nextBtn = document.getElementById(`next-${inserat.id}`);
 
-                    if (prevBtn && currentPage > 0) {
-                    prevBtn.addEventListener("click", () => {
-                        currentPage--;
-                        renderPage();
-                    });
-                    }
+                        if (prevBtn && currentPage > 0) {
+                            prevBtn.addEventListener("click", () => { currentPage--; renderPage(); });
+                        }
+                        if (nextBtn && currentPage < total - 1) {
+                            nextBtn.addEventListener("click", () => { currentPage++; renderPage(); });
+                        }
 
-                    if (nextBtn && currentPage < total - 1) {
-                    nextBtn.addEventListener("click", () => {
-                        currentPage++;
-                        renderPage();
-                    });
-                    }
-
-                    // Offer help listener
-                    if (showOfferButton) {
-                    const btn = document.getElementById(buttonId);
-                    if (!btn) return;
-                    btn.addEventListener("click", async () => {
-                        const isApplied = appliedSetRef.current.has(inserat.id);
+                        if (showOfferButton) {
+                            const btn = document.getElementById(buttonId);
+                            if (!btn) return;
+                            btn.addEventListener("click", async () => {
+                                const isApplied = appliedSetRef.current.has(inserat.id);
                                 if (isApplied) {
                                     try {
                                         await apiService.delete(`/help-requests/${inserat.id}/apply/${userId}`);
@@ -211,8 +180,7 @@ const MapPage: React.FC = () => {
                                         btn.textContent = "Lend a Hand";
                                         (btn as HTMLButtonElement).style.backgroundColor = "";
                                     } catch (err) {
-                                        const msg = err instanceof Error ? err.message : "Failed to withdraw";
-                                        alert(msg);
+                                        alert(err instanceof Error ? err.message : "Failed to withdraw");
                                     }
                                 } else {
                                     try {
@@ -223,18 +191,93 @@ const MapPage: React.FC = () => {
                                         btn.textContent = "Withdraw";
                                         (btn as HTMLButtonElement).style.backgroundColor = "#888";
                                     } catch (err) {
-                                        const msg = err instanceof Error ? err.message : "Failed to apply";
-                                        alert(msg);
+                                        alert(err instanceof Error ? err.message : "Failed to apply");
                                     }
                                 }
+                            });
+                        }
                     });
-                    }
-                });
                 };
 
                 renderPage();
+            };
+
+            // One marker per inserat (clusterer manages visibility based on zoom)
+            const allMarkers: TaggedMarker[] = [];
+
+            inseratData.forEach(inserat => {
+                const pin = document.createElement("img");
+                pin.src = "/pin.png";
+                pin.style.cssText = "width:44px;height:57px;cursor:pointer;";
+
+                const marker = new AdvancedMarkerElement({
+                    map,
+                    position: { lat: inserat.latitude, lng: inserat.longitude },
+                    content: pin,
+                }) as TaggedMarker;
+
+                marker._inserat = inserat;
+
+                // Individual marker click (only fires when not merged into a cluster)
+                marker.addListener("click", () => {
+                    openInfoWindow([inserat], { lat: inserat.latitude, lng: inserat.longitude });
+                });
+
+                allMarkers.push(marker);
             });
+
+            // Dynamic zoom-based clustering (merges overlapping pins, separates on zoom-in)
+            const { MarkerClusterer } = await import("@googlemaps/markerclusterer");
+
+            new MarkerClusterer({
+                map,
+                markers: allMarkers,
+                renderer: {
+                    render: ({ count, position }) => {
+                        const container = document.createElement("div");
+                        container.style.cssText = "position:relative;width:44px;height:57px;cursor:pointer;";
+
+                        const img = document.createElement("img");
+                        img.src = "/pin.png";
+                        img.style.cssText = "width:44px;height:57px;display:block;";
+                        container.appendChild(img);
+
+                        const badge = document.createElement("div");
+                        badge.textContent = String(count);
+                        badge.style.cssText = [
+                            "position:absolute",
+                            "top:-8px",
+                            "right:-10px",
+                            "background:#e53935",
+                            "color:#fff",
+                            "border-radius:50%",
+                            "min-width:26px",
+                            "height:26px",
+                            "font-size:15px",
+                            "font-weight:700",
+                            "display:flex",
+                            "align-items:center",
+                            "justify-content:center",
+                            "border:2.5px solid #fff",
+                            "box-shadow:0 2px 4px rgba(0,0,0,0.35)",
+                            "padding:0 4px",
+                            "line-height:1",
+                        ].join(";");
+                        container.appendChild(badge);
+
+                        return new AdvancedMarkerElement({ position, content: container, zIndex: 999 });
+                    },
+                },
+                onClusterClick: (_event, cluster) => {
+                    const clusterInserats = ((cluster.markers ?? []) as TaggedMarker[])
+                        .map(m => m._inserat)
+                        .filter((i): i is Inserat => !!i)
+                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                    const pos = cluster.position;
+                    openInfoWindow(clusterInserats, { lat: pos.lat(), lng: pos.lng() });
+                },
             });
+
         } catch (err) {
             console.error("Failed to load inserats:", err);
         }
