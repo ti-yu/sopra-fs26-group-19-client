@@ -30,9 +30,9 @@ export default function ReviewsPage() {
     const [loading, setLoading] = useState<boolean>(true);
     const [userId, setUserId] = useState<string>("");
     const [isVolunteer, setIsVolunteer] = useState<boolean>(false);
-
-    const [isModalVisible, setIsModalVisible] = useState(false);
     const [reviewText, setReviewText] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
 
     const fetchReviews = async () => {
         try {
@@ -79,76 +79,131 @@ export default function ReviewsPage() {
     }, []);
 
     const handleIgnore = async (reviewId: string) => {
+        setIsSubmitting(true);
         try {
             const rawUserId = sessionStorage.getItem('userId')?.replace(/"/g, '');
             await api.post(`/profile/${rawUserId}/reviews/${reviewId}/ignore`, {});
             message.success("Review ignored.");
+
+            setReviewText("");
             fetchReviews();
         } catch (error) {
             message.error("Failed to ignore review.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const submitReview = async () => {
         if (!reviewText.trim()) return message.warning("Please enter a review.");
         if (!pendingReview) return;
-
+        setIsSubmitting(true);
         try {
             const rawUserId = sessionStorage.getItem('userId')?.replace(/"/g, '');
             await api.post(`/profile/${rawUserId}/reviews/${pendingReview.id}/write`, {text: reviewText});
             message.success("Review submitted!");
-            setIsModalVisible(false);
+
             setReviewText("");
             fetchReviews();
         } catch (error) {
             message.error("Failed to submit review.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
         <AuthWrapper>
-            <div style={{maxWidth: '800px', margin: '40px auto', padding: '0 20px'}}>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '20px'
-                }}>
-                    <Title level={2} style={{margin: 0}}>Review History</Title>
-                    <Button onClick={() => router.back()}>Back</Button>
+            <div style={{maxWidth: '800px', margin: '40px auto', padding: '0 20px', paddingBottom: '80px'}}>
+                <div style={{marginBottom: '20px'}}>
+                    <Title level={2} style={{margin: 0}}>Reviews</Title>
                 </div>
 
-                <Card>
-                    <List
-                        loading={loading}
-                        dataSource={doneReviews}
-                        locale={{emptyText: "You have no review history yet. Finish some tasks to see them here!"}}
-                        renderItem={(review) => (
-                            <List.Item>
-                                <List.Item.Meta
-                                    title={
-                                        <span>
-                                        @{review.receiverUsername || 'User'}
-                                            {review.reviewStatus === 'IGNORED' ? (
-                                                <Tag color="default" style={{marginLeft: '8px'}}>Ignored</Tag>
-                                            ) : (
-                                                <Tag color="green" style={{marginLeft: '8px'}}>Written</Tag>
-                                            )}
-                                    </span>
-                                    }
-                                    description={
-                                        <div>
-                                            <Text type="secondary"
-                                                  style={{display: 'block'}}>Task: {review.inseratDescription}</Text>
-                                            {review.text && <Text italic>&quot;{review.text}&quot;</Text>}
-                                        </div>
-                                    }
-                                />
-                                <div style={{color: '#888'}}>{review.creationDate}</div>
-                            </List.Item>
-                        )}
-                    />
-                </Card>
+                {pendingReview && (
+                    <div style={{ marginBottom: '40px' }}>
+                        <Title level={4} style={{ color: '#e53935', marginTop: 0 }}>Action Required</Title>
+                        <Card style={{borderColor: '#e53935', borderRadius: '12px', backgroundColor: '#fff9f9'}}>
+                            <div style={{marginBottom: '15px'}}>
+                                <p style={{margin: '0 0 8px 0'}}>The
+                                    task <strong>{pendingReview.inseratDescription}</strong> has finished!</p>
+                                <Text type="secondary">
+                                    Review your experience with @{pendingReview.receiverUsername} to help build trust in
+                                    our community:
+                                </Text>
+                            </div>
+
+                            <Input.TextArea
+                                rows={4}
+                                maxLength={100}
+                                showCount
+                                value={reviewText}
+                                onChange={(e) => setReviewText(e.target.value)}
+                                placeholder="They were fantastic and very helpful..."
+                                disabled={isSubmitting}
+                                style={{marginBottom: '15px'}}
+                            />
+                            <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                                <Button
+                                    onClick={() => handleIgnore(pendingReview.id)}
+                                    disabled={isSubmitting}
+                                >
+                                    Ignore for now
+                                </Button>
+                                <Button
+                                    type="primary"
+                                    onClick={submitReview}
+                                    loading={isSubmitting}
+                                    style={{ backgroundColor: '#e53935' }}
+                                >
+                                    Submit Review
+                                </Button>
+                            </div>
+                        </Card>
+                    </div>
+                )}
+
+                <div>
+                    <Title level={4} style={{ marginTop: 0 }}>Review History</Title>
+                    <Card style={{ borderRadius: '12px' }}>
+                        <List
+                            loading={loading}
+                            dataSource={doneReviews}
+                            locale={{emptyText: "You have no review history yet. Finish some tasks to see them here!"}}
+                            renderItem={(review) => (
+                                <List.Item>
+                                    <List.Item.Meta
+                                        title={
+                                            <span>
+                                            @{review.receiverUsername || 'User'}
+                                                {review.reviewStatus === 'IGNORED' ? (
+                                                    <Tag color="default" style={{marginLeft: '8px'}}>Ignored</Tag>
+                                                ) : (
+                                                    <Tag color="green" style={{marginLeft: '8px'}}>Written</Tag>
+                                                )}
+                                        </span>
+                                        }
+                                        description={
+                                            <div style={{ marginTop: '4px' }}>
+                                                {/* 14. CHANGED: Tweaked the styling of the text below the username */}
+                                                {/* WHY: Made the task description slightly smaller so the actual Review quote stands out more clearly. */}
+                                                <Text type="secondary" style={{display: 'block', fontSize: '12px' }}>
+                                                    Task: {review.inseratDescription}
+                                                </Text>
+                                                {review.text && (
+                                                    <Text italic style={{ display: 'block', marginTop: '4px', color: '#333' }}>
+                                                        &quot;{review.text}&quot;
+                                                    </Text>
+                                                )}
+                                            </div>
+                                        }
+                                    />
+                                    <div style={{color: '#888', fontSize: '12px'}}>{review.creationDate}</div>
+                                </List.Item>
+                            )}
+                        />
+                    </Card>
+                </div>
+
                 <Navbar id={userId} isVolunteer={isVolunteer} />
             </div>
         </AuthWrapper>

@@ -12,7 +12,7 @@ interface PendingReview {
     inseratDescription?: string;
 }
 
-export default function ReviewModal() {
+export default function ReviewModal({ userId }: { userId: string }) {
     const [pendingReview, setPendingReview] = useState<PendingReview | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [reviewText, setReviewText] = useState("");
@@ -20,12 +20,9 @@ export default function ReviewModal() {
 
     useEffect(() => {
         async function checkForPendingReviews() {
+            if (!userId) return;
             try {
-                const rawUserId = localStorage.getItem('userId');
-                if (!rawUserId) return;
-                const cleanUserId = rawUserId.replace(/"/g, '');
-
-                const response = await api.get<PendingReview>(`/profile/${cleanUserId}/pendingReview`);
+                const response = await api.get<PendingReview>(`/profile/${userId}/pendingReview`);
 
                 if (response && response.id) {
                     setPendingReview(response);
@@ -33,7 +30,6 @@ export default function ReviewModal() {
                 }
             } catch (error: unknown) {
                 const apiError = error as { response?: { status?: number } };
-
                 if (apiError.response?.status !== 204) {
                     console.error("Failed to check for pending reviews:", error);
                 }
@@ -48,7 +44,7 @@ export default function ReviewModal() {
         }, 60000);
 
         return () => clearInterval(intervalId);
-    }, [isModalOpen]);
+    }, [isModalOpen, userId]);
 
     const submitReview = async () => {
         if (!reviewText.trim()) {
@@ -58,8 +54,7 @@ export default function ReviewModal() {
 
         setIsSubmitting(true);
         try {
-            const rawUserId = localStorage.getItem('userId')?.replace(/"/g, '');
-            await api.post(`/profile/${rawUserId}/reviews/${pendingReview?.id}/write`, { text: reviewText });
+            await api.post(`/profile/${userId}/reviews/${pendingReview?.id}/write`, { text: reviewText });
 
             message.success("Review posted successfully!");
             setIsModalOpen(false);
@@ -74,8 +69,7 @@ export default function ReviewModal() {
     const ignoreReview = async () => {
         setIsSubmitting(true);
         try {
-            const rawUserId = localStorage.getItem('userId')?.replace(/"/g, '');
-            await api.post(`/profile/${rawUserId}/reviews/${pendingReview?.id}/ignore`, {});
+            await api.post(`/profile/${userId}/reviews/${pendingReview?.id}/ignore`, {});
 
             setIsModalOpen(false);
             setPendingReview(null);

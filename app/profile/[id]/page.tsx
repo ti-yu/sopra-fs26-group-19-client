@@ -159,7 +159,7 @@ const Profile: React.FC = () => {
             </div>
 
 
-            <ReviewModal/>
+            <ReviewModal userId={id as string} />
 
             {/* — Role-based navigation icons — */}
             <Navbar id={id as string} isVolunteer={user.isVolunteer}/>
