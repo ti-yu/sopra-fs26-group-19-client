@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
@@ -43,6 +43,17 @@ const Register: React.FC = () => {
   const { set: setToken } = useLocalStorage<string>("token", "");
   const { set: setUserId } = useLocalStorage<string>("userId", "");
 
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleProfileFile = (file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (e) => setProfilePicture(e.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
 
@@ -80,6 +91,7 @@ const Register: React.FC = () => {
         dateOfBirth: values.dateOfBirth
             ? values.dateOfBirth.format("YYYY-MM-DD")
             : null,
+        profilePicture: profilePicture ?? null,
       };
 
       const created = await apiService.post<User>("/register", payload);
@@ -165,6 +177,59 @@ const Register: React.FC = () => {
           layout="vertical"
           initialValues={{ isVolunteer: false }}
         >
+          {/* Profile Picture */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 24 }}>
+            <div
+              onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) handleProfileFile(f); }}
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: "50%",
+                overflow: "hidden",
+                cursor: "pointer",
+                border: isDragging ? "3px dashed #1890ff" : "3px dashed #d9d9d9",
+                position: "relative",
+                transition: "border-color 0.2s",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={profilePicture ?? "/default_pb.png"}
+                alt="Profile"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+              <div style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(0,0,0,0.45)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: isDragging ? 1 : 0,
+                transition: "opacity 0.2s",
+                color: "#fff",
+                fontSize: 12,
+                textAlign: "center",
+                padding: 8,
+              }}>
+                Drop image
+              </div>
+            </div>
+            <span style={{ marginTop: 8, fontSize: 12, color: "#8c8c8c" }}>
+              Drag & drop or click to upload
+            </span>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleProfileFile(f); }}
+            />
+          </div>
+
           <Form.Item
             name="username"
             label="Username"

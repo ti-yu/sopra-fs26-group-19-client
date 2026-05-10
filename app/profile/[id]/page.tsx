@@ -107,8 +107,12 @@ const Profile: React.FC = () => {
         </div>
 
         <div className="profile-container" style={{marginTop: "-75px"}}>
-            <Avatar size={120} style={{backgroundColor: user.isVolunteer ? "#3e9188ff" : "#964f56ff"}}>
-                {user.username.charAt(0).toUpperCase()}
+            <Avatar
+                size={120}
+                src={user.profilePicture ?? "/default_pb.png"}
+                style={{backgroundColor: user.isVolunteer ? "#3e9188ff" : "#964f56ff"}}
+            >
+                {!user.profilePicture && user.username.charAt(0).toUpperCase()}
             </Avatar>
             <h1 style={{margin: "8px 0 4px"}}>{user.username}</h1>
             <p><strong>{roleLabel}</strong></p>
