@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   HomeOutlined,
   GlobalOutlined,
@@ -40,6 +40,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
   const pathname = usePathname();
+  const router = useRouter();
   const safeId = id || "";
   const roleColor = isVolunteer ? "#53beb3" : "#d9737d";
   const iconConfigs = getIconConfigs(safeId, isVolunteer);
@@ -53,6 +54,12 @@ const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
     if (href === profileHref) return pathname === href;
     return pathname === href || pathname.startsWith(href + "/");
   };
+
+    const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+        e.preventDefault(); // Stop standard browser navigation
+        router.push(href);  // Navigate using Next.js
+        router.refresh();   // Force Next.js to re-fetch server data!
+    };
 
   // Check for pending review whenever the path changes.
   // When on the profile page the ReviewModal handles the popup, so we clear the dot.
@@ -94,9 +101,10 @@ const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
         const showDot = isHome && hasPendingReview && !onProfilePage;
 
         return (
-          <Link
+          <a
             key={label}
             href={href}
+            onClick={(e) => handleNavigation(e, href)}
             style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             {/* Fixed-size wrapper prevents layout shift when circle appears/disappears */}
@@ -128,7 +136,7 @@ const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
                 }} />
               )}
             </span>
-          </Link>
+          </a>
         );
       })}
     </nav>
