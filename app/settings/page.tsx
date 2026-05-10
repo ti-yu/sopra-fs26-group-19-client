@@ -1,10 +1,24 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState} from 'react';
 import { useRouter } from 'next/navigation';
+import Script from "next/script";
 import { ApiService } from '@/api/apiService';
 import AuthWrapper from "@/components/AuthWrapper";
-import { message, Form, Input, Button, Radio } from "antd";
+import { message, Form, Input, Button, Radio, Select } from "antd";
+
+
+interface PlaceSuggestion {
+    placePrediction: {
+        text: { text: string };
+        toPlace: () => PlaceResult;
+    };
+}
+
+interface PlaceResult {
+    fetchFields: (options: { fields: string[] }) => Promise<void>;
+    formattedAddress: string;
+}
 
 interface UserProfileData {
     surname?: string;
@@ -40,6 +54,9 @@ export default function SettingsPage() {
     const router = useRouter();
     const [form] = Form.useForm();
 
+    const [query, setQuery] = useState("");
+    const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+
     useEffect(() => {
         async function fetchUserData() {
             try {
@@ -55,12 +72,16 @@ export default function SettingsPage() {
                     emailAddress: data.emailAddress || '',
                     phoneNumber: data.phoneNumber || '',
                     dateOfBirth: data.dateOfBirth || '',
-                    gender: data.gender || '',
+                    gender: data.gender || undefined,
                     address: data.address || '',
                     bio: data.bio || '',
                     password: data.password || '',
                     isVolunteer: data.isVolunteer || false
                 });
+
+                if (data.address) {
+                    setQuery(data.address);
+                }
             } catch (error) {
                 if (error instanceof Error) {
                     console.error("Failed to load profile data:", error.message);
@@ -70,6 +91,27 @@ export default function SettingsPage() {
 
         fetchUserData();
     }, [form]);
+
+    const fetchSuggestions = async (input: string) => {
+        if (!input || !window.google) return;
+        const { AutocompleteSuggestion } =
+            (await google.maps.importLibrary("places")) as google.maps.PlacesLibrary;
+
+        const response = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+            input,
+            includedRegionCodes: ["ch"],
+        });
+        setSuggestions((response.suggestions || []) as unknown as PlaceSuggestion[]);
+    };
+
+    const handleSelectAddress = async (suggestion: PlaceSuggestion) => {
+        const place = suggestion.placePrediction.toPlace();
+        await place.fetchFields({ fields: ["formattedAddress"] });
+
+        setQuery(place.formattedAddress);
+        form.setFieldValue("address", place.formattedAddress);
+        setSuggestions([]);
+    };
 
     const handleFinish = async (values: SettingsFormValues) => {
         try {
@@ -108,6 +150,10 @@ export default function SettingsPage() {
 
     return (
         <AuthWrapper>
+            <Script
+                src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=beta`}
+                strategy="afterInteractive"
+            />
             <div className="login-container">
                 <div className="auth-card" style={{height: 'auto', minHeight: 'auto', padding: '30px 20px', maxWidth: '450px'}}>
 
@@ -157,11 +203,49 @@ export default function SettingsPage() {
                         </Form.Item>
 
                         <Form.Item name="gender" label="Gender">
-                            <Input placeholder="Gender (e.g., f, m, other)" />
+                            <Select placeholder="Select gender" allowClear>
+                                <Select.Option value="Male">Male</Select.Option>
+                                <Select.Option value="Female">Female</Select.Option>
+                                <Select.Option value="Other">Other</Select.Option>
+                                <Select.Option value="Prefer not to say">Prefer not to say</Select.Option>
+                            </Select>
                         </Form.Item>
 
-                        <Form.Item name="address" label="Address">
-                            <Input placeholder="Address (e.g., Zürichstrasse 248)" />
+                        <Form.Item
+                            name="address"
+                            label="Address"
+                        >
+                            <div style={{ position: "relative" }}>
+                                <Input
+                                    value={query}
+                                    onChange={(e) => {
+                                        setQuery(e.target.value);
+                                        form.setFieldValue("address", e.target.value);
+                                        fetchSuggestions(e.target.value);
+                                    }}
+                                    placeholder="Enter address"
+                                />
+                                {suggestions.length > 0 && (
+                                    <div style={{
+                                        position: "absolute", top: "100%", left: 0, right: 0,
+                                        background: "#fff", border: "1px solid #d9d9d9",
+                                        borderRadius: "6px", zIndex: 1000, maxHeight: "200px", overflowY: "auto",
+                                        marginTop: "4px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                                    }}>
+                                        {suggestions.map((item, index) => (
+                                            <div
+                                                key={index}
+                                                style={{ padding: "8px 12px", cursor: "pointer" }}
+                                                onClick={() => handleSelectAddress(item)}
+                                                onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f5f5")}
+                                                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                                            >
+                                                {item.placePrediction.text.text}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </Form.Item>
 
                         <Form.Item name="bio" label="Bio">
