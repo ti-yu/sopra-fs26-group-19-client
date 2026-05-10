@@ -111,16 +111,16 @@ reason).
 ## Contributions Week 6 - [04.05.2026] to [11.05.2026 Date]
 
 
-| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
-| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@ti-yu]** | [06.05]   | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/adcbbf47a595452a62948678624b441fb5b55def)] | [When two Help Requests share the same coordinate, they are now paginated] | [Before, only the newest help request would be displayed] |
-|                    | [06.05]   | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/7e46a7234953fce9a2a7aa2e8877854584111561)] | [Only inserat with the status OPEN are displayed on the map/feed] | [This avoids clutter on the map/feed] |
-| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **Student**        | **Date** | **Link to Commit** | **Description**                                                             | **Relevance**                                             |
+|--------------------|----------| ------------------ |-----------------------------------------------------------------------------|-----------------------------------------------------------|
+| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task]                                             | [Why this contribution is relevant]                       |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]                                             | [Why this contribution is relevant]                       |
+| **[@romevp]**      | [10.05]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/9548a6e3431a7e14cc929f6ec6ee17cf3fc646ef)] | [added drop down menues and address selection]                              | [usabiity]                                                |
+|                    | [10.05]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/d5044912511c6081e436da74fe9d7fff67d6004e)] | [BugFixing reviews so the pop up appears and one is able to write a review] | [To make the review part work]                            |
+| **[@ti-yu]**       | [06.05]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/adcbbf47a595452a62948678624b441fb5b55def)] | [When two Help Requests share the same coordinate, they are now paginated]  | [Before, only the newest help request would be displayed] |
+|                    | [06.05]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/7e46a7234953fce9a2a7aa2e8877854584111561)] | [Only inserat with the status OPEN are displayed on the map/feed]           | [This avoids clutter on the map/feed]                     |
+| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task]                                             | [Why this contribution is relevant]                       |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]                                             | [Why this contribution is relevant]                       |
 
 
 ## Contributions Week 7 - [11.05.2026] to [18.05.2026]
