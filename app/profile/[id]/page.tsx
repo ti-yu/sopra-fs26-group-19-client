@@ -84,93 +84,112 @@ const Profile: React.FC = () => {
 
   return (
       <AuthWrapper>
-    <div style={{ "--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black"} as React.CSSProperties}>
-        <div className="headerBar">
-            <Link href="/login" style={{color: "white"}} onClick={() => sessionStorage.clear()}>
-                Logout
-            </Link>
+          <div
+              style={{"--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black"} as React.CSSProperties}>
+              <div className="headerBar" style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: "60px",
+                  backgroundColor: "var(--role-color)",
+                  zIndex: 1000,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "0 20px"
+              }}>
+                  <Link href="/login" style={{color: "white", textDecoration: "none"}}
+                        onClick={() => sessionStorage.clear()}>
+                      Logout
+                  </Link>
 
-            <h1 style={{color: "#ffffff"}}>Profile</h1>
+                  <h1 style={{color: "#ffffff", margin: 0, fontSize: "20px"}}>Profile</h1>
 
-            <Link href="/settings" style={{color: "white"}}>
-                Settings
-            </Link>
-        </div>
+                  <Link href="/settings" style={{color: "white", textDecoration: "none"}}>
+                      Settings
+                  </Link>
+              </div>
+              <div style={{
+                  backgroundColor: "var(--role-color)",
+                  height: "20vh",
+                  width: "100%",
+                  marginTop: "60px",
+                  boxSizing: "border-box"
+              }}>
+              </div>
 
-        <div style={{
-            backgroundColor: "var(--role-color)",
-            height: "25vh",
-            width: "100%",
-            paddingTop: "60px",
-            boxSizing: "border-box"
-        }}>
-        </div>
+              <div className="profile-container" style={{marginTop: "-75px"}}>
+                  <Avatar
+                      size={120}
+                      src={user.profilePicture ?? "/default_pb.png"}
+                      style={{backgroundColor: user.isVolunteer ? "#3e9188ff" : "#964f56ff"}}
+                  >
+                      {!user.profilePicture && user.username.charAt(0).toUpperCase()}
+                  </Avatar>
+                  <h1 style={{margin: "8px 0 4px"}}>{user.username}</h1>
+                  <p><strong>{roleLabel}</strong></p>
 
-        <div className="profile-container" style={{marginTop: "-75px"}}>
-            <Avatar
-                size={120}
-                src={user.profilePicture ?? "/default_pb.png"}
-                style={{backgroundColor: user.isVolunteer ? "#3e9188ff" : "#964f56ff"}}
-            >
-                {!user.profilePicture && user.username.charAt(0).toUpperCase()}
-            </Avatar>
-            <h1 style={{margin: "8px 0 4px"}}>{user.username}</h1>
-            <p><strong>{roleLabel}</strong></p>
+                  <div style={{
+                      display: "flex",
+                      alignItems: "left",
+                      marginTop: "40px",
+                      flexDirection: "column",
+                      gap: "20px"
+                  }}>
+                      <p><strong>Bio: </strong>{user.bio}</p>
+                      <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
+                      <p><strong>Gender: </strong>{user.gender}</p>
+                      <div style={{marginTop: '20px', textAlign: 'left', paddingBottom: '100px'}}>
+                          <h3 style={{borderBottom: '1px solid #eee', paddingBottom: '10px'}}>
+                              Reviews from the Community
+                          </h3>
 
-            <div style={{display: "flex", alignItems: "left", marginTop: "40px", flexDirection: "column", gap: "20px"}}>
-                <p><strong>Bio: </strong>{user.bio}</p>
-                <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
-                <p><strong>Gender: </strong>{user.gender}</p>
-                <div style={{marginTop: '20px', textAlign: 'left', paddingBottom: '100px'}}>
-                    <h3 style={{borderBottom: '1px solid #eee', paddingBottom: '10px'}}>
-                        Reviews from the Community
-                    </h3>
+                          {receivedReviews.length > 0 ? (
+                              <div style={{display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px'}}>
+                                  {receivedReviews.map((review) => (
+                                      <Card
+                                          key={review.id}
+                                          size="small"
+                                          style={{
+                                              borderRadius: '12px',
+                                              backgroundColor: '#fafafa',
+                                              borderLeft: `5px solid var(--role-color)`
+                                          }}
+                                      >
+                                          <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                              <Typography.Text strong>@{review.senderUsername}</Typography.Text>
+                                              <Typography.Text type="secondary" style={{fontSize: '12px'}}>
+                                                  {review.creationDate}
+                                              </Typography.Text>
+                                          </div>
 
-                    {receivedReviews.length > 0 ? (
-                        <div style={{display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px'}}>
-                            {receivedReviews.map((review) => (
-                                <Card
-                                    key={review.id}
-                                    size="small"
-                                    style={{
-                                        borderRadius: '12px',
-                                        backgroundColor: '#fafafa',
-                                        borderLeft: `5px solid var(--role-color)`
-                                    }}
-                                >
-                                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                        <Typography.Text strong>@{review.senderUsername}</Typography.Text>
-                                        <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
-                                            {review.creationDate}
-                                        </Typography.Text>
-                                    </div>
-
-                                    <div style={{ margin: '8px 0' }}>
-                                        <Typography.Text italic>&quot;{review.text}&quot;</Typography.Text>
-                                    </div>
-                                    <Tag color="blue" style={{fontSize: '10px'}}>
-                                        Task: {review.inseratDescription}
-                                    </Tag>
-                                </Card>
-                            ))}
-                        </div>
-                    ) : (
-                        <Empty
-                            description="No reviews yet."
-                            image={Empty.PRESENTED_IMAGE_SIMPLE}
-                            style={{marginTop: '20px'}}
-                        />
-                    )}
-                </div>
-            </div>
+                                          <div style={{margin: '8px 0'}}>
+                                              <Typography.Text italic>&quot;{review.text}&quot;</Typography.Text>
+                                          </div>
+                                          <Tag color="blue" style={{fontSize: '10px'}}>
+                                              Task: {review.inseratDescription}
+                                          </Tag>
+                                      </Card>
+                                  ))}
+                              </div>
+                          ) : (
+                              <Empty
+                                  description="No reviews yet."
+                                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                  style={{marginTop: '20px'}}
+                              />
+                          )}
+                      </div>
+                  </div>
 
 
-            <ReviewModal userId={userIdLocalStorage} />
+                  <ReviewModal userId={userIdLocalStorage}/>
 
-            {/* — Role-based navigation icons — */}
-            <Navbar id={userIdLocalStorage} isVolunteer={isVolunteerLocalStorage}/>
-        </div>
-    </div>
+                  {/* — Role-based navigation icons — */}
+                  <Navbar id={userIdLocalStorage} isVolunteer={isVolunteerLocalStorage}/>
+              </div>
+          </div>
       </AuthWrapper>
   );
 };
