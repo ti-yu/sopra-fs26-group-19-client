@@ -141,6 +141,8 @@ export default function SettingsPage() {
 
             await api.put(`/profile/${cleanUserId}`, { ...values, profilePicture: profilePicture ?? null });
 
+            sessionStorage.setItem('isVolunteer', JSON.stringify(values.isVolunteer));
+
             message.success("Profile updated successfully!");
             router.push(`/profile/${cleanUserId}`);
 
