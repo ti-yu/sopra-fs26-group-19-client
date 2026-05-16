@@ -6,6 +6,7 @@ import Script from "next/script";
 import { ApiService } from '@/api/apiService';
 import AuthWrapper from "@/components/AuthWrapper";
 import { message, Form, Input, Button, Radio, Select } from "antd";
+import imageCompression from 'browser-image-compression';
 
 
 interface PlaceSuggestion {
@@ -59,12 +60,18 @@ export default function SettingsPage() {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleProfileFile = (file: File) => {
+    const handleProfileFile = async (file: File) => {
         if (!file.type.startsWith("image/")) return;
+
+        const compressed = await imageCompression(file, {
+            maxSizeMB: 0.1,        // compress to max 100KB
+            maxWidthOrHeight: 256, // profile pictures don't need to be large
+        });
+
         const reader = new FileReader();
         reader.onload = (e) => setProfilePicture(e.target?.result as string);
-        reader.readAsDataURL(file);
-    };
+        reader.readAsDataURL(compressed);
+        };
 
     const [query, setQuery] = useState("");
     const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
