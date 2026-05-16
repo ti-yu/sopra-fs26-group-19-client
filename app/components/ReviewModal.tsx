@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Modal, Input, message } from 'antd';
+import { Modal, Input, message, Button } from 'antd';
 import { ApiService } from '@/api/apiService';
 
 const api = new ApiService();
@@ -38,13 +38,13 @@ export default function ReviewModal({ userId }: { userId: string }) {
 
         checkForPendingReviews();
 
-        //checks every 60s if review is nesessary
-        const intervalId = setInterval(() => {
-            if (!isModalOpen) checkForPendingReviews();
-        }, 60000);
+        // //checks every 60s if review is nesessary
+        // const intervalId = setInterval(() => {
+        //     if (!isModalOpen) checkForPendingReviews();
+        // }, 60000);
 
-        return () => clearInterval(intervalId);
-    }, [isModalOpen, userId]);
+        // return () => clearInterval(intervalId);
+    }, [userId]);
 
     const submitReview = async () => {
         if (!reviewText.trim()) {
@@ -64,6 +64,11 @@ export default function ReviewModal({ userId }: { userId: string }) {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const dismissForNow = () => {
+        setIsModalOpen(false);
+        setPendingReview(null);
     };
 
     const ignoreReview = async () => {
@@ -86,14 +91,19 @@ export default function ReviewModal({ userId }: { userId: string }) {
         <Modal
             title={`Review your experience with @${pendingReview.receiverUsername}`}
             open={isModalOpen}
-            onOk={submitReview}
-            onCancel={ignoreReview}
-            okText="Submit Review"
-            cancelText="Ignore for now"
             closable={false}
             maskClosable={false}
-            confirmLoading={isSubmitting}
-            cancelButtonProps={{ disabled: isSubmitting }}
+            footer={[
+                <Button key="dismiss" onClick={dismissForNow} disabled={isSubmitting}>
+                    Ignore for now
+                </Button>,
+                <Button key="ignore" onClick={ignoreReview} disabled={isSubmitting} loading={isSubmitting}>
+                    Ignore forever
+                </Button>,
+                <Button key="submit" type="primary" onClick={submitReview} loading={isSubmitting}>
+                    Submit Review
+                </Button>,
+            ]}
         >
             <div style={{ marginBottom: '15px' }}>
                 <p>The task <strong>{pendingReview.inseratDescription}</strong> has finished!</p>

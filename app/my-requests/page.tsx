@@ -28,6 +28,7 @@ const calculateAge = (dateOfBirth: string): number => {
 const MyRequests: React.FC = () => {
   const apiService = useApi();
   const { value: userId } = useLocalStorage<string>("userId", "");
+  const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
 
   const [inserats, setInserats] = useState<Inserat[]>([]);
@@ -67,6 +68,9 @@ const MyRequests: React.FC = () => {
   }, [userId]);
 
   const handleAccept = async (inseratId: string, volunteerId: string) => {
+    const key = `${inseratId}-${volunteerId}`;
+    if (acceptingId === key) return;
+    setAcceptingId(key);
     try {
       const updated = await apiService.put<Inserat>(
         `/help-requests/${inseratId}/accept/${volunteerId}`, {}
@@ -79,6 +83,8 @@ const MyRequests: React.FC = () => {
       });
     } catch (err) {
       console.error("Failed to accept volunteer", err);
+    } finally {
+      setAcceptingId(null);
     }
   };
 
@@ -191,6 +197,7 @@ const MyRequests: React.FC = () => {
                     <div style={{ display: "flex", gap: 10 }}>
                       <button
                         onClick={() => handleAccept(inserat.id, applicant.id)}
+                        disabled={acceptingId === `${inserat.id}-${applicant.id}`}
                         style={{
                           backgroundColor: "#d9737d",
                           color: "#fff",
@@ -199,7 +206,8 @@ const MyRequests: React.FC = () => {
                           padding: "10px 30px",
                           fontSize: 15,
                           fontWeight: 500,
-                          cursor: "pointer",
+                          cursor: acceptingId === `${inserat.id}-${applicant.id}` ? "not-allowed" : "pointer",
+                          opacity: acceptingId === `${inserat.id}-${applicant.id}` ? 0.6 : 1,
                         }}
                       >
                         accept

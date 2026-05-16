@@ -94,6 +94,7 @@ const CreateHelpRequest: React.FC = () => {
 
       await apiService.post("/help-requests", payload);
       router.push(`/my-requests`);
+      router.refresh();
     } catch (error) {
       const err = error as { response?: { status?: number; data?: { message?: string } }; status?: number; message?: string };
 
