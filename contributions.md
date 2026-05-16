@@ -128,8 +128,8 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@lisgeh2]** | [16.05]   | [[Link to Commit frontend](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/6805f57978e8c1c52c18b05be970fefe299f7eb1), [Link to Commit backend](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/431a098a83142920fcf4eed429acd3f91f9690a9)] | [There was a mess with multiple Review pop-ups for the same inserat and such] | [funcioning Reviews are important] |
+|                    | [date]   | [[Link to Commit 2.1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/54f52a526fc2f0f2a9db533681cb17afbe17814a), [Link to Commit 2.1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/19f7d067b82d67ed479039c4551877b9829d8767)] | [Bugfixes around the Review functionality] | [bugs suck.] |
 | **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
