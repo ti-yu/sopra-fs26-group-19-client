@@ -24,6 +24,7 @@ const calculateAge = (dateOfBirth: string): number => {
 
 interface ReviewDTO {
     id: string;
+    senderId: string;
     senderUsername: string;
     text: string;
     creationDate: string;
@@ -158,7 +159,9 @@ const Profile: React.FC = () => {
                                           }}
                                       >
                                           <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                              <Typography.Text strong>@{review.senderUsername}</Typography.Text>
+                                              <Link href={`/profile/${review.senderId}`} style={{ color: "inherit", textDecoration: "underline" }}>
+                                                  <Typography.Text strong>@{review.senderUsername}</Typography.Text>
+                                              </Link>
                                               <Typography.Text type="secondary" style={{fontSize: '12px'}}>
                                                   {review.creationDate}
                                               </Typography.Text>
