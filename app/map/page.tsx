@@ -362,14 +362,14 @@ const MapPage: React.FC = () => {
                             const showButton = isVolunteer && inserat.status === "OPEN";
 
                             return (
-                                <Card key={inserat.id} style={{ marginBottom: 12, borderRadius: 12 }}>
-                                    <p style={{ fontWeight: 600, marginBottom: 4 }}>{inserat.description}</p>
-                                    <p style={{ fontSize: 12, color: "#666", marginBottom: 2 }}>
-                                        With: <Link href={`/profile/${inserat.recipientId}`} style={{ color: "inherit", textDecoration: "underline", fontSize: 12 }}>{inserat.recipientUsername}</Link>, age {inserat.recipientAge}
+                                <Card key={inserat.id} style={{ marginBottom: 12, paddingLeft: 12, borderRadius: 12 }}>
+                                    <h3 style={{ fontSize: 20, marginBottom: 4 }}>{inserat.description}</h3>
+                                    <p style={{ fontSize: 16, color: "#666", marginBottom: 2 }}>
+                                        With: <Link href={`/profile/${inserat.recipientId}`} style={{ color: "inherit", textDecoration: "underline", fontSize: 16 }}>{inserat.recipientUsername}</Link>, age {inserat.recipientAge}
                                     </p>
-                                    <p style={{ fontSize: 12, color: "gray", marginBottom: 2 }}>📍 {inserat.location}</p>
-                                    <p style={{ fontSize: 12, marginBottom: 2 }}>📅 {inserat.date} · 🕐 {inserat.timeframe}h</p>
-                                    <p style={{ fontSize: 12, marginBottom: showButton ? 8 : 0 }}>
+                                    <p style={{ fontSize: 16, color: "gray", marginBottom: 2 }}>📍 {inserat.location}</p>
+                                    <p style={{ fontSize: 16, marginBottom: 2 }}>📅 {inserat.date} · 🕐 {inserat.timeframe}h</p>
+                                    <p style={{ fontSize: 16, marginBottom: showButton ? 8 : 0 }}>
                                         {formatWorkType(inserat.workType ?? "")}
                                     </p>
                                     {showButton && (
@@ -378,6 +378,7 @@ const MapPage: React.FC = () => {
                                             style={{
                                                 maxWidth: "400px",
                                                 backgroundColor: alreadyApplied ? "#888" : undefined,
+                                                fontSize: "16px",
                                             }}
                                             onClick={async () => {
                                                 if (alreadyApplied) {
