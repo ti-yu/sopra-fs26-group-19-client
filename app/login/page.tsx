@@ -5,6 +5,7 @@ import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
 import { Button, Form, Input, message } from "antd";
+import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 
 interface FormFieldProps {
   username: string;
@@ -63,8 +64,9 @@ const Login: React.FC = () => {
 
         {/* --- Header Section --- */}
         <div className="auth-card-header">
+          {/* Clearer call-to-action for new users: "Register" alone was ambiguous to elderly users. */}
           <button type="button" className="header-link" onClick={() => router.push("/registration")}>
-            <strong>Register</strong>
+            <strong>Create new account</strong>
           </button>
           <h1>Login</h1>
         </div>
@@ -90,11 +92,15 @@ const Login: React.FC = () => {
           >
             <Input.Password
               placeholder="Password"
-              iconRender={visible => (
-                <span className="password-toggle">
-                  {visible ? "Hide" : "Show"}
-                </span>
-              )}
+              // Match the registration page (which uses antd's default eye icons).
+              // Wrap with role="img" + aria-label so screen readers announce state.
+              iconRender={visible =>
+                visible ? (
+                  <EyeOutlined aria-label="Hide password" />
+                ) : (
+                  <EyeInvisibleOutlined aria-label="Show password" />
+                )
+              }
             />
           </Form.Item>
 

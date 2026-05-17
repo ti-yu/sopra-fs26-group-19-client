@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 import Script from "next/script";
 import Navbar from "@/components/navbar"
 import { User } from "@/types/user";
 import { Inserat } from "@/types/inserat"
-import { Spin, Card } from "antd";
+import { Spin, Card, Select, Slider, DatePicker, Button } from "antd";
+import { FilterOutlined } from "@ant-design/icons";
+import dayjs, { Dayjs } from "dayjs";
 import Link from "next/link";
 
 const formatWorkType = (workType: string): string => {
@@ -24,6 +26,36 @@ const formatWorkType = (workType: string): string => {
     return types[workType] ?? workType;
 };
 
+// Work-type filter options surfaced in the filter panel.
+const WORK_TYPE_OPTIONS = [
+    "GARDENING",
+    "SHOPPING",
+    "HEAVY_LIFTING",
+    "IT_SUPPORT",
+    "TUTORING",
+    "TRANSPORT",
+    "CLEANING",
+    "OTHER",
+];
+
+const FILTER_STORAGE_KEY = "mapFilter";
+
+interface PersistedFilter {
+    workTypes: string[];
+    durationMin: number;
+    durationMax: number;
+    dateFromIso: string | null;
+    dateToIso: string | null;
+}
+
+const DEFAULT_FILTER: PersistedFilter = {
+    workTypes: [],
+    durationMin: 0,
+    durationMax: 9,
+    dateFromIso: null,
+    dateToIso: null,
+};
+
 const MapPage: React.FC = () => {
     const apiService = useApi();
     const { value: userId } = useLocalStorage<string>("userId", "");
@@ -34,6 +66,71 @@ const MapPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [inserats, setInserats] = useState<Inserat[]>([]);
     const { value: view, set: setView } = useLocalStorage<"map" | "feed">("mapView", "map");
+
+    // --- Filters (#161) -------------------------------------------------------
+    // The filter panel persists last selection in localStorage so reopening the
+    // page restores it. Filtering is purely client-side over `inserats`.
+    const [filterOpen, setFilterOpen] = useState(false);
+    const [workTypeFilter, setWorkTypeFilter] = useState<string[]>([]);
+    const [durationRange, setDurationRange] = useState<[number, number]>([0, 9]);
+    const [dateFrom, setDateFrom] = useState<Dayjs | null>(null);
+    const [dateTo, setDateTo] = useState<Dayjs | null>(null);
+
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem(FILTER_STORAGE_KEY);
+            if (!raw) return;
+            const parsed: PersistedFilter = JSON.parse(raw);
+            setWorkTypeFilter(parsed.workTypes ?? []);
+            setDurationRange([parsed.durationMin ?? 0, parsed.durationMax ?? 9]);
+            setDateFrom(parsed.dateFromIso ? dayjs(parsed.dateFromIso) : null);
+            setDateTo(parsed.dateToIso ? dayjs(parsed.dateToIso) : null);
+        } catch {
+            // Corrupt filter blob: ignore and use defaults.
+        }
+    }, []);
+
+    useEffect(() => {
+        const blob: PersistedFilter = {
+            workTypes: workTypeFilter,
+            durationMin: durationRange[0],
+            durationMax: durationRange[1],
+            dateFromIso: dateFrom ? dateFrom.toISOString() : null,
+            dateToIso: dateTo ? dateTo.toISOString() : null,
+        };
+        try {
+            localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(blob));
+        } catch {
+            // Storage full / Safari private mode. silent failure.
+        }
+    }, [workTypeFilter, durationRange, dateFrom, dateTo]);
+
+    const filteredInserats = useMemo(() => {
+        return inserats.filter(i => {
+            // #139. never offer your own request in the volunteer's feed/map.
+            if (i.recipientId === userId) return false;
+            if (workTypeFilter.length > 0 && !workTypeFilter.includes(i.workType ?? "")) return false;
+            const tf = parseFloat(i.timeframe);
+            if (!Number.isNaN(tf)) {
+                if (tf < durationRange[0] || tf > durationRange[1]) return false;
+            }
+            if (dateFrom && dayjs(i.date).isBefore(dateFrom, "day")) return false;
+            if (dateTo && dayjs(i.date).isAfter(dateTo, "day")) return false;
+            return true;
+        });
+    }, [inserats, workTypeFilter, durationRange, dateFrom, dateTo, userId]);
+
+    const resetFilters = () => {
+        setWorkTypeFilter(DEFAULT_FILTER.workTypes);
+        setDurationRange([DEFAULT_FILTER.durationMin, DEFAULT_FILTER.durationMax]);
+        setDateFrom(null);
+        setDateTo(null);
+    };
+    const activeFilterCount =
+        (workTypeFilter.length > 0 ? 1 : 0) +
+        (durationRange[0] !== 0 || durationRange[1] !== 9 ? 1 : 0) +
+        (dateFrom ? 1 : 0) +
+        (dateTo ? 1 : 0);
 
     // Tracks which inserats the current volunteer has applied to.
     // appliedSetRef is used inside map marker closures (always current).
@@ -109,6 +206,20 @@ const MapPage: React.FC = () => {
             const inseratData = await apiService.get<Inserat[]>("/help-requests-map");
             setInserats(inseratData);
 
+            // Apply the user-visible filter to the marker set. #139. never
+            // surface your own help requests in the volunteer map.
+            const visibleInserats = inseratData.filter(i => {
+                if (i.recipientId === userId) return false;
+                if (workTypeFilter.length > 0 && !workTypeFilter.includes(i.workType ?? "")) return false;
+                const tf = parseFloat(i.timeframe);
+                if (!Number.isNaN(tf)) {
+                    if (tf < durationRange[0] || tf > durationRange[1]) return false;
+                }
+                if (dateFrom && dayjs(i.date).isBefore(dateFrom, "day")) return false;
+                if (dateTo && dayjs(i.date).isAfter(dateTo, "day")) return false;
+                return true;
+            });
+
             // Initialise which inserats the current user has already applied to
             const initialApplied = new Set(
                 inseratData
@@ -119,7 +230,12 @@ const MapPage: React.FC = () => {
 
             // Shared info window renderer for both individual markers and clusters.
             // Accepts an array of inserats (length ≥ 1) and the position to open at.
-            type TaggedMarker = google.maps.marker.AdvancedMarkerElement & { _inserat: Inserat };
+            //
+            // `_inserats` (plural) holds every inserat sharing this marker's
+            // exact coordinate. Cluster click flatMaps these arrays across the
+            // markers in the cluster so the info window sees ALL underlying
+            // inserats, not just one per marker. (Fixes #215 for same-location pins.)
+            type TaggedMarker = google.maps.marker.AdvancedMarkerElement & { _inserats: Inserat[] };
 
             const openInfoWindow = (windowInserats: Inserat[], position: google.maps.LatLngLiteral) => {
                 let currentPage = 0;
@@ -127,7 +243,8 @@ const MapPage: React.FC = () => {
                 const renderPage = () => {
                     const inserat = windowInserats[currentPage];
                     const total = windowInserats.length;
-                    const showOfferButton = isVolunteer && inserat.status === "OPEN";
+                    // #139. never show the apply button on a user's own inserat.
+                    const showOfferButton = isVolunteer && inserat.status === "OPEN" && inserat.recipientId !== userId;
                     const alreadyApplied = appliedSetRef.current.has(inserat.id);
                     const buttonId = `offer-help-${inserat.id}`;
                     const buttonLabel = alreadyApplied ? "Withdraw" : "Lend a Hand";
@@ -202,25 +319,96 @@ const MapPage: React.FC = () => {
                 renderPage();
             };
 
-            // One marker per inserat (clusterer manages visibility based on zoom)
+            // --- Marker creation -------------------------------------------
+            // Two-layer grouping (fixes #215):
+            //   1. Exact-coordinate group: multiple inserats at IDENTICAL
+            //      lat/lng become ONE marker (with a count badge), tagged
+            //      with the full inserat list. Click: paginated info window.
+            //      Without this, at max zoom two stacked pins would overlap
+            //      and only the topmost would be clickable.
+            //   2. Proximity clustering (below) is then applied by
+            //      MarkerClusterer on top of those grouped markers.
             const allMarkers: TaggedMarker[] = [];
 
-            inseratData.forEach(inserat => {
-                const pin = document.createElement("img");
-                pin.src = "/pin.png";
-                pin.style.cssText = "width:44px;height:57px;cursor:pointer;";
+            // Group inserats by exact coordinate string.
+            const byCoord = new Map<string, Inserat[]>();
+            visibleInserats.forEach(i => {
+                // Stringify to a stable key; floats compared via string equality
+                // is fine here because backend stores them as fixed-precision.
+                const key = `${i.latitude},${i.longitude}`;
+                const existing = byCoord.get(key);
+                if (existing) {
+                    existing.push(i);
+                } else {
+                    byCoord.set(key, [i]);
+                }
+            });
+
+            byCoord.forEach((coLocatedInserats, coordKey) => {
+                const [latStr, lngStr] = coordKey.split(",");
+                const lat = parseFloat(latStr);
+                const lng = parseFloat(lngStr);
+                const count = coLocatedInserats.length;
+
+                // The pin is a container (so we can overlay a count badge
+                // if more than one inserat shares this exact spot).
+                const container = document.createElement("div");
+                container.style.cssText = "position:relative;width:44px;height:57px;cursor:pointer;";
+
+                const pinImg = document.createElement("img");
+                pinImg.src = "/pin.png";
+                pinImg.alt = "";
+                pinImg.style.cssText = "width:44px;height:57px;display:block;";
+                container.appendChild(pinImg);
+
+                if (count > 1) {
+                    const badge = document.createElement("div");
+                    badge.textContent = String(count);
+                    badge.style.cssText = [
+                        "position:absolute",
+                        "top:-8px",
+                        "right:-10px",
+                        "background:#e53935",
+                        "color:#fff",
+                        "border-radius:50%",
+                        "min-width:26px",
+                        "height:26px",
+                        "font-size:15px",
+                        "font-weight:700",
+                        "display:flex",
+                        "align-items:center",
+                        "justify-content:center",
+                        "border:2.5px solid #fff",
+                        "box-shadow:0 2px 4px rgba(0,0,0,0.35)",
+                        "padding:0 4px",
+                        "line-height:1",
+                    ].join(";");
+                    container.appendChild(badge);
+                }
+
+                container.setAttribute("role", "img");
+                container.setAttribute(
+                    "aria-label",
+                    count === 1
+                        ? `Help request: ${coLocatedInserats[0].description}`
+                        : `${count} help requests at this location`
+                );
 
                 const marker = new AdvancedMarkerElement({
                     map,
-                    position: { lat: inserat.latitude, lng: inserat.longitude },
-                    content: pin,
+                    position: { lat, lng },
+                    content: container,
                 }) as TaggedMarker;
 
-                marker._inserat = inserat;
+                marker._inserats = coLocatedInserats;
 
-                // Individual marker click (only fires when not merged into a cluster)
+                // Click (fires when not inside a proximity cluster): open the
+                // paginated info window for every inserat at this exact point.
                 marker.addListener("click", () => {
-                    openInfoWindow([inserat], { lat: inserat.latitude, lng: inserat.longitude });
+                    const sorted = coLocatedInserats
+                        .slice()
+                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                    openInfoWindow(sorted, { lat, lng });
                 });
 
                 allMarkers.push(marker);
@@ -239,8 +427,12 @@ const MapPage: React.FC = () => {
 
                         const img = document.createElement("img");
                         img.src = "/pin.png";
+                        img.alt = "";
                         img.style.cssText = "width:44px;height:57px;display:block;";
                         container.appendChild(img);
+
+                        container.setAttribute("role", "img");
+                        container.setAttribute("aria-label", `${count} help requests at this location`);
 
                         const badge = document.createElement("div");
                         badge.textContent = String(count);
@@ -269,9 +461,11 @@ const MapPage: React.FC = () => {
                     },
                 },
                 onClusterClick: (_event, cluster) => {
+                    // Each marker in the cluster may carry MULTIPLE co-located
+                    // inserats. flatMap across them so the info window sees
+                    // every underlying request.
                     const clusterInserats = ((cluster.markers ?? []) as TaggedMarker[])
-                        .map(m => m._inserat)
-                        .filter((i): i is Inserat => !!i)
+                        .flatMap(m => m._inserats ?? [])
                         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
                     const pos = cluster.position;
                     openInfoWindow(clusterInserats, { lat: pos.lat(), lng: pos.lng() });
@@ -281,7 +475,7 @@ const MapPage: React.FC = () => {
         } catch (err) {
             console.error("Failed to load inserats:", err);
         }
-    }, [apiService, isVolunteer, userId]);
+    }, [apiService, isVolunteer, userId, workTypeFilter, durationRange, dateFrom, dateTo]);
 
     useEffect(() => {
         if (typeof google === "undefined") return;
@@ -309,9 +503,17 @@ const MapPage: React.FC = () => {
 
     return (
         <>
-            {/* Header with view toggle */}
+            {/* Header with view toggle + filter button */}
             <div className="headerBar" style={{ background: "#f5f5f5", height: "8vh", top: "0px" }}>
-                <p></p>
+                <Button
+                    type={filterOpen ? "primary" : "default"}
+                    icon={<FilterOutlined />}
+                    onClick={() => setFilterOpen(o => !o)}
+                    aria-expanded={filterOpen}
+                    aria-controls="map-filter-panel"
+                >
+                    {activeFilterCount > 0 ? `Filter (${activeFilterCount})` : "Filter"}
+                </Button>
                 <h1> Help Requests </h1>
                 <div style={{ display: "flex", gap: 8 }}>
                     <button
@@ -335,7 +537,83 @@ const MapPage: React.FC = () => {
                 onLoad={initMap}
             />
 
-            {/* Map view — always rendered but hidden when feed is active */}
+            {/* Filter panel. Appears below the header when toggled. Filters
+                apply client-side to both map markers and feed cards. (#161) */}
+            {filterOpen && (
+                <div
+                    id="map-filter-panel"
+                    role="region"
+                    aria-label="Help request filters"
+                    style={{
+                        position: "fixed",
+                        top: "8vh",
+                        left: 0,
+                        right: 0,
+                        background: "#fff",
+                        borderBottom: "1px solid #e0e0e0",
+                        padding: "16px",
+                        zIndex: 999,
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                    }}
+                >
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 600, margin: "0 auto" }}>
+                        <div>
+                            <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>Work type</label>
+                            <Select
+                                mode="multiple"
+                                allowClear
+                                style={{ width: "100%" }}
+                                placeholder="All types"
+                                value={workTypeFilter}
+                                onChange={setWorkTypeFilter}
+                                options={WORK_TYPE_OPTIONS.map(v => ({ value: v, label: formatWorkType(v) }))}
+                            />
+                        </div>
+
+                        <div>
+                            <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>
+                                Duration: {durationRange[0]} to {durationRange[1] >= 9 ? "8+" : durationRange[1]} h
+                            </label>
+                            <Slider
+                                range
+                                min={0}
+                                max={9}
+                                step={0.5}
+                                value={durationRange}
+                                onChange={(value) => setDurationRange(value as [number, number])}
+                            />
+                        </div>
+
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                            <div style={{ flex: 1, minWidth: 140 }}>
+                                <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>From</label>
+                                <DatePicker
+                                    style={{ width: "100%" }}
+                                    value={dateFrom}
+                                    onChange={setDateFrom}
+                                    format="DD.MM.YYYY"
+                                />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 140 }}>
+                                <label style={{ display: "block", marginBottom: 4, fontWeight: 600 }}>To</label>
+                                <DatePicker
+                                    style={{ width: "100%" }}
+                                    value={dateTo}
+                                    onChange={setDateTo}
+                                    format="DD.MM.YYYY"
+                                />
+                            </div>
+                        </div>
+
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                            <Button onClick={resetFilters}>Reset</Button>
+                            <Button type="primary" onClick={() => setFilterOpen(false)}>Done</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Map view, always rendered but hidden when feed is active */}
             <div
                 id="map"
                 style={{
@@ -354,12 +632,17 @@ const MapPage: React.FC = () => {
                     overflowY: "auto",
                     padding: "1rem",
                 }}>
-                    {inserats.length === 0 ? (
-                        <p style={{ textAlign: "center", color: "#888" }}>No requests found.</p>
+                    {filteredInserats.length === 0 ? (
+                        <p style={{ textAlign: "center", color: "#555" }}>
+                            {inserats.length === 0
+                                ? "No requests found."
+                                : "No requests match your filters."}
+                        </p>
                     ) : (
-                        inserats.map(inserat => {
+                        filteredInserats.map(inserat => {
                             const alreadyApplied = appliedSet.has(inserat.id);
-                            const showButton = isVolunteer && inserat.status === "OPEN";
+                            // #139. guard own inserats from showing the apply button (also filtered above).
+                            const showButton = isVolunteer && inserat.status === "OPEN" && inserat.recipientId !== userId;
 
                             return (
                                 <Card key={inserat.id} style={{ marginBottom: 12, paddingLeft: 12, borderRadius: 12 }}>
@@ -367,7 +650,7 @@ const MapPage: React.FC = () => {
                                     <p style={{ fontSize: 16, color: "#666", marginBottom: 2 }}>
                                         With: <Link href={`/profile/${inserat.recipientId}`} style={{ color: "inherit", textDecoration: "underline", fontSize: 16 }}>{inserat.recipientUsername}</Link>, age {inserat.recipientAge}
                                     </p>
-                                    <p style={{ fontSize: 16, color: "gray", marginBottom: 2 }}>📍 {inserat.location}</p>
+                                    <p style={{ fontSize: 16, color: "#555", marginBottom: 2 }}>📍 {inserat.location}</p>
                                     <p style={{ fontSize: 16, marginBottom: 2 }}>📅 {inserat.date} · 🕐 {inserat.timeframe}h</p>
                                     <p style={{ fontSize: 16, marginBottom: showButton ? 8 : 0 }}>
                                         {formatWorkType(inserat.workType ?? "")}

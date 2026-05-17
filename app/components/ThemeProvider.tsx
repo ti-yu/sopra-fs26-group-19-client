@@ -5,7 +5,7 @@ import { ConfigProvider, App as AntdApp } from "antd";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { createContext, useContext, useState, useCallback } from "react";
 
-// ✅ shared context
+// Shared role context, consumed by useRole() across pages.
 interface RoleContextType {
   isVolunteer: boolean;
   setIsVolunteer: (val: boolean) => void;
@@ -44,7 +44,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
             colorBgContainer: "#f5f5f5",
             colorText: "#000000",
             colorBorder: "#e0e0e0",
-            colorTextPlaceholder: "#aaaaaa",
+            colorTextPlaceholder: "#767676",
             borderRadius: 10,
             fontSize: 16,
             },
@@ -59,7 +59,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
             },
             Input: {
                 colorBorder: "#e0e0e0",
-                colorTextPlaceholder: "#aaaaaa",
+                colorTextPlaceholder: "#767676",
                 colorPrimaryBorder: "#ffcc00",
             },
             Select: {

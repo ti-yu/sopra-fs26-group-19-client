@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Avatar, Spin, Card, Tag, Empty, Typography } from "antd";
+import { Avatar, Spin, Card, Tag, Empty, Typography, Rate, Button } from "antd";
 import { User } from "@/types/user";
 import Navbar from "@/components/navbar"
 import { useApi } from "@/hooks/useApi";
@@ -29,7 +29,11 @@ interface ReviewDTO {
     text: string;
     creationDate: string;
     inseratDescription: string;
+    /** Half-step star rating, 0.5 - 5.0. Nullable for legacy reviews. */
+    stars?: number | null;
 }
+
+const INITIAL_REVIEW_COUNT = 10;
 
 const Profile: React.FC = () => {
   const apiService = useApi();
@@ -43,6 +47,7 @@ const Profile: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
     const [receivedReviews, setReceivedReviews] = useState<ReviewDTO[]>([]);
+    const [visibleReviewCount, setVisibleReviewCount] = useState(INITIAL_REVIEW_COUNT);
 
     useEffect(() => {
         if (!id) return;
@@ -55,7 +60,11 @@ const Profile: React.FC = () => {
                 ]);
 
                 setUser(userData);
-                setReceivedReviews(reviewsData || []);
+                // #158. newest first. Server doesn't guarantee order; sort client-side.
+                const sorted = (reviewsData || []).slice().sort((a, b) => {
+                    return new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime();
+                });
+                setReceivedReviews(sorted);
             } catch (err: unknown) {
                 setError(err instanceof Error ? err.message : "Failed to load user");
             } finally {
@@ -82,6 +91,11 @@ const Profile: React.FC = () => {
   }
 
   const roleLabel = user.isVolunteer ? "Volunteer" : "Recipient";
+  // Heading rewords itself based on whose profile we're on (#10 polish):
+  // a volunteer receives reviews from clients (recipients) and vice-versa.
+  const reviewsHeading = user.isVolunteer ? "Reviews from clients" : "Reviews from helpers";
+  const visibleReviews = receivedReviews.slice(0, visibleReviewCount);
+  const hasMoreReviews = receivedReviews.length > visibleReviewCount;
 
   return (
       <AuthWrapper>
@@ -143,12 +157,12 @@ const Profile: React.FC = () => {
                       <p><strong>Gender: </strong>{user.gender}</p>
                       <div style={{marginTop: '20px', textAlign: 'left', paddingBottom: '100px'}}>
                           <h3 style={{borderBottom: '1px solid #eee', paddingBottom: '10px'}}>
-                              Reviews from the Community
+                              {reviewsHeading}
                           </h3>
 
                           {receivedReviews.length > 0 ? (
                               <div style={{display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px'}}>
-                                  {receivedReviews.map((review) => (
+                                  {visibleReviews.map((review) => (
                                       <Card
                                           key={review.id}
                                           size="small"
@@ -158,11 +172,20 @@ const Profile: React.FC = () => {
                                               borderLeft: `5px solid var(--role-color)`
                                           }}
                                       >
-                                          <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                              <Link href={`/profile/${review.senderId}`} style={{ color: "inherit", textDecoration: "underline" }}>
-                                                  <Typography.Text strong>@{review.senderUsername}</Typography.Text>
-                                              </Link>
-                                              <Typography.Text type="secondary" style={{fontSize: '12px'}}>
+                                          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8}}>
+                                              <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                  <Link href={`/profile/${review.senderId}`} style={{ color: "inherit", textDecoration: "underline" }}>
+                                                      <Typography.Text strong>@{review.senderUsername}</Typography.Text>
+                                                  </Link>
+                                                  {review.stars != null && review.stars > 0 && (
+                                                      <span>
+                                                          <Rate disabled allowHalf value={review.stars} style={{ fontSize: 14 }} />
+                                                          {/* color:#555 instead of secondary (#888) for WCAG AA contrast (#77) */}
+                                                          <span style={{ marginLeft: 8, color: "#555", fontSize: 12 }}>{review.stars.toFixed(1)} / 5</span>
+                                                      </span>
+                                                  )}
+                                              </span>
+                                              <Typography.Text style={{ fontSize: '12px', color: '#555' }}>
                                                   {review.creationDate}
                                               </Typography.Text>
                                           </div>
@@ -175,6 +198,16 @@ const Profile: React.FC = () => {
                                           </Tag>
                                       </Card>
                                   ))}
+
+                                  {hasMoreReviews && (
+                                      <Button
+                                          type="default"
+                                          onClick={() => setVisibleReviewCount(c => c + INITIAL_REVIEW_COUNT)}
+                                          style={{ alignSelf: "center" }}
+                                      >
+                                          Show more ({receivedReviews.length - visibleReviewCount} more)
+                                      </Button>
+                                  )}
                               </div>
                           ) : (
                               <Empty
@@ -189,7 +222,7 @@ const Profile: React.FC = () => {
 
                   <ReviewModal userId={userIdLocalStorage}/>
 
-                  {/* — Role-based navigation icons — */}
+                  {/* Role-based navigation icons */}
                   <Navbar id={userIdLocalStorage} isVolunteer={isVolunteer}/>
               </div>
           </div>

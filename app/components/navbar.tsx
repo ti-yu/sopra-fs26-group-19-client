@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  HomeOutlined,
+  UserOutlined,
   GlobalOutlined,
   UnorderedListOutlined,
   EditOutlined,
@@ -21,16 +21,17 @@ interface IconConfig {
 const getIconConfigs = (id: string, isVolunteer: boolean): IconConfig[] =>
   isVolunteer
     ? [
-        { icon: <HomeOutlined style={{ fontSize: 28 }} />, label: "My Profile", href: `/profile/${id}` },
-        { icon: <GlobalOutlined style={{ fontSize: 28 }} />, label: "My Feed", href: "/map" },
-        { icon: <UnorderedListOutlined style={{ fontSize: 28 }} />, label: "My Applications", href: "/my-applications" },
-        { icon: <StarOutlined style={{ fontSize: 28 }} />, label: "Reviews", href: "/reviews" },
+        // Profile uses a user-shaped icon, not a house. "home" is no longer the profile in our IA.
+        { icon: <UserOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Profile", href: `/profile/${id}` },
+        { icon: <GlobalOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Feed", href: "/map" },
+        { icon: <UnorderedListOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Applications", href: "/my-applications" },
+        { icon: <StarOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "Reviews", href: "/reviews" },
       ]
     : [
-        { icon: <HomeOutlined style={{ fontSize: 28 }} />, label: "My Profile", href: `/profile/${id}` },
-        { icon: <EditOutlined style={{ fontSize: 28 }} />, label: "New Inserat", href: `/profile/${id}/CreateHelpRequest` },
-        { icon: <UnorderedListOutlined style={{ fontSize: 28 }} />, label: "My Requests", href: "/my-requests" },
-        { icon: <StarOutlined style={{ fontSize: 28 }} />, label: "Reviews", href: "/reviews" },
+        { icon: <UserOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Profile", href: `/profile/${id}` },
+        { icon: <EditOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "New Inserat", href: `/profile/${id}/CreateHelpRequest` },
+        { icon: <UnorderedListOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Requests", href: "/my-requests" },
+        { icon: <StarOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "Reviews", href: "/reviews" },
       ];
 
 interface NavbarProps {
@@ -105,6 +106,8 @@ const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
             key={label}
             href={href}
             onClick={(e) => handleNavigation(e, href)}
+            aria-label={label}
+            aria-current={active ? "page" : undefined}
             style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             {/* Fixed-size wrapper prevents layout shift when circle appears/disappears */}
