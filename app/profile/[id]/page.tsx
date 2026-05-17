@@ -105,7 +105,7 @@ const Profile: React.FC = () => {
                       Logout
                   </Link>
 
-                  <h1 style={{color: "#ffffff", margin: 0, fontSize: "20px"}}>Profile</h1>
+                  <h1 style={{color: "#ffffff", margin: 0}}>Profile</h1>
 
                   <Link href="/settings" style={{color: "white", textDecoration: "none"}}>
                       Settings
