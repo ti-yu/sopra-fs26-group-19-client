@@ -157,7 +157,7 @@ a {
 
 .headerBar > * {
   flex: 1;
-  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-size: clamp(1rem, 2vw, 1.3rem);
 }
 
 .headerBar > *:nth-child(2) {
