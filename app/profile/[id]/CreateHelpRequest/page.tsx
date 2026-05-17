@@ -46,6 +46,14 @@ const CreateHelpRequest: React.FC = () => {
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]); // ✅ typed
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null); // ✅ typed
 
+  // Add to state at the top of the component:
+  const [dateOpen, setDateOpen] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [viewMonth, setViewMonth] = useState(new Date().getMonth());
+  const [viewYear, setViewYear] = useState(new Date().getFullYear());
+  const [selectedHour, setSelectedHour] = useState<number | null>(null);
+  const [selectedMinute, setSelectedMinute] = useState<number | null>(null);
+
   const fetchSuggestions = async (input: string) => {
     if (!input || !window.google) return;
 
@@ -123,7 +131,7 @@ const CreateHelpRequest: React.FC = () => {
 
           <div className="auth-card-header">
             <button type="button" className="header-link" onClick={() => router.back()}>
-              Cancel
+              <strong> Cancel </strong>
             </button>
             <h1>Get Help!</h1>
           </div>
@@ -245,7 +253,7 @@ const CreateHelpRequest: React.FC = () => {
 
             <Form.Item>
               <Button type="primary" htmlType="submit" block>
-                post request online
+                Post Request
               </Button>
             </Form.Item>
           </Form>
