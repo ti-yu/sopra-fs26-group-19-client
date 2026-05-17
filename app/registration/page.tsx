@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Form, Radio, Input, DatePicker, Select, Switch, message } from "antd";
+import { Button, Form, Radio, Input, DatePicker, Select, message, Modal } from "antd";
 import dayjs from "dayjs";
 import Script from "next/script";
 import imageCompression from "browser-image-compression";
+import { useRole } from "@/components/ThemeProvider";
 
 interface PlaceSuggestion {
   placePrediction: {
@@ -40,6 +41,7 @@ const Register: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [form] = Form.useForm();
+  const { setIsVolunteer } = useRole();
 
   const { set: setToken } = useLocalStorage<string>("token", "");
   const { set: setUserId } = useLocalStorage<string>("userId", "");
@@ -47,6 +49,40 @@ const Register: React.FC = () => {
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null);
+
+  // Watches the role toggle and re-themes the whole page (and the global antd
+  // ConfigProvider) the moment the user flips between volunteer / recipient.
+  const watchedIsVolunteer = Form.useWatch("isVolunteer", form);
+  useEffect(() => {
+    if (typeof watchedIsVolunteer === "boolean") {
+      setIsVolunteer(watchedIsVolunteer);
+    }
+  }, [watchedIsVolunteer, setIsVolunteer]);
+
+  /** True if any registration field has user-entered data. Used to gate the
+   *  "Back to Login" confirm dialog. */
+  const isFormDirty = (): boolean => {
+    const values = form.getFieldsValue();
+    return Object.entries(values).some(([k, v]) => {
+      if (k === "isVolunteer") return false; // default value, not user-entered
+      return v !== undefined && v !== null && v !== "";
+    }) || !!profilePicture;
+  };
+
+  const handleBackToLogin = () => {
+    if (!isFormDirty()) {
+      router.push("/login");
+      return;
+    }
+    Modal.confirm({
+      title: "Discard your registration data?",
+      content: "You'll lose what you've entered. Continue?",
+      okText: "Yes, go to Login",
+      cancelText: "Stay on Registration",
+      onOk: () => router.push("/login"),
+    });
+  };
 
   const handleProfileFile = async (file: File) => {
     if (!file.type.startsWith("image/")) return;
@@ -80,6 +116,7 @@ const Register: React.FC = () => {
     const place = suggestion.placePrediction.toPlace();
     await place.fetchFields({ fields: ["formattedAddress"] });
 
+    setSelectedPlace(place);
     setQuery(place.formattedAddress);
     form.setFieldValue("address", place.formattedAddress);
     setSuggestions([]);
@@ -101,18 +138,16 @@ const Register: React.FC = () => {
         profilePicture: profilePicture ?? null,
       };
 
+      // The server's /register already auto-logs in (UserService.createUser
+      // calls loginUser internally) and returns a token. Skip the extra POST
+      // /login round-trip the client used to make. saves ~1s on slow links.
       const created = await apiService.post<User>("/register", payload);
 
-      const loginResponse = await apiService.post<User>("/login", {
-        username: values.username,
-        password: values.password,
-      });
-
-      if (!loginResponse.token) {
-        throw new Error("Login succeeded but no token was returned.");
+      if (!created.token) {
+        throw new Error("Registration succeeded but no token was returned.");
       }
 
-      setToken(loginResponse.token);
+      setToken(created.token);
       setUserId(created.id);
       sessionStorage.setItem("isVolunteer", String(created.isVolunteer));
 
@@ -166,11 +201,15 @@ const Register: React.FC = () => {
 
         {/* --- Header Section --- */}
         <div className="auth-card-header">
-          <button type="button" className="header-link" onClick={() => router.push("/login")}>
-            <strong> Login</strong>
+          <button type="button" className="header-link" onClick={handleBackToLogin}>
+            <strong>Back to Login</strong>
           </button>
           <h1>Registration</h1>
         </div>
+
+        <p style={{ fontSize: 12, color: "#555", margin: "8px 0 16px" }}>
+          Fields marked with <span style={{ color: "#e53935" }}>*</span> are required.
+        </p>
 
         {/* --- Form Section --- */}
         <Form
@@ -281,7 +320,8 @@ const Register: React.FC = () => {
           </Form.Item>
 
           <Form.Item name="bio" label="Bio">
-            <Input.TextArea placeholder="Short bio" maxLength={200} showCount />
+            {/* Matches the Settings page placeholder for consistency. */}
+            <Input.TextArea placeholder="Introduce yourself!" maxLength={200} showCount />
           </Form.Item>
 
           <Form.Item name="address" label="Address">
@@ -315,8 +355,17 @@ const Register: React.FC = () => {
                     {suggestions.map((item, index) => (
                         <div
                             key={index}
-                            style={{ padding: "8px 12px", cursor: "pointer" }}
+                            role="option"
+                            aria-selected={false}
+                            tabIndex={0}
                             onClick={() => handleSelectAddress(item)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    handleSelectAddress(item);
+                                }
+                            }}
+                            style={{ padding: "8px 12px", cursor: "pointer" }}
                             onMouseEnter={(e) =>
                                 (e.currentTarget.style.background = "#f5f5f5")
                             }
@@ -360,15 +409,9 @@ const Register: React.FC = () => {
               </Radio.Group>
           </Form.Item>
 
-          <Form.Item>
+          <Form.Item style={{ marginBottom: 0 }}>
             <Button type="primary" htmlType="submit" block>
               Register
-            </Button>
-          </Form.Item>
-
-          <Form.Item style={{ marginBottom: 0 }}>
-            <Button type="default" onClick={() => router.push("/login")} block>
-              Back to Login
             </Button>
           </Form.Item>
         </Form>

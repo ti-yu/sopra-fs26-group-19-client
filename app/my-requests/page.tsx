@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Spin, Empty } from "antd";
+import React, { useCallback, useEffect, useState } from "react";
+import { Spin, Empty, Tag } from "antd";
 import Link from "next/link";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "@/components/navbar";
 import AuthWrapper from "@/components/AuthWrapper";
+import PageBanner, { BANNER_HEIGHT_PX } from "@/components/PageBanner";
 import { Inserat, Applicant } from "@/types/inserat";
 
 const formatDate = (dateStr: string) => {
@@ -35,52 +36,53 @@ const MyRequests: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [applicantsMap, setApplicantsMap] = useState<Record<string, Applicant[]>>({});
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (!userId) return;
-    const fetchData = async () => {
-      try {
-        const data = await apiService.get<Inserat[]>(`/users/${userId}/help-requests`);
-        const sorted = data.sort((a, b) => {
-          if (a.status === "DONE" && b.status !== "DONE") return 1;
-          if (a.status !== "DONE" && b.status === "DONE") return -1;
-          return new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime();
-        });
-        setInserats(sorted);
+    try {
+      const data = await apiService.get<Inserat[]>(`/users/${userId}/help-requests`);
+      // #157. keep ACCEPTED visible. Sort: OPEN first (newest), then ACCEPTED, then DONE.
+      const statusRank = (s: string) => (s === "OPEN" ? 0 : s === "ACCEPTED" ? 1 : 2);
+      const sorted = data.slice().sort((a, b) => {
+        const r = statusRank(a.status) - statusRank(b.status);
+        if (r !== 0) return r;
+        return new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime();
+      });
+      setInserats(sorted);
 
-        // Fetch applicants for all OPEN inserats
-        const openInserats = sorted.filter((i) => i.status === "OPEN");
-        const applicantEntries = await Promise.all(
-          openInserats.map(async (inserat) => {
-            const applicants = await apiService.get<Applicant[]>(
-              `/help-requests/${inserat.id}/applicants`
-            );
-            return [inserat.id, applicants] as [string, Applicant[]];
-          })
-        );
-        setApplicantsMap(Object.fromEntries(applicantEntries));
-      } catch (err) {
-        console.error("Failed to load help requests", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      // Fetch applicants for all OPEN inserats
+      const openInserats = sorted.filter((i) => i.status === "OPEN");
+      const applicantEntries = await Promise.all(
+        openInserats.map(async (inserat) => {
+          const applicants = await apiService.get<Applicant[]>(
+            `/help-requests/${inserat.id}/applicants`
+          );
+          return [inserat.id, applicants] as [string, Applicant[]];
+        })
+      );
+      setApplicantsMap(Object.fromEntries(applicantEntries));
+    } catch (err) {
+      console.error("Failed to load help requests", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, apiService]);
+
+  useEffect(() => {
     fetchData();
-  }, [userId]);
+  }, [fetchData]);
 
   const handleAccept = async (inseratId: string, volunteerId: string) => {
+    // #157. Show loading state while the PUT round-trip completes, then refetch
+    // the full list so the accepted inserat re-renders with status ACCEPTED
+    // (visible, not vanished) and applicants disappear.
     const key = `${inseratId}-${volunteerId}`;
     if (acceptingId === key) return;
     setAcceptingId(key);
     try {
-      const updated = await apiService.put<Inserat>(
+      await apiService.put<Inserat>(
         `/help-requests/${inseratId}/accept/${volunteerId}`, {}
       );
-      setInserats((prev) => prev.map((i) => (i.id === inseratId ? updated : i)));
-      setApplicantsMap((prev) => {
-        const copy = { ...prev };
-        delete copy[inseratId];
-        return copy;
-      });
+      await fetchData();
     } catch (err) {
       console.error("Failed to accept volunteer", err);
     } finally {
@@ -122,13 +124,9 @@ const MyRequests: React.FC = () => {
   return (
     <AuthWrapper>
     <div>
-      <div className="headerBar" style={{ background: "#f5f5f5", height: "8vh", top: "0px" }}>
-          <p></p>
-          <h1>My Requests</h1>
-          <p></p>
-        </div>
+      <PageBanner title="My Requests" isVolunteer={isVolunteer} />
 
-      <div style={{ padding: "16vh 16px 100px", maxWidth: 600, margin: "0 auto" }}>
+      <div style={{ padding: `${BANNER_HEIGHT_PX + 16}px 16px 100px`, maxWidth: 600, margin: "0 auto" }}>
         {inserats.length === 0 ? (
           <Empty description="No help requests yet" style={{ marginTop: 40 }} />
         ) : (
@@ -149,15 +147,23 @@ const MyRequests: React.FC = () => {
                   marginBottom: 16,
                 }}
               >
-                {/* Card header: date + description + edit */}
+                {/* Card header: date + description + status + edit */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                     <span style={{ fontSize: 18, fontWeight: 700 }}>
                       {formatDate(inserat.date)}
                     </span>
                     <span style={{ fontSize: 18, fontWeight: 700 }}>
                       {inserat.description}
                     </span>
+                    {/* #76: don't rely on color/opacity alone, show a textual status tag. */}
+                    {isDone ? (
+                      <Tag color="default">Done</Tag>
+                    ) : isAccepted ? (
+                      <Tag color="green">Accepted</Tag>
+                    ) : (
+                      <Tag color="blue">Open</Tag>
+                    )}
                   </div>
                   {!isDone && isOpen && (
                     inserat.volunteerAppliedCount === 0 ? (
@@ -180,7 +186,7 @@ const MyRequests: React.FC = () => {
 
                 {/* OPEN: show applicants or "nobody applied" */}
                 {isOpen && applicants.length === 0 && (
-                  <div style={{ marginTop: 12, color: "#888", fontSize: 14 }}>
+                  <div style={{ marginTop: 12, color: "#555", fontSize: 14 }}>
                     Nobody has yet applied for this request.
                   </div>
                 )}
@@ -198,6 +204,7 @@ const MyRequests: React.FC = () => {
                       <button
                         onClick={() => handleAccept(inserat.id, applicant.id)}
                         disabled={acceptingId === `${inserat.id}-${applicant.id}`}
+                        aria-busy={acceptingId === `${inserat.id}-${applicant.id}`}
                         style={{
                           backgroundColor: "#d9737d",
                           color: "#fff",
@@ -210,7 +217,7 @@ const MyRequests: React.FC = () => {
                           opacity: acceptingId === `${inserat.id}-${applicant.id}` ? 0.6 : 1,
                         }}
                       >
-                        accept
+                        {acceptingId === `${inserat.id}-${applicant.id}` ? "Saving…" : "accept"}
                       </button>
                       <button
                         onClick={() => handleDismiss(inserat.id, applicant.id)}

@@ -1,55 +1,40 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ApiService } from '@/api/apiService';
 import AuthWrapper from "@/components/AuthWrapper";
-import { message, Card, List, Button, Input, Typography, Tag, } from "antd";
+import { message, Card, Button, Input, Typography, Tag, Empty, Rate } from "antd";
 import Navbar from "@/components/navbar";
+import PageBanner, { BANNER_HEIGHT_PX } from "@/components/PageBanner";
 import Link from "next/link";
+import useLocalStorage from "@/hooks/useLocalStorage";
+import { Review } from "@/types/review";
 
 const { Title, Text } = Typography;
 const api = new ApiService();
 
-interface ReviewDTO {
-    id: string;
-    senderId: string;
-    receiverId: string;
-    inseratId: string;
-    text: string;
-    creationDate: string;
-    reviewStatus?: string;
-    receiverUsername?: string;
-    inseratDescription?: string;
-    inseratLocation?: string;
-}
+const INITIAL_VISIBLE_COUNT = 10;
 
 export default function ReviewsPage() {
-    const router = useRouter();
-    const [pendingReview, setPendingReview] = useState<ReviewDTO | null>(null);
-    const [doneReviews, setDoneReviews] = useState<ReviewDTO[]>([]);
+    const [pendingReview, setPendingReview] = useState<Review | null>(null);
+    const [doneReviews, setDoneReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [userId, setUserId] = useState<string>("");
-    const [isVolunteer, setIsVolunteer] = useState<boolean>(false);
     const [reviewText, setReviewText] = useState("");
+    const [stars, setStars] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
 
+    const { value: userId } = useLocalStorage<string>("userId", "");
+    const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
 
     const fetchReviews = async () => {
+        if (!userId) return;
         try {
             setLoading(true);
-            const rawUserId = sessionStorage.getItem('userId');
-            if (!rawUserId) return;
-            const cleanUserId = rawUserId.replace(/"/g, '');
 
             try {
-                const pendingData = await api.get<ReviewDTO>(`/profile/${cleanUserId}/pendingReview`);
-
-                if (pendingData && pendingData.id) {
-                    setPendingReview(pendingData);
-                } else {
-                    setPendingReview(null);
-                }
+                const pendingData = await api.get<Review>(`/profile/${userId}/pendingReview`);
+                setPendingReview(pendingData && pendingData.id ? pendingData : null);
             } catch (err: unknown) {
                 const apiError = err as { response?: { status?: number } };
                 if (apiError.response?.status !== 204) {
@@ -58,10 +43,13 @@ export default function ReviewsPage() {
                 setPendingReview(null);
             }
 
-            const doneData = await api.get<ReviewDTO[]>(`/profile/${cleanUserId}/reviews/done`);
-            setDoneReviews(doneData || []);
-
-        } catch (error) {
+            const doneData = await api.get<Review[]>(`/profile/${userId}/reviews/done`);
+            // #158. newest reviews on top. The server doesn't guarantee order; sort here.
+            const sorted = (doneData || []).slice().sort((a, b) => {
+                return new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime();
+            });
+            setDoneReviews(sorted);
+        } catch {
             message.error("Failed to load reviews.");
         } finally {
             setLoading(false);
@@ -69,68 +57,73 @@ export default function ReviewsPage() {
     };
 
     useEffect(() => {
-        const rawId = sessionStorage.getItem('userId')?.replace(/"/g, '');
-        const rawIsVolunteer = sessionStorage.getItem('isVolunteer') === 'true';
-
-        if (rawId) {
-            setUserId(rawId);
-            setIsVolunteer(rawIsVolunteer);
-        }
         fetchReviews();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userId]);
 
-    const handleIgnore = async (reviewId: string) => {
+    const handleDismissForNow = async () => {
+        // #151. pushes reminder out by 24h server-side.
+        if (!pendingReview) return;
         setIsSubmitting(true);
         try {
-            const rawUserId = sessionStorage.getItem('userId')?.replace(/"/g, '');
-            await api.post(`/profile/${rawUserId}/reviews/${reviewId}/ignore`, {});
-            message.success("Review ignored.");
-
+            await api.post(`/profile/${userId}/reviews/${pendingReview.id}/dismiss-for-now`, {});
             setReviewText("");
+            setStars(0);
             fetchReviews();
-        } catch (error) {
-            message.error("Failed to ignore review.");
+        } catch {
+            message.error("Failed to dismiss review.");
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const submitReview = async () => {
-        if (!reviewText.trim()) return message.warning("Please enter a review.");
         if (!pendingReview) return;
+        if (stars <= 0) {
+            message.warning("Please pick a star rating.");
+            return;
+        }
+        if (!reviewText.trim()) {
+            message.warning("Please enter a review.");
+            return;
+        }
         setIsSubmitting(true);
         try {
-            const rawUserId = sessionStorage.getItem('userId')?.replace(/"/g, '');
-            await api.post(`/profile/${rawUserId}/reviews/${pendingReview.id}/write`, {text: reviewText});
+            await api.post(`/profile/${userId}/reviews/${pendingReview.id}/write`, {
+                text: reviewText,
+                stars,
+            });
             message.success("Review submitted!");
-
             setReviewText("");
+            setStars(0);
             fetchReviews();
-        } catch (error) {
+        } catch {
             message.error("Failed to submit review.");
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    const visibleReviews = doneReviews.slice(0, visibleCount);
+    const hasMore = doneReviews.length > visibleCount;
+
     return (
         <AuthWrapper>
-            
-            <div className="headerBar" style={{ background: "#f5f5f5", height: "8vh", top: "0px" }}>
-                <p></p>
-                <h1>Review History</h1>
-                <p></p>
-            </div>
+            <PageBanner title="Review History" isVolunteer={isVolunteer} />
 
-            <div style={{maxWidth: '800px', margin: '16vh auto', padding: '0 20px', paddingBottom: '80px'}}>
+            <div style={{
+                maxWidth: '800px',
+                margin: `${BANNER_HEIGHT_PX + 16}px auto 0`,
+                padding: '0 20px 100px',
+            }}>
 
                 {pendingReview && (
                     <div style={{ marginBottom: '40px' }}>
                         <Title level={4} style={{ color: '#e53935', marginTop: 0 }}>Action Required</Title>
-                        <Card style={{borderColor: '#e53935', borderRadius: '12px', backgroundColor: '#fff9f9'}}>
-                            <div style={{marginBottom: '15px'}}>
-                                <p style={{margin: '0 0 8px 0'}}>The
-                                    task <strong>{pendingReview.inseratDescription}</strong> has finished!</p>
+                        <Card style={{ borderColor: '#e53935', borderRadius: '12px', backgroundColor: '#fff9f9' }}>
+                            <div style={{ marginBottom: '15px' }}>
+                                <p style={{ margin: '0 0 8px 0' }}>The task{' '}
+                                    <strong>{pendingReview.inseratDescription}</strong> has finished!</p>
                                 <Text type="secondary">
                                     Review your experience with{" "}
                                     {pendingReview.receiverId ? (
@@ -144,6 +137,17 @@ export default function ReviewsPage() {
                                 </Text>
                             </div>
 
+                            <div style={{ marginBottom: 12 }}>
+                                <Rate
+                                    allowHalf
+                                    value={stars}
+                                    onChange={setStars}
+                                    aria-label="Star rating from 0.5 to 5 in half steps"
+                                    disabled={isSubmitting}
+                                />
+                                {stars > 0 && <span style={{ marginLeft: 12, color: "#555" }}>{stars.toFixed(1)} / 5</span>}
+                            </div>
+
                             <Input.TextArea
                                 rows={4}
                                 maxLength={100}
@@ -152,11 +156,11 @@ export default function ReviewsPage() {
                                 onChange={(e) => setReviewText(e.target.value)}
                                 placeholder="They were fantastic and very helpful..."
                                 disabled={isSubmitting}
-                                style={{marginBottom: '15px'}}
+                                style={{ marginBottom: '15px' }}
                             />
-                            <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
+                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                                 <Button
-                                    onClick={() => handleIgnore(pendingReview.id)}
+                                    onClick={handleDismissForNow}
                                     disabled={isSubmitting}
                                 >
                                     Ignore for now
@@ -174,51 +178,82 @@ export default function ReviewsPage() {
                     </div>
                 )}
 
+                {/* Past reviews list. Replaces the deprecated antd <List> with Cards (#152) */}
                 <div>
-                    <Card style={{ borderRadius: '12px' }}>
-                        <List
-                            loading={loading}
-                            dataSource={doneReviews}
-                            locale={{emptyText: "You have no review history yet. Finish some tasks to see them here!"}}
-                            renderItem={(review) => (
-                                <List.Item>
-                                    <List.Item.Meta
-                                        title={
+                    {loading ? (
+                        <Card style={{ borderRadius: '12px' }}>
+                            <Text type="secondary">Loading…</Text>
+                        </Card>
+                    ) : doneReviews.length === 0 ? (
+                        <Card style={{ borderRadius: '12px' }}>
+                            <Empty
+                                description="You have no review history yet. Finish some tasks to see them here!"
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            />
+                        </Card>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            {visibleReviews.map((review) => {
+                                // #152: only render Written or Ignored. pending should never appear here
+                                // because the server filters them out, but we still defensively check.
+                                const statusTag = review.reviewStatus === 'IGNORED' ? (
+                                    <Tag color="default" style={{ marginLeft: '8px' }}>Ignored forever</Tag>
+                                ) : review.reviewStatus === 'WRITTEN' ? (
+                                    <Tag color="green" style={{ marginLeft: '8px' }}>Written</Tag>
+                                ) : null;
+
+                                return (
+                                    <Card
+                                        key={review.id}
+                                        style={{ borderRadius: '12px' }}
+                                    >
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
                                             <span>
-                                            {review.receiverId ? (
-                                                <Link href={`/profile/${review.receiverId}`} style={{ color: "inherit", textDecoration: "underline" }}>
-                                                    @{review.receiverUsername || 'User'}
-                                                </Link>
-                                            ) : (
-                                                <span>@{review.receiverUsername || 'User'}</span>
-                                            )}
-                                                {review.reviewStatus === 'IGNORED' ? (
-                                                    <Tag color="default" style={{marginLeft: '8px'}}>Ignored</Tag>
+                                                {review.receiverId ? (
+                                                    <Link href={`/profile/${review.receiverId}`} style={{ color: "inherit", textDecoration: "underline" }}>
+                                                        <Text strong>@{review.receiverUsername || 'User'}</Text>
+                                                    </Link>
                                                 ) : (
-                                                    <Tag color="green" style={{marginLeft: '8px'}}>Written</Tag>
+                                                    <Text strong>@{review.receiverUsername || 'User'}</Text>
                                                 )}
-                                        </span>
-                                        }
-                                        description={
-                                            <div style={{ marginTop: '4px' }}>
-                                                {/* 14. CHANGED: Tweaked the styling of the text below the username */}
-                                                {/* WHY: Made the task description slightly smaller so the actual Review quote stands out more clearly. */}
-                                                <Text type="secondary" style={{display: 'block', fontSize: '12px' }}>
-                                                    Task: {review.inseratDescription}
-                                                </Text>
-                                                {review.text && (
-                                                    <Text italic style={{ display: 'block', marginTop: '4px', color: '#333' }}>
-                                                        &quot;{review.text}&quot;
-                                                    </Text>
-                                                )}
+                                                {statusTag}
+                                            </span>
+                                            {/* #77 contrast: was '#888', moved to '#555' for WCAG AA */}
+                                            <span style={{ color: '#555', fontSize: '12px' }}>{review.creationDate}</span>
+                                        </div>
+
+                                        {review.stars != null && review.stars > 0 && (
+                                            <div style={{ marginTop: 4 }}>
+                                                <Rate disabled allowHalf value={review.stars} style={{ fontSize: 14 }} />
+                                                <span style={{ marginLeft: 8, color: "#555", fontSize: 12 }}>{review.stars.toFixed(1)} / 5</span>
                                             </div>
-                                        }
-                                    />
-                                    <div style={{color: '#888', fontSize: '12px'}}>{review.creationDate}</div>
-                                </List.Item>
+                                        )}
+
+                                        <div style={{ marginTop: '4px' }}>
+                                            <Text type="secondary" style={{ display: 'block', fontSize: '12px' }}>
+                                                Task: {review.inseratDescription}
+                                            </Text>
+                                            {review.text && (
+                                                <Text italic style={{ display: 'block', marginTop: '4px', color: '#333' }}>
+                                                    &quot;{review.text}&quot;
+                                                </Text>
+                                            )}
+                                        </div>
+                                    </Card>
+                                );
+                            })}
+
+                            {hasMore && (
+                                <Button
+                                    type="default"
+                                    onClick={() => setVisibleCount(c => c + INITIAL_VISIBLE_COUNT)}
+                                    style={{ alignSelf: "center", marginTop: 8 }}
+                                >
+                                    Show more ({doneReviews.length - visibleCount} more)
+                                </Button>
                             )}
-                        />
-                    </Card>
+                        </div>
+                    )}
                 </div>
 
                 <Navbar id={userId} isVolunteer={isVolunteer} />
