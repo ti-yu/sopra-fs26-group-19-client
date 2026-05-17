@@ -132,8 +132,8 @@ reason).
 |                    | [date]   | [[Link to Commit 2.1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/54f52a526fc2f0f2a9db533681cb17afbe17814a), [Link to Commit 2.1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/19f7d067b82d67ed479039c4551877b9829d8767)] | [Bugfixes around the Review functionality] | [bugs suck.] |
 | **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@ti-yu]** | [16.05]   | [Link to Commit 1] (https://github.com/ti-yu/sopra-fs26-group-19-client/commit/320de1a75cca3e9e5765cd312a9517c57cd99bbd) | [Changed the Focus Indicator colour to something more visible after reviewing the entire site is keyboard-navigable as part of a general accessibility audit] | [Our target audience consists of older adults, so to ensure the site is usable for users who can't use a mouse (e.g. due to Parkinson's, ensuring keyboard navigability is critical)] |
+|                    | [17.05]   | [Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/ad68143c258c8117406c3ae300ac2715c66d6765) | [Added a feature so that the Settings page updates based on the user's isVolunteer status] | [Adds to the overall polish and consistency of the site] |
 | **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 

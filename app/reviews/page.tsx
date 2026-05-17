@@ -115,10 +115,14 @@ export default function ReviewsPage() {
 
     return (
         <AuthWrapper>
-            <div style={{maxWidth: '800px', margin: '40px auto', padding: '0 20px', paddingBottom: '80px'}}>
-                <div style={{marginBottom: '20px'}}>
-                    <Title level={2} style={{margin: 0}}>Reviews</Title>
-                </div>
+            
+            <div className="headerBar" style={{ background: "#f5f5f5", height: "8vh", top: "0px" }}>
+                <p></p>
+                <h1>Review History</h1>
+                <p></p>
+            </div>
+
+            <div style={{maxWidth: '800px', margin: '16vh auto', padding: '0 20px', paddingBottom: '80px'}}>
 
                 {pendingReview && (
                     <div style={{ marginBottom: '40px' }}>
@@ -171,7 +175,6 @@ export default function ReviewsPage() {
                 )}
 
                 <div>
-                    <Title level={4} style={{ marginTop: 0 }}>Review History</Title>
                     <Card style={{ borderRadius: '12px' }}>
                         <List
                             loading={loading}

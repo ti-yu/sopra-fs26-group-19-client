@@ -157,6 +157,7 @@ a {
 
 .headerBar > * {
   flex: 1;
+  font-size: clamp(1rem, 2vw, 1.3rem);
 }
 
 .headerBar > *:nth-child(2) {
@@ -240,4 +241,10 @@ a {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+}
+
+/* ─── Focus Indicator ───────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid #ffcc00;
+  outline-offset: 2px;
 }

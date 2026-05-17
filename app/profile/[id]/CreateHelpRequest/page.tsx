@@ -41,7 +41,6 @@ const CreateHelpRequest: React.FC = () => {
   const [form] = Form.useForm();
   const { value: userId } = useLocalStorage<string>("userId", "");
   const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
-
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]); // ✅ typed
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null); // ✅ typed
@@ -123,7 +122,7 @@ const CreateHelpRequest: React.FC = () => {
 
           <div className="auth-card-header">
             <button type="button" className="header-link" onClick={() => router.back()}>
-              Cancel
+              <strong> Cancel </strong>
             </button>
             <h1>Get Help!</h1>
           </div>
@@ -176,7 +175,7 @@ const CreateHelpRequest: React.FC = () => {
               <DatePicker
                 style={{ width: "100%" }}
                 format="DD.MM.YYYY"
-                placeholder="Date: DD.MM.YYYY"
+                placeholder="Enter Date: DD.MM.YYYY"
                 disabledDate={(current) => current && current < dayjs().startOf("day")}
               />
             </Form.Item>
@@ -220,71 +219,32 @@ const CreateHelpRequest: React.FC = () => {
             </Form.Item>
 
             <Form.Item
-                name="location"
-                label="Location"
-                rules={[{ required: true, message: "Please select an address from the dropdown!" }]}
+              name="location"
+              label="Location"
+              rules={[{ required: true, message: "Please select an address from the dropdown!" }]}
             >
-              <div style={{ position: "relative" }}>
-                <Input
-                  value={query}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setQuery(value);
-                    form.setFieldValue("location", value);
-                    fetchSuggestions(value);
-                  }}
-                  placeholder="Enter address"
-                />
-
-                {suggestions.length > 0 && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "100%",
-                      left: 0,
-                      right: 0,
-                      background: "#fff",
-                      border: "1px solid #d9d9d9",
-                      borderRadius: "6px",
-                      marginTop: "4px",
-                      zIndex: 1000,
-                      maxHeight: "200px",
-                      overflowY: "auto",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    {suggestions.map((item, index) => (
-                      <div
-                        key={index}
-                        role="option"
-                        aria-selected={false}
-                        tabIndex={0}
-                        onClick={() => handleSelect(item)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            handleSelect(item);
-                          }
-                        }}
-                        style={{ padding: "8px 12px", cursor: "pointer" }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.background = "#f5f5f5")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.background = "transparent")
-                        }
-                      >
-                        {item.placePrediction.text.text}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Select
+                showSearch
+                placeholder="Enter address"
+                onSearch={(value) => {
+                  form.setFieldValue("location", value);
+                  fetchSuggestions(value);
+                }}
+                onSelect={(_value: string, option: { suggestion: PlaceSuggestion }) => {
+                  handleSelect(option.suggestion);
+                }}
+                options={suggestions.map((item, index) => ({
+                  key: index,
+                  value: item.placePrediction.text.text,
+                  label: item.placePrediction.text.text,
+                  suggestion: item,
+                }))}
+              />
             </Form.Item>
 
             <Form.Item>
               <Button type="primary" htmlType="submit" block>
-                post request online
+                Post Request
               </Button>
             </Form.Item>
           </Form>

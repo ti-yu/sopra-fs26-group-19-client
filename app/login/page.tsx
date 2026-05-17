@@ -64,7 +64,7 @@ const Login: React.FC = () => {
         {/* --- Header Section --- */}
         <div className="auth-card-header">
           <button type="button" className="header-link" onClick={() => router.push("/registration")}>
-            register
+            <strong>Register</strong>
           </button>
           <h1>Login</h1>
         </div>
@@ -102,7 +102,7 @@ const Login: React.FC = () => {
 
           <Form.Item style={{ marginBottom: 0 }}>
             <Button type="primary" htmlType="submit" block>
-              Login
+              <strong>Login</strong>
             </Button>
           </Form.Item>
         </Form>

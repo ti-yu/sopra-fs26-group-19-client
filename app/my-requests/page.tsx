@@ -165,14 +165,14 @@ const MyRequests: React.FC = () => {
                         href={`/my-requests/${inserat.id}/edit`}
                         style={{ color: "#d9737d", fontSize: 14, whiteSpace: "nowrap", marginLeft: 8, fontWeight: 500 }}
                       >
-                        edit request
+                        <strong>Edit Request</strong>
                       </Link>
                     ) : (
                       <span
                         title="Cannot edit once someone has applied"
                         style={{ color: "#bbb", fontSize: 14, whiteSpace: "nowrap", marginLeft: 8, fontWeight: 500, cursor: "not-allowed", userSelect: "none" }}
                       >
-                        edit request
+                        <strong>Edit Request</strong>
                       </span>
                     )
                   )}
