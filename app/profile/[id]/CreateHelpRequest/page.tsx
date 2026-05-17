@@ -41,18 +41,9 @@ const CreateHelpRequest: React.FC = () => {
   const [form] = Form.useForm();
   const { value: userId } = useLocalStorage<string>("userId", "");
   const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
-
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]); // ✅ typed
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null); // ✅ typed
-
-  // Add to state at the top of the component:
-  const [dateOpen, setDateOpen] = useState(false);
-  const [timeOpen, setTimeOpen] = useState(false);
-  const [viewMonth, setViewMonth] = useState(new Date().getMonth());
-  const [viewYear, setViewYear] = useState(new Date().getFullYear());
-  const [selectedHour, setSelectedHour] = useState<number | null>(null);
-  const [selectedMinute, setSelectedMinute] = useState<number | null>(null);
 
   const fetchSuggestions = async (input: string) => {
     if (!input || !window.google) return;

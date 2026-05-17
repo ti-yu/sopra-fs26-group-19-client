@@ -36,7 +36,7 @@ const Profile: React.FC = () => {
   const params = useParams();
   const id = params?.id;
   const { value: userIdLocalStorage } = useLocalStorage<string>("userId", "");
-  const { value: isVolunteerLocalStorage } = useLocalStorage<boolean>("isVolunteer", false);
+  const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -190,7 +190,7 @@ const Profile: React.FC = () => {
                   <ReviewModal userId={userIdLocalStorage}/>
 
                   {/* — Role-based navigation icons — */}
-                  <Navbar id={userIdLocalStorage} isVolunteer={isVolunteerLocalStorage}/>
+                  <Navbar id={userIdLocalStorage} isVolunteer={isVolunteer}/>
               </div>
           </div>
       </AuthWrapper>
