@@ -7,6 +7,7 @@ import { ApiService } from '@/api/apiService';
 import AuthWrapper from "@/components/AuthWrapper";
 import { message, Form, Input, Button, Radio, Select } from "antd";
 import imageCompression from 'browser-image-compression';
+import { useRole } from "@/components/ThemeProvider";
 
 
 interface PlaceSuggestion {
@@ -59,6 +60,7 @@ export default function SettingsPage() {
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const {isVolunteer, setIsVolunteer } = useRole()
 
     const handleProfileFile = async (file: File) => {
         if (!file.type.startsWith("image/")) return;
@@ -148,7 +150,7 @@ export default function SettingsPage() {
 
             await api.put(`/profile/${cleanUserId}`, { ...values, profilePicture: profilePicture ?? null });
 
-            sessionStorage.setItem('isVolunteer', JSON.stringify(values.isVolunteer));
+            setIsVolunteer(values.isVolunteer);
 
             message.success("Profile updated successfully!");
             router.push(`/profile/${cleanUserId}`);
@@ -179,14 +181,14 @@ export default function SettingsPage() {
                 src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=beta`}
                 strategy="afterInteractive"
             />
-            <div className="login-container">
+            <div className="login-container" style={{ "--role-color": isVolunteer ? "#53beb3" : "#d9737d" } as React.CSSProperties}>
                 <div className="auth-card" style={{height: 'auto', minHeight: 'auto', padding: '30px 20px', maxWidth: '450px'}}>
 
                     <div className="auth-card-header" style={{marginBottom: '20px', display: 'flex', justifyContent: 'center'}}>
                         <button
                             type="button"
                             className="header-link"
-                            style={{color: 'var(--primary)', left: 0, position: 'absolute', cursor: 'pointer'}}
+                            style={{left: 0, position: 'absolute', cursor: 'pointer', color: 'var(--role-color)'}}
                             onClick={() => router.back()}
                         >
                             <strong>Cancel</strong>
@@ -347,7 +349,6 @@ export default function SettingsPage() {
                                 htmlType="submit"
                                 block
                                 style={{
-                                    backgroundColor: 'var(--primary)',
                                     borderRadius: '25px',
                                     height: '54px',
                                     fontSize: '18px',
