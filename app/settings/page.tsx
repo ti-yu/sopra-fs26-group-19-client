@@ -189,7 +189,7 @@ export default function SettingsPage() {
                             style={{color: 'var(--primary)', left: 0, position: 'absolute', cursor: 'pointer'}}
                             onClick={() => router.back()}
                         >
-                            Cancel
+                            <strong>Cancel</strong>
                         </button>
                         <h1 style={{fontSize: '28px', lineHeight: '1.2', maxWidth: '200px', textAlign: 'center'}}>
                             Update user profile details
