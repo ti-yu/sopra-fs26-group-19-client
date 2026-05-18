@@ -175,7 +175,7 @@ const Profile: React.FC = () => {
                                           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8}}>
                                               <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                                   <Link href={`/profile/${review.senderId}`} style={{ color: "inherit", textDecoration: "underline" }}>
-                                                      <Typography.Text strong>@{review.senderUsername}</Typography.Text>
+                                                      <Typography.Text strong>from{review.senderUsername}</Typography.Text>
                                                   </Link>
                                                   {review.stars != null && review.stars > 0 && (
                                                       <span>

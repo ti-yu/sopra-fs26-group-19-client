@@ -202,7 +202,7 @@ const Register: React.FC = () => {
         {/* --- Header Section --- */}
         <div className="auth-card-header">
           <button type="button" className="header-link" onClick={handleBackToLogin}>
-            <strong>Back to Login</strong>
+            <strong>Login</strong>
           </button>
           <h1>Registration</h1>
         </div>

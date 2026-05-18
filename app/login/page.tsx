@@ -66,7 +66,7 @@ const Login: React.FC = () => {
         <div className="auth-card-header">
           {/* Clearer call-to-action for new users: "Register" alone was ambiguous to elderly users. */}
           <button type="button" className="header-link" onClick={() => router.push("/registration")}>
-            <strong>Create new account</strong>
+            <strong>Register</strong>
           </button>
           <h1>Login</h1>
         </div>
