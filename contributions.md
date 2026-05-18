@@ -134,9 +134,8 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@ti-yu]** | [16.05]   | [Link to Commit 1] (https://github.com/ti-yu/sopra-fs26-group-19-client/commit/320de1a75cca3e9e5765cd312a9517c57cd99bbd) | [Changed the Focus Indicator colour to something more visible after reviewing the entire site is keyboard-navigable as part of a general accessibility audit] | [Our target audience consists of older adults, so to ensure the site is usable for users who can't use a mouse (e.g. due to Parkinson's, ensuring keyboard navigability is critical)] |
 |                    | [17.05]   | [Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/ad68143c258c8117406c3ae300ac2715c66d6765) | [Added a feature so that the Settings page updates based on the user's isVolunteer status] | [Adds to the overall polish and consistency of the site] |
-| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-
+| **[@jonathanboggia]** | [17.05]   | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-server/commit/588d3bdf7e7985b50a7f7c884d6a9ebc6b1495be)] | [Added password-change endpoint, star ratings on reviews with 0.5-steps, 24h ignore-for-now timer for the review popup, new tests] | [Settings now has a proper old/new password flow, reviews now include a star rating, and "Ignore for now" no longer loses the review forever] |
+| **[@jonathanboggia]** | [17.05]   | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/4c31740564998b23cfdd2e055b08923e0e4e72af)] | [UX polish: login/registration, settings reorder + change-password UI, CreateHelpRequest rewrite, shared page banner, star rating UI, map filters, and bug fixes] | [Major usability improvements: clearer auth flow, consistent banners, reviews with ratings, help-request filters, and the same-location pin grouping fix] |
 
 
 ## Contributions Week 8 - [18.05.2026] to [22.06.2025]
