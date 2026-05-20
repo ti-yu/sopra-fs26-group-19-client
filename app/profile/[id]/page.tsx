@@ -151,7 +151,7 @@ const Profile: React.FC = () => {
                       marginTop: "40px",
                       flexDirection: "column",
                       gap: "20px",
-                      width: "clamp(250px, 400px, 500px)",
+                      width: "70vw",
                   }}>
                       <p><strong>Bio: </strong>{user.bio}</p>
                       <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
