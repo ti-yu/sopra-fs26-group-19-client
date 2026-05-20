@@ -147,16 +147,16 @@ const Profile: React.FC = () => {
 
                   <div style={{
                       display: "flex",
-                      alignItems: "left",
+                      alignItems: "flex-start",
                       marginTop: "40px",
                       flexDirection: "column",
                       gap: "20px",
-                      width: "350px",
+                      width: "clamp(250px, 400px, 500px)",
                   }}>
                       <p><strong>Bio: </strong>{user.bio}</p>
                       <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
                       <p><strong>Gender: </strong>{user.gender}</p>
-                      <div style={{marginTop: '20px', textAlign: 'left', paddingBottom: '100px'}}>
+                      <div style={{marginTop: '20px', textAlign: 'left', paddingBottom: '100px', alignSelf: 'center'}}>
                           <h3 style={{borderBottom: '1px solid #eee', paddingBottom: '10px'}}>
                               {reviewsHeading}
                           </h3>
