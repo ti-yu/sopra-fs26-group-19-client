@@ -100,7 +100,7 @@ const Profile: React.FC = () => {
   return (
       <AuthWrapper>
           <div
-              style={{"--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black"} as React.CSSProperties}>
+              style={{"--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black",} as React.CSSProperties}>
               <div className="headerBar" style={{
                   position: "fixed",
                   top: 0,
@@ -134,7 +134,7 @@ const Profile: React.FC = () => {
               }}>
               </div>
 
-              <div className="profile-container" style={{marginTop: "-75px"}}>
+              <div className="profile-container" style={{marginTop: "-75px",}}>
                   <Avatar
                       size={120}
                       src={user.profilePicture ?? "/default_pb.png"}
@@ -150,7 +150,8 @@ const Profile: React.FC = () => {
                       alignItems: "left",
                       marginTop: "40px",
                       flexDirection: "column",
-                      gap: "20px"
+                      gap: "20px",
+                      width: "350px",
                   }}>
                       <p><strong>Bio: </strong>{user.bio}</p>
                       <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
