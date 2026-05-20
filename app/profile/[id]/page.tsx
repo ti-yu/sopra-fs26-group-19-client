@@ -100,7 +100,7 @@ const Profile: React.FC = () => {
   return (
       <AuthWrapper>
           <div
-              style={{"--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black"} as React.CSSProperties}>
+              style={{"--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black",} as React.CSSProperties}>
               <div className="headerBar" style={{
                   position: "fixed",
                   top: 0,
@@ -134,7 +134,7 @@ const Profile: React.FC = () => {
               }}>
               </div>
 
-              <div className="profile-container" style={{marginTop: "-75px"}}>
+              <div className="profile-container" style={{marginTop: "-75px",}}>
                   <Avatar
                       size={120}
                       src={user.profilePicture ?? "/default_pb.png"}
@@ -147,15 +147,16 @@ const Profile: React.FC = () => {
 
                   <div style={{
                       display: "flex",
-                      alignItems: "left",
+                      alignItems: "flex-start",
                       marginTop: "40px",
                       flexDirection: "column",
-                      gap: "20px"
+                      gap: "20px",
+                      width: "70vw",
                   }}>
                       <p><strong>Bio: </strong>{user.bio}</p>
                       <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
                       <p><strong>Gender: </strong>{user.gender}</p>
-                      <div style={{marginTop: '20px', textAlign: 'left', paddingBottom: '100px'}}>
+                      <div style={{marginTop: '20px', textAlign: 'left', paddingBottom: '100px', alignSelf: 'center'}}>
                           <h3 style={{borderBottom: '1px solid #eee', paddingBottom: '10px'}}>
                               {reviewsHeading}
                           </h3>
