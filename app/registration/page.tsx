@@ -50,6 +50,7 @@ const Register: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Watches the role toggle and re-themes the whole page (and the global antd
   // ConfigProvider) the moment the user flips between volunteer / recipient.
@@ -124,6 +125,7 @@ const Register: React.FC = () => {
 
 
   const handleRegister = async (values: RegisterFormValues) => {
+    setIsSubmitting(true);
     try {
       const cleanedValues = Object.entries(values).reduce((acc, [key, value]) => {
         acc[key] = (value === "" || value === undefined) ? null : value;
@@ -183,6 +185,8 @@ const Register: React.FC = () => {
       else {
         message.error("An unknown error occurred. Please try again later.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -419,8 +423,8 @@ const Register: React.FC = () => {
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0 }}>
-            <Button type="primary" htmlType="submit" block>
-              Register
+            <Button type="primary" htmlType="submit" block loading={isSubmitting} disabled={isSubmitting}>
+              {isSubmitting ? "Registering..." : "Register"}
             </Button>
           </Form.Item>
         </Form>
