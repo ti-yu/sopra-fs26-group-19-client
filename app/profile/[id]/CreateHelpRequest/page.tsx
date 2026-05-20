@@ -196,6 +196,33 @@ const CreateHelpRequest: React.FC = () => {
             onValuesChange={handleValuesChange}
             scrollToFirstError
             layout="vertical"
+            onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const current = document.activeElement as HTMLElement;
+
+              // Allow normal form submission when focused on submit button
+              if (
+                current instanceof HTMLButtonElement &&
+                current.type === "submit"
+              ) {
+                return;
+              }
+
+              e.preventDefault();
+
+              const focusable = Array.from(
+                document.querySelectorAll<HTMLElement>(
+                  'input, select, textarea, button, [tabindex]:not([tabindex="-1"])'
+                )
+              ).filter(el => !el.hasAttribute("disabled"));
+
+              const idx = focusable.indexOf(current);
+
+              if (idx !== -1 && idx < focusable.length - 1) {
+                focusable[idx + 1].focus();
+              }
+            }
+          }}
           >
             <Form.Item
               name="description"
@@ -237,6 +264,8 @@ const CreateHelpRequest: React.FC = () => {
                 format="DD.MM.YYYY"
                 placeholder="Enter Date: DD.MM.YYYY"
                 disabledDate={(current) => current && current < dayjs().startOf("day")}
+                onChange={(date) => form.setFieldValue("date", date)}
+                inputReadOnly={false}
               />
             </Form.Item>
 
@@ -281,74 +310,29 @@ const CreateHelpRequest: React.FC = () => {
             {/* Location: free-text Input + suggestion overlay (matches the
                 registration page's pattern). The user must pick a Google
                 Places suggestion before the form submits, otherwise the
-                latitude/longitude needed by the map can't be resolved. */}
-            <Form.Item label="Location" required>
-              <div style={{ position: "relative" }}>
-                <Input
-                  value={query}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setQuery(value);
-                    // A typed-but-not-picked address is invalid. clear the
-                    // previously picked place so submission is blocked.
-                    setSelectedPlace(null);
-                    fetchSuggestions(value);
-                    setHasFormData(true);
-                  }}
-                  placeholder="Enter address, then pick a suggestion"
-                  aria-label="Address"
-                />
-
-                {suggestions.length > 0 && (
-                  <div
-                    role="listbox"
-                    style={{
-                      position: "absolute",
-                      top: "100%",
-                      left: 0,
-                      right: 0,
-                      background: "#fff",
-                      border: "1px solid #d9d9d9",
-                      borderRadius: "6px",
-                      marginTop: "4px",
-                      zIndex: 1000,
-                      maxHeight: "200px",
-                      overflowY: "auto",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    {suggestions.map((item, index) => (
-                      <div
-                        key={index}
-                        role="option"
-                        aria-selected={false}
-                        tabIndex={0}
-                        onClick={() => handleSelect(item)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            handleSelect(item);
-                          }
-                        }}
-                        style={{ padding: "8px 12px", cursor: "pointer" }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.background = "#f5f5f5")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.background = "transparent")
-                        }
-                      >
-                        {item.placePrediction.text.text}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {!selectedPlace && query && (
-                  <p style={{ color: "#e53935", fontSize: 12, marginTop: 4 }}>
-                    Please pick an address from the dropdown.
-                  </p>
-                )}
-              </div>
+                latitude/longitude needed by the map can't be resolved. */}            
+            <Form.Item
+              name="location"
+              label="Location"
+              rules={[{ required: true, message: "Please select an address from the list!" }]}
+            >
+              <Select
+                showSearch
+                placeholder="Enter address, then pick a suggestion"
+                onSearch={(value) => {
+                  form.setFieldValue("location", value);
+                  fetchSuggestions(value);
+                }}
+                onSelect={(_value: string, option: { suggestion: PlaceSuggestion }) => {
+                  handleSelect(option.suggestion);
+                }}
+                options={suggestions.map((item, index) => ({
+                  key: index,
+                  value: item.placePrediction.text.text,
+                  label: item.placePrediction.text.text,
+                  suggestion: item,
+                }))}
+              />
             </Form.Item>
 
             <Form.Item>

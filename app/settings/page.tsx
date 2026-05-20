@@ -265,6 +265,33 @@ export default function SettingsPage() {
                         onFinish={handleFinish}
                         size="large"
                         className="auth-form"
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                            const current = document.activeElement as HTMLElement;
+
+                            // Allow normal form submission when focused on submit button
+                            if (
+                                current instanceof HTMLButtonElement &&
+                                current.type === "submit"
+                            ) {
+                                return;
+                            }
+
+                            e.preventDefault();
+
+                            const focusable = Array.from(
+                                document.querySelectorAll<HTMLElement>(
+                                'input, select, textarea, button, [tabindex]:not([tabindex="-1"])'
+                                )
+                            ).filter(el => !el.hasAttribute("disabled"));
+
+                            const idx = focusable.indexOf(current);
+
+                            if (idx !== -1 && idx < focusable.length - 1) {
+                                focusable[idx + 1].focus();
+                            }
+                            }
+                        }}
                     >
                         {/* Profile Picture */}
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 24 }}>
@@ -398,7 +425,13 @@ export default function SettingsPage() {
                         </Form.Item>
 
                         <Form.Item name="dateOfBirth" label="Date of Birth">
-                            <DatePicker style={{ width: "100%" }} placeholder="Pick date of birth" />
+                            <DatePicker 
+                                style={{ width: "100%" }}
+                                format="DD.MM.YYYY"
+                                placeholder="DD.MM.YYYY"
+                                onChange={(date) => form.setFieldValue("dateOfBirth", date)}
+                                inputReadOnly={false}
+                            />
                         </Form.Item>
 
                         <Form.Item name="isVolunteer" label="Account Role">
