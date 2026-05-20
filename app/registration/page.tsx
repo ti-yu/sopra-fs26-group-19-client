@@ -226,10 +226,19 @@ const Register: React.FC = () => {
           {/* Profile Picture */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 24 }}>
             <div
+              tabIndex={0}
+              role="button"
+              aria-label="Upload profile picture"
               onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) handleProfileFile(f); }}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
               onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
               style={{
                 width: 100,
                 height: 100,
