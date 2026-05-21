@@ -29,7 +29,6 @@ interface ReviewDTO {
     text: string;
     creationDate: string;
     inseratDescription: string;
-    /** Half-step star rating, 0.5 - 5.0. Nullable for legacy reviews. */
     stars?: number | null;
 }
 
@@ -97,6 +96,11 @@ const Profile: React.FC = () => {
   const visibleReviews = receivedReviews.slice(0, visibleReviewCount);
   const hasMoreReviews = receivedReviews.length > visibleReviewCount;
 
+    const validRatings = receivedReviews.filter(r => typeof r.stars === 'number' && r.stars > 0);
+    const averageRating = validRatings.length > 0
+        ? validRatings.reduce((sum, r) => sum + r.stars!, 0) / validRatings.length
+        : 0;
+
   return (
       <AuthWrapper>
           <div
@@ -155,14 +159,33 @@ const Profile: React.FC = () => {
                       maxWidth: "700px",
                   }}>
                       <div style={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        flexDirection: "column",
-                        gap: "20px",
+                          display: "flex",
+                          alignItems: "flex-start",
+                          flexDirection: "column",
+                          gap: "20px",
                       }}>
                           <p><strong>Bio: </strong>{user.bio}</p>
                           <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
                           <p><strong>Gender: </strong>{user.gender}</p>
+                          <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                              <strong>Rating: </strong>
+                              {validRatings.length > 0 ? (
+                                  <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                      <Rate disabled allowHalf value={averageRating}
+                                            style={{color: "var(--role-color)", fontSize: "18px", margin: 0}}/>
+                                      <span style={{
+                                          color: "#555",
+                                          fontWeight: "bold"
+                                      }}>({averageRating.toFixed(1)})</span>
+                                      <span style={{
+                                          color: "#555",
+                                          fontSize: "12px"
+                                      }}> from {validRatings.length} reviews</span>
+                                  </div>
+                              ) : (
+                                  <span style={{color: "#888", fontStyle: "italic"}}>No ratings yet</span>
+                              )}
+                          </div>
                       </div>
                       <div style={{marginTop: '20px', textAlign: 'left', paddingBottom: '100px'}}>
                           <h3 style={{borderBottom: '1px solid #eee', paddingBottom: '10px'}}>
@@ -181,7 +204,7 @@ const Profile: React.FC = () => {
                                               borderLeft: `5px solid var(--role-color)`
                                           }}
                                       >
-                                          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8}}>
+                                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8}}>
                                               <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                                   <Link href={`/profile/${review.senderId}`} style={{ color: "inherit", textDecoration: "underline" }}>
                                                       <Typography.Text strong>From {review.senderUsername}</Typography.Text>
@@ -230,8 +253,6 @@ const Profile: React.FC = () => {
 
 
                   <ReviewModal userId={userIdLocalStorage}/>
-
-                  {/* Role-based navigation icons */}
                   <Navbar id={userIdLocalStorage} isVolunteer={isVolunteer}/>
               </div>
           </div>
