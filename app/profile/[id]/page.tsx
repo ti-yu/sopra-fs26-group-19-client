@@ -147,16 +147,24 @@ const Profile: React.FC = () => {
 
                   <div style={{
                       display: "flex",
-                      alignItems: "flex-start",
+                      alignItems: "center",
                       marginTop: "40px",
                       flexDirection: "column",
                       gap: "20px",
-                      width: "70vw",
+                      width: "80vw",
+                      maxWidth: "700px",
                   }}>
-                      <p><strong>Bio: </strong>{user.bio}</p>
-                      <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
-                      <p><strong>Gender: </strong>{user.gender}</p>
-                      <div style={{marginTop: '20px', textAlign: 'left', paddingBottom: '100px', alignSelf: 'center'}}>
+                      <div style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        flexDirection: "column",
+                        gap: "20px",
+                      }}>
+                          <p><strong>Bio: </strong>{user.bio}</p>
+                          <p><strong>Age: </strong>{user.dateOfBirth ? calculateAge(user.dateOfBirth) : "Unknown"}</p>
+                          <p><strong>Gender: </strong>{user.gender}</p>
+                      </div>
+                      <div style={{marginTop: '20px', textAlign: 'left', paddingBottom: '100px'}}>
                           <h3 style={{borderBottom: '1px solid #eee', paddingBottom: '10px'}}>
                               {reviewsHeading}
                           </h3>
