@@ -60,7 +60,7 @@ const Profile: React.FC = () => {
 
                 setUser(userData);
                 // #158. newest first. Server doesn't guarantee order; sort client-side.
-                const sorted = (reviewsData || []).slice().sort((a, b) => {
+                const sorted = (reviewsData || []).slice().reverse().sort((a, b) => {
                     return new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime();
                 });
                 setReceivedReviews(sorted);
