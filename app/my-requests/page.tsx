@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Spin, Empty, Tag } from "antd";
+import { Spin, Empty, Tag, Popconfirm, message, Button } from "antd";
 import Link from "next/link";
+import { DeleteOutlined } from "@ant-design/icons";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "@/components/navbar";
@@ -111,6 +112,20 @@ const MyRequests: React.FC = () => {
     }
   };
 
+  const handleDeleteRequest = async (inseratId: string) => {
+    try {
+      const rawUserId = sessionStorage.getItem('userId')?.replace(/"/g, '') || "";
+
+      await apiService.delete(`/help-requests/${inseratId}?userId=${rawUserId}`);
+
+      message.success("Help request deleted successfully.");
+      fetchData();
+    } catch (error) {
+      console.error("Failed to delete the request", error);
+      message.error("Failed to delete the request.");
+    }
+  };
+
   if (loading) {
     return (
       <AuthWrapper>
@@ -165,23 +180,43 @@ const MyRequests: React.FC = () => {
                       <Tag color="blue">Open</Tag>
                     )}
                   </div>
-                  {!isDone && isOpen && (
-                    inserat.volunteerAppliedCount === 0 ? (
-                      <Link
-                        href={`/my-requests/${inserat.id}/edit`}
-                        style={{ color: "#d9737d", fontSize: 14, whiteSpace: "nowrap", marginLeft: 8, fontWeight: 500 }}
-                      >
-                        <strong>Edit Request</strong>
-                      </Link>
-                    ) : (
-                      <span
-                        title="Cannot edit once someone has applied"
-                        style={{ color: "#bbb", fontSize: 14, whiteSpace: "nowrap", marginLeft: 8, fontWeight: 500, cursor: "not-allowed", userSelect: "none" }}
-                      >
-                        <strong>Edit Request</strong>
-                      </span>
-                    )
-                  )}
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    {!isDone && isOpen && (
+                        inserat.volunteerAppliedCount === 0 ? (
+                            <Link
+                                href={`/my-requests/${inserat.id}/edit`}
+                                style={{ color: "#d9737d", fontSize: 14, whiteSpace: "nowrap", fontWeight: 500 }}
+                            >
+                              <strong>Edit Request</strong>
+                            </Link>
+                        ) : (
+                            <span
+                                title="Cannot edit once someone has applied"
+                                style={{ color: "#bbb", fontSize: 14, whiteSpace: "nowrap", fontWeight: 500, cursor: "not-allowed", userSelect: "none" }}
+                            >
+                          <strong>Edit Request</strong>
+                        </span>
+                        )
+                    )}
+
+                    <Popconfirm
+                        title="Delete Help Request"
+                        description="Are you sure you want to delete this post?"
+                        onConfirm={() => handleDeleteRequest(inserat.id)}
+                        okText="Yes, Delete"
+                        cancelText="Cancel"
+                        okButtonProps={{ danger: true }}
+                    >
+                      <Button
+                          danger
+                          type="text"
+                          icon={<DeleteOutlined />}
+                          style={{ padding: 0, minWidth: 'auto', width: '32px', height: '32px' }}
+                          title="Delete Request"
+                      />
+                    </Popconfirm>
+                  </div>
                 </div>
 
                 {/* OPEN: show applicants or "nobody applied" */}
