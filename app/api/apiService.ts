@@ -113,13 +113,18 @@ export class ApiService {
   /**
    * DELETE request.
    * @param endpoint - The API endpoint (e.g. "/users/123").
+   * @param options - Optional fetch configurations
    * @returns JSON data of type T.
    */
-  public async delete<T>(endpoint: string): Promise<T> {
+  public async delete<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "DELETE",
-      headers: this.defaultHeaders,
+      ...options,
+      headers: {
+        ...this.defaultHeaders, // Keep the default JSON headers
+        ...options?.headers,    // Add our custom userId header!
+      },
     });
     return this.processResponse<T>(
       res,
