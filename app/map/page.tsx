@@ -163,8 +163,8 @@ const MapPage: React.FC = () => {
         const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
         const map = new GoogleMap(document.getElementById("map") as HTMLElement, {
-            center: { lat: 47.3769, lng: 8.5417 },
-            zoom: 12,
+            center: { lat: 46.7985, lng: 8.2318 },
+            zoom: 8,
             mapId: "687f31f6db63e48236a75a4a",
         });
 
