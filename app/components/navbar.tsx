@@ -23,15 +23,15 @@ const getIconConfigs = (id: string, isVolunteer: boolean): IconConfig[] =>
     ? [
         // Profile uses a user-shaped icon, not a house. "home" is no longer the profile in our IA.
         { icon: <UserOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Profile", href: `/profile/${id}` },
-        { icon: <GlobalOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Feed", href: "/map" },
+        { icon: <GlobalOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "Open Requests", href: "/map" },
         { icon: <UnorderedListOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Applications", href: "/my-applications" },
-        { icon: <StarOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "Reviews", href: "/reviews" },
+        { icon: <StarOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Reviews", href: "/reviews" },
       ]
     : [
         { icon: <UserOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Profile", href: `/profile/${id}` },
-        { icon: <EditOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "New Inserat", href: `/profile/${id}/CreateHelpRequest` },
+        { icon: <EditOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "Create Help Request", href: `/profile/${id}/CreateHelpRequest` },
         { icon: <UnorderedListOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Requests", href: "/my-requests" },
-        { icon: <StarOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "Reviews", href: "/reviews" },
+        { icon: <StarOutlined style={{ fontSize: 28 }} aria-hidden="true" />, label: "My Reviews", href: "/reviews" },
       ];
 
 interface NavbarProps {

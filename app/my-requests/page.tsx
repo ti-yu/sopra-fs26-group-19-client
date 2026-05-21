@@ -8,7 +8,6 @@ import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "@/components/navbar";
 import AuthWrapper from "@/components/AuthWrapper";
-import PageBanner, { BANNER_HEIGHT_PX } from "@/components/PageBanner";
 import { Inserat, Applicant } from "@/types/inserat";
 
 const formatDate = (dateStr: string) => {
@@ -139,9 +138,12 @@ const MyRequests: React.FC = () => {
   return (
     <AuthWrapper>
     <div>
-      <PageBanner title="My Requests" isVolunteer={isVolunteer} />
 
-      <div style={{ padding: `${BANNER_HEIGHT_PX + 16}px 16px 100px`, maxWidth: 600, margin: "0 auto" }}>
+      <div className="headerBar" style={{ "--role-color": isVolunteer ? "#53beb3" : "#d9737d"} as React.CSSProperties}>
+          <h1>My Requests</h1>
+      </div>
+
+      <div style={{ padding: `calc(8vh + 16px) 16px 100px`, maxWidth: 600, margin: "0 auto" }}>
         {inserats.length === 0 ? (
           <Empty description="No help requests yet" style={{ marginTop: 40 }} />
         ) : (

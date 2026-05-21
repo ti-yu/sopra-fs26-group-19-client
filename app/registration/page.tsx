@@ -50,6 +50,7 @@ const Register: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Watches the role toggle and re-themes the whole page (and the global antd
   // ConfigProvider) the moment the user flips between volunteer / recipient.
@@ -124,6 +125,7 @@ const Register: React.FC = () => {
 
 
   const handleRegister = async (values: RegisterFormValues) => {
+    setIsSubmitting(true);
     try {
       const cleanedValues = Object.entries(values).reduce((acc, [key, value]) => {
         acc[key] = (value === "" || value === undefined) ? null : value;
@@ -183,6 +185,8 @@ const Register: React.FC = () => {
       else {
         message.error("An unknown error occurred. Please try again later.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -222,14 +226,50 @@ const Register: React.FC = () => {
           scrollToFirstError
           layout="vertical"
           initialValues={{ isVolunteer: false }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const current = document.activeElement as HTMLElement;
+
+              // Allow normal form submission when focused on submit button
+              if (
+                current instanceof HTMLButtonElement &&
+                current.type === "submit"
+              ) {
+                return;
+              }
+
+              e.preventDefault();
+
+              const focusable = Array.from(
+                document.querySelectorAll<HTMLElement>(
+                  'input, select, textarea, button, [tabindex]:not([tabindex="-1"])'
+                )
+              ).filter(el => !el.hasAttribute("disabled"));
+
+              const idx = focusable.indexOf(current);
+
+              if (idx !== -1 && idx < focusable.length - 1) {
+                focusable[idx + 1].focus();
+              }
+            }
+          }}
         >
           {/* Profile Picture */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 24 }}>
             <div
+              tabIndex={0}
+              role="button"
+              aria-label="Upload profile picture"
               onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) handleProfileFile(f); }}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
               onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
               style={{
                 width: 100,
                 height: 100,
@@ -394,12 +434,70 @@ const Register: React.FC = () => {
             />
           </Form.Item>
 
-          <Form.Item name="phoneNumber" label="Phone Number">
-            <Input placeholder="Enter phone number" />
+          <Form.Item
+            name="phoneNumber"
+            label="Phone Number"
+            rules={[
+              {
+                pattern: /^\+41\s\d{2}\s\d{3}\s\d{4}$/,
+                message: "Use format: +41 76 123 4567",
+              },
+            ]}
+          >
+            <Input
+              placeholder="+41 76 123 4567"
+              onFocus={(e) => {
+                if (!e.target.value) {
+                  form.setFieldValue("phoneNumber", "+41 ");
+                }
+              }}
+              onBlur={(e) => {
+                // Reset to empty if user didn't type a number
+                if (e.target.value.trim() === "+41") {
+                  form.setFieldValue("phoneNumber", "");
+                }
+              }}
+              onChange={(e) => {
+                let value = e.target.value;
+
+                // Always enforce +41 prefix
+                if (!value.startsWith("+41 ")) {
+                  value = "+41 ";
+                }
+
+                // Remove everything except digits after +41
+                const digits = value
+                  .replace("+41 ", "")
+                  .replace(/\D/g, "")
+                  .slice(0, 9);
+
+                // Format as: 76 123 4567
+                let formatted = "+41 ";
+
+                if (digits.length > 0) {
+                  formatted += digits.slice(0, 2);
+                }
+
+                if (digits.length >= 3) {
+                  formatted += " " + digits.slice(2, 5);
+                }
+
+                if (digits.length >= 6) {
+                  formatted += " " + digits.slice(5, 9);
+                }
+
+                form.setFieldValue("phoneNumber", formatted);
+              }}
+            />
           </Form.Item>
 
           <Form.Item name="dateOfBirth" label="Date of Birth">
-            <DatePicker style={{ width: "100%" }} />
+            <DatePicker style={{ width: "100%" }} 
+              format="DD.MM.YYYY"
+              placeholder="DD.MM.YYYY"
+              onChange={(date) => form.setFieldValue("dateOfBirth", date)}
+              inputReadOnly={false} 
+            />
           </Form.Item>
 
           <Form.Item name="isVolunteer" label="Account Role">
@@ -410,8 +508,8 @@ const Register: React.FC = () => {
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0 }}>
-            <Button type="primary" htmlType="submit" block>
-              Register
+            <Button type="primary" htmlType="submit" block loading={isSubmitting} disabled={isSubmitting}>
+              {isSubmitting ? "Registering..." : "Register"}
             </Button>
           </Form.Item>
         </Form>

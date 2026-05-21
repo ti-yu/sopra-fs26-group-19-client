@@ -5,7 +5,6 @@ import { ApiService } from '@/api/apiService';
 import AuthWrapper from "@/components/AuthWrapper";
 import { message, Card, Button, Input, Typography, Tag, Empty, Rate } from "antd";
 import Navbar from "@/components/navbar";
-import PageBanner, { BANNER_HEIGHT_PX } from "@/components/PageBanner";
 import Link from "next/link";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { Review } from "@/types/review";
@@ -109,11 +108,13 @@ export default function ReviewsPage() {
 
     return (
         <AuthWrapper>
-            <PageBanner title="Review History" isVolunteer={isVolunteer} />
+            <div className="headerBar" style={{ "--role-color": isVolunteer ? "#53beb3" : "#d9737d"} as React.CSSProperties}>
+                <h1>Review History</h1>
+            </div>
 
             <div style={{
                 maxWidth: '800px',
-                margin: `${BANNER_HEIGHT_PX + 16}px auto 0`,
+                margin: `calc(8vh + 16px) auto 0`,
                 padding: '0 20px 100px',
             }}>
 
