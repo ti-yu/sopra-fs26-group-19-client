@@ -68,7 +68,7 @@ const MyApplications: React.FC = () => {
   return (
     <AuthWrapper>
       <div>
-        <div className="headerBar" style={{ background: "#f5f5f5", height: "8vh", top: "0px" }}>
+        <div className="headerBar" style={{ "--role-color": isVolunteer ? "#53beb3" : "#d9737d"} as React.CSSProperties}>
           <p></p>
           <h1>My Applications</h1>
           <p></p>

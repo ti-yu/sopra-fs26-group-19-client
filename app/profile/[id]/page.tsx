@@ -101,28 +101,17 @@ const Profile: React.FC = () => {
       <AuthWrapper>
           <div
               style={{"--role-color": user.isVolunteer ? "#53beb3" : "#d9737d", color: "black",} as React.CSSProperties}>
-              <div className="headerBar" style={{
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: "60px",
-                  backgroundColor: "var(--role-color)",
-                  zIndex: 1000,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "0 20px"
-              }}>
-                  <Link href="/login" style={{color: "white", textDecoration: "none"}}
+              <div className="headerBar">
+                
+                  <Link href="/login" style={{color: "white", textDecoration: "none", fontSize: "18px"}}
                         onClick={() => sessionStorage.clear()}>
-                      Logout
+                      <strong>Logout</strong>
                   </Link>
 
                   <h1 style={{color: "#ffffff", margin: 0}}>Profile</h1>
 
-                  <Link href="/settings" style={{color: "white", textDecoration: "none"}}>
-                      Settings
+                  <Link href="/settings" style={{color: "white", textDecoration: "none", fontSize: "18px"}}>
+                      <strong>Settings</strong>
                   </Link>
               </div>
               <div style={{

@@ -49,37 +49,51 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
             fontSize: 16,
             },
             components: {
-            Button: {
+              Button: {
+                  colorPrimary: primaryColor,
+                  colorPrimaryBorder: "#ffcc00",
+                  primaryColor: "#ffffff",
+                  borderRadius: 30,
+                  controlHeight: 55,
+                  fontSize: 18,
+              },
+              Input: {
+                  colorBorder: "#e0e0e0",
+                  colorTextPlaceholder: "#767676",
+                  colorPrimaryBorder: "#ffcc00",
+              },
+              Select: {
+                  colorBgContainer: "#f5f5f5",
+                  colorPrimaryBorder: "#ffcc00",
+                  colorText: "#000000",
+                  colorBgElevated: "#ffffff",
+                  optionSelectedBg: "#fdf0f1",
+                  optionActiveBg: "#fdf0f1",
+              },
+              DatePicker: {
+                  colorBgContainer: "#f5f5f5",
+                  colorText: "#000000",
+                  colorPrimaryBorder: "#ffcc00",
+              },
+              Form: {
+                  labelColor: "#000000",
+                  colorPrimaryBorder: "#ffcc00",
+              },
+              Card: {
+                colorPrimaryBorder: "#ffcc00"
+              },
+              Slider: {
                 colorPrimary: primaryColor,
-                colorPrimaryBorder: "#ffcc00",
-                primaryColor: "#ffffff",
-                borderRadius: 30,
-                controlHeight: 55,
-                fontSize: 18,
-            },
-            Input: {
-                colorBorder: "#e0e0e0",
-                colorTextPlaceholder: "#767676",
-                colorPrimaryBorder: "#ffcc00",
-            },
-            Select: {
-                colorBgContainer: "#f5f5f5",
-                colorPrimaryBorder: "#ffcc00",
-                colorText: "#000000",
-                colorBgElevated: "#ffffff",
-                optionSelectedBg: "#fdf0f1",
-                optionActiveBg: "#fdf0f1",
-            },
-            DatePicker: {
-                colorBgContainer: "#f5f5f5",
-                colorText: "#000000",
-                colorPrimaryBorder: "#ffcc00",
-            },
-            Form: {
-                labelColor: "#000000",
-                colorPrimaryBorder: "#ffcc00",
-            },
-            Card: {},
+                colorPrimaryBorder: primaryColor,
+                colorPrimaryBorderHover: primaryColor,
+                handleColor: primaryColor,
+                handleActiveColor: primaryColor,
+                trackBg: primaryColor,
+                trackHoverBg: primaryColor,
+                dotActiveBorderColor: primaryColor,
+                railBg: "#e0e0e0",
+                railHoverBg: "#d0d0d0",
+              },
             },
         }}
         >

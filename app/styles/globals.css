@@ -139,33 +139,29 @@ a {
 .headerBar {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
   padding: 2vh clamp(0.5rem, 3vw, 5vh);
   position: fixed;
   z-index: 100;
   width: 100%;
+  height: 8vh;
+  background-color: var(--role-color);
+  top: 0px
 }
 
 .headerBar h1 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: clamp(1.5rem, 4vw, 2rem);
-  color: #000000;
+  color: #ffffff;
+  white-space: nowrap;
   pointer-events: none;
   cursor: default;
 }
 
-.headerBar > * {
-  flex: 1;
-  font-size: clamp(1rem, 2vw, 1.3rem);
-}
-
-.headerBar > *:nth-child(2) {
-  text-align: center;
-}
-
 .headerBar > *:last-child {
-  display: flex;
-  justify-content: flex-end;
+  margin-left: auto; 
 }
 /* ─── Google Maps InfoWindow ────────────────────────── */
 
