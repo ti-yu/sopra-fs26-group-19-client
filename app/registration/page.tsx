@@ -434,8 +434,61 @@ const Register: React.FC = () => {
             />
           </Form.Item>
 
-          <Form.Item name="phoneNumber" label="Phone Number">
-            <Input placeholder="Enter phone number" />
+          <Form.Item
+            name="phoneNumber"
+            label="Phone Number"
+            rules={[
+              {
+                pattern: /^\+41\s\d{2}\s\d{3}\s\d{4}$/,
+                message: "Use format: +41 76 123 4567",
+              },
+            ]}
+          >
+            <Input
+              placeholder="+41 76 123 4567"
+              onFocus={(e) => {
+                if (!e.target.value) {
+                  form.setFieldValue("phoneNumber", "+41 ");
+                }
+              }}
+              onBlur={(e) => {
+                // Reset to empty if user didn't type a number
+                if (e.target.value.trim() === "+41") {
+                  form.setFieldValue("phoneNumber", "");
+                }
+              }}
+              onChange={(e) => {
+                let value = e.target.value;
+
+                // Always enforce +41 prefix
+                if (!value.startsWith("+41 ")) {
+                  value = "+41 ";
+                }
+
+                // Remove everything except digits after +41
+                const digits = value
+                  .replace("+41 ", "")
+                  .replace(/\D/g, "")
+                  .slice(0, 9);
+
+                // Format as: 76 123 4567
+                let formatted = "+41 ";
+
+                if (digits.length > 0) {
+                  formatted += digits.slice(0, 2);
+                }
+
+                if (digits.length >= 3) {
+                  formatted += " " + digits.slice(2, 5);
+                }
+
+                if (digits.length >= 6) {
+                  formatted += " " + digits.slice(5, 9);
+                }
+
+                form.setFieldValue("phoneNumber", formatted);
+              }}
+            />
           </Form.Item>
 
           <Form.Item name="dateOfBirth" label="Date of Birth">
