@@ -141,7 +141,7 @@ const Profile: React.FC = () => {
                       style={{backgroundColor: user.isVolunteer ? "#3e9188ff" : "#964f56ff"}}
                   >
                       {!user.profilePicture && user.username.charAt(0).toUpperCase()}
-                  </Avatar>
+                  </Avatar> 
                   <h1 style={{margin: "8px 0 4px"}}>{user.username}</h1>
                   <p><strong>{roleLabel}</strong></p>
 
