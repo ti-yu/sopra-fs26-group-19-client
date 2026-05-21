@@ -164,7 +164,7 @@ const MapPage: React.FC = () => {
 
         const map = new GoogleMap(document.getElementById("map") as HTMLElement, {
             center: { lat: 46.7985, lng: 8.2318 },
-            zoom: 8,
+            zoom: 8.5,
             mapId: "687f31f6db63e48236a75a4a",
         });
 
