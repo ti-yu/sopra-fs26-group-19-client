@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, Form, Input, DatePicker, Select, TimePicker, App } from "antd";
+import { Button, Form, Input, DatePicker, Select, TimePicker, message } from "antd";
 import dayjs from "dayjs";
 import Navbar from "@/components/navbar";
 import Script from "next/script";
@@ -11,26 +11,28 @@ import { useState } from "react";
 import AuthWrapper from "@/components/AuthWrapper";
 
 /**
- * Formats a duration value (in hours) into a compact "Xh Ym" form.
+ * Formats a duration value (in hours) into the friendlier "Xh Ym" form.
+ * Special-cases the < 30 min lower bound and the > 8 h upper bound.
  */
 const formatDuration = (value: number): string => {
+  if (value < 0.5) return "< 30 min";
+  if (value > 8) return "> 8 h";
   const hours = Math.floor(value);
   const minutes = Math.round((value - hours) * 60);
   if (hours === 0) return `${minutes} min`;
-  if (minutes === 0) return `${hours}h`;
-  return `${hours}h ${minutes} min`;
+  if (minutes === 0) return `${hours} h`;
+  return `${hours} h ${minutes} min`;
 };
 
-// Discrete duration options offered in the dropdown. We need a defined end
-// time for each help request, so unbounded "<30min" / ">8h" buckets are gone.
+/**
+ * Discrete duration options surfaced in the dropdown. The 0.25 / 8.5 bookends
+ * map to the textual "< 30 min" / "> 8 h" labels but still serialise as a
+ * concrete number to the backend.
+ */
 const DURATION_OPTIONS: number[] = [
-  1 / 60,  // 1 min
-  5 / 60,
-  10 / 60,
-  15 / 60,
-  30 / 60,
-  45 / 60,
-  1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8,
+  0.25, // < 30 min
+  0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8,
+  8.5,  // > 8 h
 ];
 
 interface PlaceSuggestion {
@@ -62,7 +64,6 @@ const CreateHelpRequest: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [form] = Form.useForm();
-  const { message } = App.useApp();
   const { value: userId } = useLocalStorage<string>("userId", "");
   const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
   const [query, setQuery] = useState("");
@@ -229,7 +230,7 @@ const CreateHelpRequest: React.FC = () => {
               rules={[{ required: true, message: "Please describe what you need help with!" }]}
             >
               <Input.TextArea
-                placeholder='E.g. "Help me carry groceries up my 3rd-floor apartment."'
+                placeholder="E.g. 'Help me carry groceries up to my 3rd-floor apartment on Saturday afternoon. I live near the main station.'"
                 maxLength={255}
                 showCount
                 rows={4}
@@ -261,7 +262,7 @@ const CreateHelpRequest: React.FC = () => {
               <DatePicker
                 style={{ width: "100%" }}
                 format="DD.MM.YYYY"
-                placeholder="Select or enter date (DD.MM.YYYY)"
+                placeholder="Enter Date: DD.MM.YYYY"
                 disabledDate={(current) => current && current < dayjs().startOf("day")}
                 onChange={(date) => form.setFieldValue("date", date)}
                 inputReadOnly={false}
@@ -306,68 +307,32 @@ const CreateHelpRequest: React.FC = () => {
               </Select>
             </Form.Item>
 
-            {/* Location: same Input + suggestion-overlay pattern as the
-                registration page. User must pick a Google Places suggestion
-                so the backend gets a real lat/lng. */}
-            <Form.Item label="Location" required>
-              <div style={{ position: "relative" }}>
-                <Input
-                  value={query}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setQuery(value);
-                    setSelectedPlace(null);
-                    fetchSuggestions(value);
-                    setHasFormData(true);
-                  }}
-                  placeholder="Enter address"
-                  aria-label="Address"
-                />
-                {suggestions.length > 0 && (
-                  <div
-                    role="listbox"
-                    style={{
-                      position: "absolute",
-                      top: "100%",
-                      left: 0,
-                      right: 0,
-                      background: "#fff",
-                      border: "1px solid #d9d9d9",
-                      borderRadius: "6px",
-                      zIndex: 1000,
-                      maxHeight: "200px",
-                      overflowY: "auto",
-                      marginTop: "4px",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    {suggestions.map((item, index) => (
-                      <div
-                        key={index}
-                        role="option"
-                        aria-selected={false}
-                        tabIndex={0}
-                        onClick={() => handleSelect(item)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            handleSelect(item);
-                          }
-                        }}
-                        style={{ padding: "8px 12px", cursor: "pointer" }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.background = "#f5f5f5")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.background = "transparent")
-                        }
-                      >
-                        {item.placePrediction.text.text}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+            {/* Location: free-text Input + suggestion overlay (matches the
+                registration page's pattern). The user must pick a Google
+                Places suggestion before the form submits, otherwise the
+                latitude/longitude needed by the map can't be resolved. */}            
+            <Form.Item
+              name="location"
+              label="Location"
+              rules={[{ required: true, message: "Please select an address from the list!" }]}
+            >
+              <Select
+                showSearch
+                placeholder="Enter address, then pick a suggestion"
+                onSearch={(value) => {
+                  form.setFieldValue("location", value);
+                  fetchSuggestions(value);
+                }}
+                onSelect={(_value: string, option: { suggestion: PlaceSuggestion }) => {
+                  handleSelect(option.suggestion);
+                }}
+                options={suggestions.map((item, index) => ({
+                  key: index,
+                  value: item.placePrediction.text.text,
+                  label: item.placePrediction.text.text,
+                  suggestion: item,
+                }))}
+              />
             </Form.Item>
 
             <Form.Item>

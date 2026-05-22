@@ -173,7 +173,7 @@ a {
 }
 
 .gm-style .gm-style-iw {
-  background-color: rgb(217, 115, 125) !important;
+  background-color: rgba(217, 115, 125, 0.75) !important;
   border-radius: 12px !important;
 }
 
@@ -192,9 +192,8 @@ a {
 
 .gm-style .gm-style-iw-tc::after,
 .gm-style .gm-style-iw-t::after {
-  background: rgb(217, 115, 125) !important;
+  background: rgba(217, 115, 125, 0.75) !important;
 }
-
 
 .gm-style .gm-style-iw-chr button span {
   background-color: white !important;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Spin, Empty, Tag, Popconfirm, App, Button } from "antd";
+import { Spin, Empty, Tag, Popconfirm, message, Button } from "antd";
 import Link from "next/link";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useApi } from "@/hooks/useApi";
@@ -9,8 +9,6 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "@/components/navbar";
 import AuthWrapper from "@/components/AuthWrapper";
 import { Inserat, Applicant } from "@/types/inserat";
-import { formatDuration, formatTimeRange } from "@/utils/inseratFormat";
-import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 
 const formatDate = (dateStr: string) => {
   const [, month, day] = dateStr.split("-");
@@ -30,7 +28,6 @@ const calculateAge = (dateOfBirth: string): number => {
 
 const MyRequests: React.FC = () => {
   const apiService = useApi();
-  const { message } = App.useApp();
   const { value: userId } = useLocalStorage<string>("userId", "");
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
@@ -73,8 +70,6 @@ const MyRequests: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  useAutoRefresh(fetchData, Boolean(userId));
 
   const handleAccept = async (inseratId: string, volunteerId: string) => {
     // #157. Show loading state while the PUT round-trip completes, then refetch
@@ -150,11 +145,7 @@ const MyRequests: React.FC = () => {
 
       <div style={{ padding: `calc(8vh + 16px) 16px 100px`, maxWidth: 600, margin: "0 auto" }}>
         {inserats.length === 0 ? (
-          <Empty
-            description="No help requests yet. Create one to ask for help in your area."
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            style={{ marginTop: 40 }}
-          />
+          <Empty description="No help requests yet" style={{ marginTop: 40 }} />
         ) : (
           inserats.map((inserat) => {
             const isDone = inserat.status === "DONE";
@@ -230,16 +221,6 @@ const MyRequests: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Location + schedule summary, visible on every status */}
-                <div style={{ marginTop: 8, color: "#555", fontSize: 14 }}>
-                  <div>📍 {inserat.location}</div>
-                  <div>
-                    📅 {inserat.date}
-                    {inserat.time ? <> &nbsp;·&nbsp; 🕒 {formatTimeRange(inserat.time, inserat.timeframe)}</> : null}
-                    &nbsp;·&nbsp; ⏳ {formatDuration(inserat.timeframe)}
-                  </div>
-                </div>
-
                 {/* OPEN: show applicants or "nobody applied" */}
                 {isOpen && applicants.length === 0 && (
                   <div style={{ marginTop: 12, color: "#555", fontSize: 14 }}>
@@ -250,12 +231,7 @@ const MyRequests: React.FC = () => {
                 {isOpen && applicants.map((applicant) => (
                   <div key={applicant.id} style={{ marginTop: 16 }}>
                     <div style={{ fontSize: 14, marginBottom: 8 }}>
-                      <Link
-                        href={`/profile/${applicant.id}`}
-                        style={{ color: "inherit", textDecoration: "underline" }}
-                      >
-                        <strong>{applicant.username}</strong>
-                      </Link>
+                      <strong>{applicant.username}</strong>
                       {applicant.dateOfBirth && ` (${calculateAge(applicant.dateOfBirth)})`}
                       {" "}has applied to your request!
                       <br />
@@ -302,7 +278,7 @@ const MyRequests: React.FC = () => {
                 {/* ACCEPTED: show accepted volunteer with contact info */}
                 {isAccepted && inserat.volunteerAcceptedUsername && (
                   <div style={{ marginTop: 12, fontSize: 14 }}>
-                    You have accepted <strong><Link href={`/profile/${inserat.volunteerAcceptedId}`} style={{ color: "inherit", textDecoration: "underline" }}>{inserat.volunteerAcceptedUsername}</Link></strong> to help you. Here are the volunteer&apos;s contact details:
+                    You have accepted <strong><Link href={`/profile/${inserat.volunteerAcceptedId}`} style={{ color: "inherit", textDecoration: "underline" }}>{inserat.volunteerAcceptedUsername}</Link></strong> to help you.
                     {inserat.volunteerAcceptedPhone && (
                       <>
                         <br />

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Form, Radio, Input, DatePicker, Select, App, Modal } from "antd";
+import { Button, Form, Radio, Input, DatePicker, Select, message, Modal } from "antd";
 import dayjs from "dayjs";
 import Script from "next/script";
 import imageCompression from "browser-image-compression";
@@ -41,7 +41,6 @@ const Register: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [form] = Form.useForm();
-  const { message } = App.useApp();
   const { setIsVolunteer } = useRole();
 
   const { set: setToken } = useLocalStorage<string>("token", "");
@@ -443,10 +442,61 @@ const Register: React.FC = () => {
             />
           </Form.Item>
 
-          <Form.Item name="phoneNumber" label="Phone Number">
-            {/* International numbers are welcome, no Swiss-only constraint.
-                The +41 example is just a placeholder hint. */}
-            <Input placeholder="+41 76 123 45 67" />
+          <Form.Item
+            name="phoneNumber"
+            label="Phone Number"
+            rules={[
+              {
+                pattern: /^\+41\s\d{2}\s\d{3}\s\d{4}$/,
+                message: "Use format: +41 76 123 4567",
+              },
+            ]}
+          >
+            <Input
+              placeholder="+41 76 123 4567"
+              onFocus={(e) => {
+                if (!e.target.value) {
+                  form.setFieldValue("phoneNumber", "+41 ");
+                }
+              }}
+              onBlur={(e) => {
+                // Reset to empty if user didn't type a number
+                if (e.target.value.trim() === "+41") {
+                  form.setFieldValue("phoneNumber", "");
+                }
+              }}
+              onChange={(e) => {
+                let value = e.target.value;
+
+                // Always enforce +41 prefix
+                if (!value.startsWith("+41 ")) {
+                  value = "+41 ";
+                }
+
+                // Remove everything except digits after +41
+                const digits = value
+                  .replace("+41 ", "")
+                  .replace(/\D/g, "")
+                  .slice(0, 9);
+
+                // Format as: 76 123 4567
+                let formatted = "+41 ";
+
+                if (digits.length > 0) {
+                  formatted += digits.slice(0, 2);
+                }
+
+                if (digits.length >= 3) {
+                  formatted += " " + digits.slice(2, 5);
+                }
+
+                if (digits.length >= 6) {
+                  formatted += " " + digits.slice(5, 9);
+                }
+
+                form.setFieldValue("phoneNumber", formatted);
+              }}
+            />
           </Form.Item>
 
           <Form.Item name="dateOfBirth" label="Date of Birth">

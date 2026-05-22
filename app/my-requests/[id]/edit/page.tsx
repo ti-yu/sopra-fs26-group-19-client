@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, Form, Input, DatePicker, Select, TimePicker, Spin, App } from "antd";
+import { Button, Form, Input, DatePicker, Select, TimePicker, Spin } from "antd";
 import dayjs from "dayjs";
 import Navbar from "@/components/navbar";
 import Script from "next/script";
@@ -35,32 +35,12 @@ type EditFormValues = {
   workType: string;
 };
 
-// Same compact duration formatter as the create page.
-const formatDuration = (value: number): string => {
-  const hours = Math.floor(value);
-  const minutes = Math.round((value - hours) * 60);
-  if (hours === 0) return `${minutes} min`;
-  if (minutes === 0) return `${hours}h`;
-  return `${hours}h ${minutes} min`;
-};
-
-const DURATION_OPTIONS: number[] = [
-  1 / 60,
-  5 / 60,
-  10 / 60,
-  15 / 60,
-  30 / 60,
-  45 / 60,
-  1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8,
-];
-
 const EditHelpRequest: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const inseratId = params?.id as string;
   const apiService = useApi();
   const [form] = Form.useForm();
-  const { message } = App.useApp();
   const { value: userId } = useLocalStorage<string>("userId", "");
   const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
 
@@ -120,8 +100,6 @@ const EditHelpRequest: React.FC = () => {
 
   const handleSubmit = async (values: EditFormValues) => {
     try {
-      // If the user picked a new address, use that. Otherwise fall back to
-      // the lat/lng we loaded for the original location.
       const location = selectedPlace
         ? {
             location: selectedPlace.formattedAddress,
@@ -131,7 +109,7 @@ const EditHelpRequest: React.FC = () => {
         : initialLocation;
 
       if (!location) {
-        message.error("Please pick an address from the dropdown!");
+        alert("Please select a valid address!");
         return;
       }
 
@@ -151,9 +129,9 @@ const EditHelpRequest: React.FC = () => {
       router.push(`/my-requests`);
     } catch (error) {
       if (error instanceof Error) {
-        message.error(`Something went wrong: ${error.message}`);
+        alert(`Something went wrong:\n${error.message}`);
       } else {
-        message.error("An unknown error occurred.");
+        console.error("An unknown error occurred.");
       }
     }
   };
@@ -192,14 +170,41 @@ const EditHelpRequest: React.FC = () => {
               variant="outlined"
               onFinish={handleSubmit}
               layout="vertical"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const current = document.activeElement as HTMLElement;
+
+                  // Allow normal form submission when focused on submit button
+                  if (
+                    current instanceof HTMLButtonElement &&
+                    current.type === "submit"
+                  ) {
+                    return;
+                  }
+
+                  e.preventDefault();
+
+                  const focusable = Array.from(
+                    document.querySelectorAll<HTMLElement>(
+                      'input, select, textarea, button, [tabindex]:not([tabindex="-1"])'
+                    )
+                  ).filter(el => !el.hasAttribute("disabled"));
+
+                  const idx = focusable.indexOf(current);
+
+                  if (idx !== -1 && idx < focusable.length - 1) {
+                    focusable[idx + 1].focus();
+                  }
+                }
+              }}
             >
               <Form.Item
                 name="description"
-                label="What do you need help with?"
-                rules={[{ required: true, message: "Please describe what you need help with!" }]}
+                label="Title"
+                rules={[{ required: true, message: "Please enter a description!" }]}
               >
                 <Input.TextArea
-                  placeholder='E.g. "Help me carry groceries up my 3rd-floor apartment."'
+                  placeholder="short description and requirements"
                   maxLength={255}
                   showCount
                   rows={4}
@@ -231,7 +236,7 @@ const EditHelpRequest: React.FC = () => {
                 <DatePicker
                   style={{ width: "100%" }}
                   format="DD.MM.YYYY"
-                  placeholder="Select or enter date (DD.MM.YYYY)"
+                  placeholder="Date: DD.MM.YYYY"
                   disabledDate={(current) => current && current < dayjs().startOf("day")}
                   onChange={(date) => form.setFieldValue("date", date)}
                   inputReadOnly={false}
@@ -245,7 +250,7 @@ const EditHelpRequest: React.FC = () => {
                 <TimePicker
                   format="HH:mm"
                   style={{ width: "100%" }}
-                  placeholder="Select or enter time (HH:mm)"
+                  placeholder="Select time (HH:mm)"
                   disabledTime={() => {
                     const sel = form.getFieldValue("date") as dayjs.Dayjs | undefined;
                     if (!sel || !sel.isSame(dayjs(), "day")) return {};
@@ -263,77 +268,40 @@ const EditHelpRequest: React.FC = () => {
 
               <Form.Item
                 name="timeframe"
-                label="Duration"
-                rules={[{ required: true, message: "Please select a duration!" }]}
+                label="Duration (hours)"
+                rules={[{ required: true, message: "Please enter the duration!" }]}
               >
                 <Select placeholder="Select duration">
-                  {DURATION_OPTIONS.map(value => (
-                    <Select.Option key={value} value={String(value)}>
-                      {formatDuration(value)}
-                    </Select.Option>
-                  ))}
-                </Select>
+                {Array.from({ length: 17 }, (_, i) => (i+1) * 0.5).map(value => (
+                  <Select.Option key={value} value={String(value)}>
+                    {value === 0.5 ? "30 min" : value === 8.5 ? ">8 hours" : `${value} hour${value !== 1 ? "s" : ""}`}
+                  </Select.Option>
+                ))}
+              </Select>
               </Form.Item>
 
-              {/* Location: free-text Input + suggestion overlay (same as register/create). */}
-              <Form.Item label="Location" required>
-                <div style={{ position: "relative" }}>
-                  <Input
-                    value={query}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setQuery(value);
-                      setSelectedPlace(null);
-                      fetchSuggestions(value);
-                    }}
-                    placeholder="Enter address"
-                    aria-label="Address"
-                  />
-                  {suggestions.length > 0 && (
-                    <div
-                      role="listbox"
-                      style={{
-                        position: "absolute",
-                        top: "100%",
-                        left: 0,
-                        right: 0,
-                        background: "#fff",
-                        border: "1px solid #d9d9d9",
-                        borderRadius: "6px",
-                        zIndex: 1000,
-                        maxHeight: "200px",
-                        overflowY: "auto",
-                        marginTop: "4px",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      }}
-                    >
-                      {suggestions.map((item, index) => (
-                        <div
-                          key={index}
-                          role="option"
-                          aria-selected={false}
-                          tabIndex={0}
-                          onClick={() => handleSelect(item)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              handleSelect(item);
-                            }
-                          }}
-                          style={{ padding: "8px 12px", cursor: "pointer" }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background = "#f5f5f5")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background = "transparent")
-                          }
-                        >
-                          {item.placePrediction.text.text}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+              <Form.Item
+                name="location"
+                label="Location"
+                rules={[{ required: true, message: "Please select an address from the list!" }]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Enter address, then pick a suggestion"
+                  onSearch={(value) => {
+                    form.setFieldValue("location", value);
+                    fetchSuggestions(value);
+                  }}
+                  onSelect={(_value: string, option: { suggestion: PlaceSuggestion }) => {
+                    handleSelect(option.suggestion);
+                  }}
+                  options={suggestions.map((item, index) => ({
+                    key: index,
+                    value: item.placePrediction.text.text,
+                    label: item.placePrediction.text.text,
+                    suggestion: item,
+                  }))}
+                />
               </Form.Item>
 
               <Form.Item>

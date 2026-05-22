@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Form, Input, App } from "antd";
+import { Button, Form, Input, message } from "antd";
 import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
@@ -17,7 +17,6 @@ const Login: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [form] = Form.useForm();
-  const { message } = App.useApp();
   const { set: setUserId } = useLocalStorage<string>("userId", "");
   const { set: setToken } = useLocalStorage<string>("token", "");
   const [isSubmitting, setIsSubmitting] = useState(false);
