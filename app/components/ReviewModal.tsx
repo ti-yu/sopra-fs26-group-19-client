@@ -128,7 +128,7 @@ export default function ReviewModal({ userId }: { userId: string }) {
             closable={false}
             maskClosable={false}
             footer={[
-                <div style={{display: 'flex', gap: '10px', flexDirection: 'column', justifyContent: 'center'}}>
+                <div key="container" style={{display: 'flex', gap: '10px', flexDirection: 'column', justifyContent: 'center'}}>
                     <Button key="dismiss" onClick={dismissForNow} disabled={isSubmitting} style={{marginTop: "30px" }}>
                         Ignore for now
                     </Button>
