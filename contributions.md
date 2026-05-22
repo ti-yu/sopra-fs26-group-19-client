@@ -141,14 +141,14 @@ reason).
 ## Contributions Week 8 - [18.05.2026] to [22.06.2025]
 
 
-| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
-| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **Student**        | **Date** | **Link to Commit** | **Description**                                            | **Relevance**                                                               |
+|--------------------|----------| ------------------ |------------------------------------------------------------|-----------------------------------------------------------------------------|
+| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task]                            | [Why this contribution is relevant]                                         |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]                            | [Why this contribution is relevant]                                         |
+| **[@romevp]**      | [21.05]  | [[Link to Commit 1](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/998966437af7005af30642d4661a686cd578bf1d)] | [Implemented function to delete Help Requests once posted] | [It is important people can delete requests in case they change their mind] |
+|                    | [21.05]  | [[Link to Commit 2](https://github.com/ti-yu/sopra-fs26-group-19-client/commit/f9af365990068c102733ddfa4a020482fb7c855a)] | [Added an average rating to the Profile]                   | [An average rating helps with security and trust]                           |
+| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task]                            | [Why this contribution is relevant]                                         |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]                            | [Why this contribution is relevant]                                         |
+| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task]                            | [Why this contribution is relevant]                                         |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task]                            | [Why this contribution is relevant]                                         |
 

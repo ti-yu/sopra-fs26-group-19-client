@@ -77,8 +77,9 @@ const MapPage: React.FC = () => {
     const [dateTo, setDateTo] = useState<Dayjs | null>(null);
 
     useEffect(() => {
+        if (!userId) return;
         try {
-            const raw = localStorage.getItem(FILTER_STORAGE_KEY);
+            const raw = localStorage.getItem(`mapFilter_${userId}`);
             if (!raw) return;
             const parsed: PersistedFilter = JSON.parse(raw);
             setWorkTypeFilter(parsed.workTypes ?? []);
@@ -88,9 +89,10 @@ const MapPage: React.FC = () => {
         } catch {
             // Corrupt filter blob: ignore and use defaults.
         }
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
+        if (!userId) return;
         const blob: PersistedFilter = {
             workTypes: workTypeFilter,
             durationMin: durationRange[0],
@@ -99,7 +101,7 @@ const MapPage: React.FC = () => {
             dateToIso: dateTo ? dateTo.toISOString() : null,
         };
         try {
-            localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(blob));
+            localStorage.setItem(`mapFilter_${userId}`, JSON.stringify(blob));
         } catch {
             // Storage full / Safari private mode. silent failure.
         }
@@ -228,13 +230,6 @@ const MapPage: React.FC = () => {
             );
             updateApplied(initialApplied);
 
-            // Shared info window renderer for both individual markers and clusters.
-            // Accepts an array of inserats (length ≥ 1) and the position to open at.
-            //
-            // `_inserats` (plural) holds every inserat sharing this marker's
-            // exact coordinate. Cluster click flatMaps these arrays across the
-            // markers in the cluster so the info window sees ALL underlying
-            // inserats, not just one per marker. (Fixes #215 for same-location pins.)
             type TaggedMarker = google.maps.marker.AdvancedMarkerElement & { _inserats: Inserat[] };
 
             const openInfoWindow = (windowInserats: Inserat[], position: google.maps.LatLngLiteral) => {
@@ -319,22 +314,10 @@ const MapPage: React.FC = () => {
                 renderPage();
             };
 
-            // --- Marker creation -------------------------------------------
-            // Two-layer grouping (fixes #215):
-            //   1. Exact-coordinate group: multiple inserats at IDENTICAL
-            //      lat/lng become ONE marker (with a count badge), tagged
-            //      with the full inserat list. Click: paginated info window.
-            //      Without this, at max zoom two stacked pins would overlap
-            //      and only the topmost would be clickable.
-            //   2. Proximity clustering (below) is then applied by
-            //      MarkerClusterer on top of those grouped markers.
             const allMarkers: TaggedMarker[] = [];
 
-            // Group inserats by exact coordinate string.
             const byCoord = new Map<string, Inserat[]>();
             visibleInserats.forEach(i => {
-                // Stringify to a stable key; floats compared via string equality
-                // is fine here because backend stores them as fixed-precision.
                 const key = `${i.latitude},${i.longitude}`;
                 const existing = byCoord.get(key);
                 if (existing) {
@@ -511,6 +494,7 @@ const MapPage: React.FC = () => {
                     onClick={() => setFilterOpen(o => !o)}
                     aria-expanded={filterOpen}
                     aria-controls="map-filter-panel"
+                    style={{height: "40px", fontWeight: "600"}}
                 >
                     {activeFilterCount > 0 ? `Filter (${activeFilterCount})` : "Filter"}
                 </Button>
@@ -606,8 +590,8 @@ const MapPage: React.FC = () => {
                         </div>
 
                         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-                            <Button onClick={resetFilters}>Reset</Button>
-                            <Button type="primary" onClick={() => setFilterOpen(false)}>Done</Button>
+                            <Button className="filterButton" style={{height: "30px", fontWeight: "600"}} onClick={resetFilters}>Reset</Button>
+                            <Button type="primary" style={{height: "30px", fontWeight: "600"}}  onClick={() => setFilterOpen(false)}>Done</Button>
                         </div>
                     </div>
                 </div>

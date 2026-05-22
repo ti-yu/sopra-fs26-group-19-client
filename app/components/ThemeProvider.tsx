@@ -51,6 +51,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
             components: {
               Button: {
                   colorPrimary: primaryColor,
+                  colorText: "#555",
                   colorPrimaryBorder: "#ffcc00",
                   primaryColor: "#ffffff",
                   borderRadius: 30,

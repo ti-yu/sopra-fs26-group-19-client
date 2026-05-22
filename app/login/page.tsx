@@ -6,6 +6,7 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
 import { Button, Form, Input, message } from "antd";
 import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
 interface FormFieldProps {
   username: string;
@@ -17,11 +18,11 @@ const Login: React.FC = () => {
   const apiService = useApi();
   const [form] = Form.useForm();
   const { set: setUserId } = useLocalStorage<string>("userId", "");
-
-
   const { set: setToken } = useLocalStorage<string>("token", "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async (values: FormFieldProps) => {
+    setIsSubmitting(true);
     try {
       const response = await apiService.post<User>("/login", values);
       if (response.token) {
@@ -55,6 +56,8 @@ const Login: React.FC = () => {
       else {
         message.error("An unknown error occurred.");
       }
+    } finally {
+      setIsSubmitting(false); 
     }
   };
 
@@ -107,8 +110,8 @@ const Login: React.FC = () => {
           <div className="auth-form-spacer" />
 
           <Form.Item style={{ marginBottom: 0 }}>
-            <Button type="primary" htmlType="submit" block>
-              <strong>Login</strong>
+            <Button type="primary" htmlType="submit" block loading={isSubmitting} disabled={isSubmitting}>
+              {isSubmitting ? "Logging in..." : "Login"}
             </Button>
           </Form.Item>
         </Form>
