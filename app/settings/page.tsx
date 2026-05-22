@@ -82,7 +82,12 @@ export default function SettingsPage() {
 
     const handleProfileFile = async (file: File) => {
         if (!file.type.startsWith("image/")) return;
-        // Keep profile pictures under ~100KB / 256px so they don't slow the app down.
+    
+        if (file.size > 10*1024*1024) { //i.e. 10MB
+          message.error("Profile picture must be smaller than 10MB.");
+        return;
+        }
+
         const compressed = await imageCompression(file, { maxSizeMB: 0.1, maxWidthOrHeight: 256 });
         const reader = new FileReader();
         reader.onload = (e) => setProfilePicture(e.target?.result as string);

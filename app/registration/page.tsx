@@ -88,6 +88,11 @@ const Register: React.FC = () => {
   const handleProfileFile = async (file: File) => {
     if (!file.type.startsWith("image/")) return;
 
+    if (file.size > 10*1024*1024) { //i.e. 10MB
+      message.error("Profile picture must be smaller than 10MB.");
+    return;
+    }
+
     const compressed = await imageCompression(file, {
       maxSizeMB: 0.1,        // compress to max 100KB
       maxWidthOrHeight: 256, // profile pictures don't need to be large
@@ -354,7 +359,10 @@ const Register: React.FC = () => {
           <Form.Item
             name="password"
             label="Password"
-            rules={[{ required: true, message: "Please input your password!" }]}
+            rules={[
+              { required: true, message: "Please input your password!" },
+              { min: 6, message: "Password must be at least 6 characters long." },
+            ]}
           >
             <Input.Password placeholder="Enter password" />
           </Form.Item>
