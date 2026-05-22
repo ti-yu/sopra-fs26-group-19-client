@@ -487,7 +487,20 @@ const MapPage: React.FC = () => {
     return (
         <>
             {/* Header with view toggle + filter button */}
-            <div className="headerBar" style={{ "--role-color": "#f5f5f5" } as React.CSSProperties}>
+            <div style={{ 
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "2vh clamp(0.5rem, 3vw, 5vh)",
+                position: "fixed",
+                zIndex: "100",
+                width: "100%",
+                height: "8vh",
+                backgroundColor: "#f5f5f5",
+                top: "0px",
+                
+                }}>
                 <Button
                     type={filterOpen ? "primary" : "default"}
                     icon={<FilterOutlined />}
@@ -498,7 +511,7 @@ const MapPage: React.FC = () => {
                 >
                     {activeFilterCount > 0 ? `Filter (${activeFilterCount})` : "Filter"}
                 </Button>
-                <h1 style={{"color": "#333333", fontSize: "clamp(1rem, 4vw, 2rem)", whiteSpace: "wrap"}}> Help Requests </h1>
+                <h1 style={{"color": "#333333", fontSize: "clamp(1rem, 4vw, 2rem)", flex: "1", margin: "0, 4rem", textAlign: "center"}}> Help Requests </h1>
                 <div style={{ display: "flex", gap: 8 }}>
                     <button
                         className={`toggle-button ${view === "map" ? "active" : ""}`}

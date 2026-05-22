@@ -10,6 +10,7 @@ import Link from "next/link";
 import AuthWrapper from "@/components/AuthWrapper";
 import ReviewModal from '@/components/ReviewModal';
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { Fleur_De_Leah } from "next/font/google";
 
 const calculateAge = (dateOfBirth: string): number => {
   const today = new Date();
@@ -118,11 +119,11 @@ const Profile: React.FC = () => {
                       <strong>Settings</strong>
                   </Link>
               </div>
+              
               <div style={{
                   backgroundColor: "var(--role-color)",
-                  height: "20vh",
+                  height: "calc(60px + 20vh)",
                   width: "100%",
-                  marginTop: "60px",
                   boxSizing: "border-box"
               }}>
               </div>
@@ -159,6 +160,9 @@ const Profile: React.FC = () => {
                           <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
                               <strong>Rating: </strong>
                               {validRatings.length > 0 ? (
+
+                                <div style={{display: 'flex', flexDirection:'column'}}>
+                                    
                                   <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
                                       <Rate disabled allowHalf value={averageRating}
                                             style={{color: "var(--role-color)", fontSize: "18px", margin: 0}}/>
@@ -166,11 +170,13 @@ const Profile: React.FC = () => {
                                           color: "#555",
                                           fontWeight: "bold"
                                       }}>({averageRating.toFixed(1)})</span>
-                                      <span style={{
+                                  </div>
+
+                                  <span style={{
                                           color: "#555",
                                           fontSize: "12px"
                                       }}> from {validRatings.length} reviews</span>
-                                  </div>
+                                </div>
                               ) : (
                                   <span style={{color: "#888", fontStyle: "italic"}}>No ratings yet</span>
                               )}

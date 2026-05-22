@@ -177,7 +177,7 @@ const CreateHelpRequest: React.FC = () => {
                 cursor: hasFormData ? "pointer" : "not-allowed",
               }}
             >
-              <strong> Clear form </strong>
+              <strong> Cancel </strong>
             </button>
             <h1>Get Help!</h1>
           </div>
