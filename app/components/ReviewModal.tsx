@@ -128,15 +128,17 @@ export default function ReviewModal({ userId }: { userId: string }) {
             closable={false}
             maskClosable={false}
             footer={[
-                <Button key="dismiss" onClick={dismissForNow} disabled={isSubmitting}>
-                    Ignore for now
-                </Button>,
-                <Button key="ignore" onClick={ignoreForever} disabled={isSubmitting} loading={isSubmitting}>
-                    Ignore forever
-                </Button>,
-                <Button key="submit" type="primary" onClick={submitReview} loading={isSubmitting}>
-                    Submit Review
-                </Button>,
+                <div style={{display: 'flex', gap: '10px', flexDirection: 'column', justifyContent: 'center'}}>
+                    <Button key="dismiss" onClick={dismissForNow} disabled={isSubmitting} style={{marginTop: "30px" }}>
+                        Ignore for now
+                    </Button>
+                    <Button key="ignore" onClick={ignoreForever} disabled={isSubmitting} loading={isSubmitting}>
+                        Ignore forever
+                    </Button>
+                    <Button key="submit" type="primary" onClick={submitReview} loading={isSubmitting}>
+                        Submit Review
+                    </Button>
+                </div>
             ]}
         >
             <div style={{ marginBottom: '15px' }}>

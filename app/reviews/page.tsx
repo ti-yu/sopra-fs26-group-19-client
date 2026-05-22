@@ -159,8 +159,8 @@ export default function ReviewsPage() {
                                 disabled={isSubmitting}
                                 style={{ marginBottom: '15px' }}
                             />
-                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                                <Button
+                            <div style={{ display: 'flex', gap: '10px', flexDirection: 'column', justifyContent: 'center'}}>
+                                <Button style={{ marginTop: "30px" }}
                                     onClick={handleDismissForNow}
                                     disabled={isSubmitting}
                                 >
