@@ -10,6 +10,7 @@ export interface Application {
   description: string;
   location: string;
   date: string;
+  time?: string | null;
   timeframe: string;
   status: "OPEN" | "ACCEPTED" | "DONE";
   creationDate: string;

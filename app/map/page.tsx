@@ -7,6 +7,8 @@ import Script from "next/script";
 import Navbar from "@/components/navbar"
 import { User } from "@/types/user";
 import { Inserat } from "@/types/inserat"
+import { formatDuration, formatTimeRange } from "@/utils/inseratFormat"
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { Spin, Card, Select, Slider, DatePicker, Button } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
@@ -37,8 +39,6 @@ const WORK_TYPE_OPTIONS = [
     "CLEANING",
     "OTHER",
 ];
-
-const FILTER_STORAGE_KEY = "mapFilter";
 
 interface PersistedFilter {
     workTypes: string[];
@@ -105,7 +105,7 @@ const MapPage: React.FC = () => {
         } catch {
             // Storage full / Safari private mode. silent failure.
         }
-    }, [workTypeFilter, durationRange, dateFrom, dateTo]);
+    }, [workTypeFilter, durationRange, dateFrom, dateTo, userId]);
 
     const filteredInserats = useMemo(() => {
         return inserats.filter(i => {
@@ -158,7 +158,7 @@ const MapPage: React.FC = () => {
             }
         };
         fetchUser();
-    }, [userId]);
+    }, [apiService, userId]);
 
     const initMap = useCallback(async () => {
         const { Map: GoogleMap, InfoWindow } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
@@ -170,7 +170,23 @@ const MapPage: React.FC = () => {
             mapId: "687f31f6db63e48236a75a4a",
         });
 
-        const infoWindow = new InfoWindow();
+        const infoWindow = new InfoWindow({ zIndex: 1000 });
+
+        // The pin that anchors the currently open InfoWindow is hidden while
+        // the popup shows so it doesn't draw over the "Lend a Hand" button.
+        // Restored when the popup closes (X button, map click, or another pin
+        // is clicked).
+        let currentAnchorContent: HTMLElement | null = null;
+        const restoreAnchorPin = () => {
+            if (currentAnchorContent) {
+                currentAnchorContent.style.visibility = "";
+                currentAnchorContent = null;
+            }
+        };
+        infoWindow.addListener("closeclick", restoreAnchorPin);
+        // Closing the InfoWindow by other means (e.g. clicking a Place marker
+        // which replaces the content) still fires the visible state change.
+        map.addListener("click", restoreAnchorPin);
 
         map.addListener("click", async (event: google.maps.MapMouseEvent & { placeId?: string }) => {
             if (!event.placeId) return;
@@ -232,7 +248,17 @@ const MapPage: React.FC = () => {
 
             type TaggedMarker = google.maps.marker.AdvancedMarkerElement & { _inserats: Inserat[] };
 
-            const openInfoWindow = (windowInserats: Inserat[], position: google.maps.LatLngLiteral) => {
+            const openInfoWindow = (
+                windowInserats: Inserat[],
+                position: google.maps.LatLngLiteral,
+                anchorContent?: HTMLElement,
+            ) => {
+                restoreAnchorPin();
+                if (anchorContent) {
+                    currentAnchorContent = anchorContent;
+                    currentAnchorContent.style.visibility = "hidden";
+                }
+
                 let currentPage = 0;
 
                 const renderPage = () => {
@@ -258,7 +284,8 @@ const MapPage: React.FC = () => {
                         <p style="margin:0 0 4px;font-size:16px;">Age: ${inserat.recipientAge}</p>
                         <p style="margin:0 0 4px;color:gray;font-size:16px;">Where: ${inserat.location}</p>
                         <p style="margin:0 0 4px;font-size:16px;">📅 ${inserat.date}</p>
-                        <p style="margin:0;font-size:16px;">🕐 ${inserat.timeframe}h</p>
+                        ${inserat.time ? `<p style="margin:0 0 4px;font-size:16px;">🕒 ${formatTimeRange(inserat.time, inserat.timeframe)}</p>` : ""}
+                        <p style="margin:0;font-size:16px;">⏳ ${formatDuration(inserat.timeframe)}</p>
                         <p style="margin:0 0 8px;font-size:16px;">${formatWorkType(inserat.workType ?? "")}</p>
                         ${showOfferButton ? `<button id="${buttonId}" class="offer-button" style="${alreadyApplied ? "background-color:#888;" : ""}">${buttonLabel}</button>` : ""}
                         </div>
@@ -391,7 +418,7 @@ const MapPage: React.FC = () => {
                     const sorted = coLocatedInserats
                         .slice()
                         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-                    openInfoWindow(sorted, { lat, lng });
+                    openInfoWindow(sorted, { lat, lng }, container);
                 });
 
                 allMarkers.push(marker);
@@ -440,7 +467,10 @@ const MapPage: React.FC = () => {
                         ].join(";");
                         container.appendChild(badge);
 
-                        return new AdvancedMarkerElement({ position, content: container, zIndex: 999 });
+                        // No explicit zIndex: let Google's natural layering put the
+                        // open InfoWindow on top of all markers. Issue: with a high
+                        // zIndex the cluster pin sometimes drew over the popup.
+                        return new AdvancedMarkerElement({ position, content: container });
                     },
                 },
                 onClusterClick: (_event, cluster) => {
@@ -465,6 +495,11 @@ const MapPage: React.FC = () => {
         if (loading) return;
         initMap();
     }, [initMap, loading]);
+
+    useAutoRefresh(() => {
+        if (loading || typeof google === "undefined") return;
+        return initMap();
+    }, !loading);
 
     if (loading) {
         return (
@@ -648,7 +683,11 @@ const MapPage: React.FC = () => {
                                         With: <Link href={`/profile/${inserat.recipientId}`} style={{ color: "inherit", textDecoration: "underline", fontSize: 16 }}>{inserat.recipientUsername}</Link>, age {inserat.recipientAge}
                                     </p>
                                     <p style={{ fontSize: 16, color: "#555", marginBottom: 2 }}>📍 {inserat.location}</p>
-                                    <p style={{ fontSize: 16, marginBottom: 2 }}>📅 {inserat.date} · 🕐 {inserat.timeframe}h</p>
+                                    <p style={{ fontSize: 16, marginBottom: 2 }}>
+                                        📅 {inserat.date}
+                                        {inserat.time ? <> &nbsp;·&nbsp; 🕒 {formatTimeRange(inserat.time, inserat.timeframe)}</> : null}
+                                        &nbsp;·&nbsp; ⏳ {formatDuration(inserat.timeframe)}
+                                    </p>
                                     <p style={{ fontSize: 16, marginBottom: showButton ? 8 : 0 }}>
                                         {formatWorkType(inserat.workType ?? "")}
                                     </p>

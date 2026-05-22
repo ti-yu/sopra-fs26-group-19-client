@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Avatar, Spin, Card, Tag, Empty, Typography, Rate, Button } from "antd";
 import { User } from "@/types/user";
@@ -10,7 +10,7 @@ import Link from "next/link";
 import AuthWrapper from "@/components/AuthWrapper";
 import ReviewModal from '@/components/ReviewModal';
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Fleur_De_Leah } from "next/font/google";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 
 const calculateAge = (dateOfBirth: string): number => {
   const today = new Date();
@@ -49,30 +49,39 @@ const Profile: React.FC = () => {
     const [receivedReviews, setReceivedReviews] = useState<ReviewDTO[]>([]);
     const [visibleReviewCount, setVisibleReviewCount] = useState(INITIAL_REVIEW_COUNT);
 
-    useEffect(() => {
+    const fetchData = useCallback(async (showLoading = false) => {
         if (!id) return;
-        const fetchData = async () => {
-            try {
+        try {
+            if (showLoading) {
                 setLoading(true);
-                const [userData, reviewsData] = await Promise.all([
-                    apiService.get<User>(`/profile/${id}`),
-                    apiService.get<ReviewDTO[]>(`/profile/${id}/reviews/received`)
-                ]);
+            }
 
-                setUser(userData);
-                // #158. newest first. Server doesn't guarantee order; sort client-side.
-                const sorted = (reviewsData || []).slice().reverse().sort((a, b) => {
-                    return new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime();
-                });
-                setReceivedReviews(sorted);
-            } catch (err: unknown) {
-                setError(err instanceof Error ? err.message : "Failed to load user");
-            } finally {
+            const [userData, reviewsData] = await Promise.all([
+                apiService.get<User>(`/profile/${id}`),
+                apiService.get<ReviewDTO[]>(`/profile/${id}/reviews/received`)
+            ]);
+
+            setUser(userData);
+            setError(null);
+            // #158. newest first. Server doesn't guarantee order; sort client-side.
+            const sorted = (reviewsData || []).slice().reverse().sort((a, b) => {
+                return new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime();
+            });
+            setReceivedReviews(sorted);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to load user");
+        } finally {
+            if (showLoading) {
                 setLoading(false);
             }
-        };
-        fetchData();
-    }, [id]);
+        }
+    }, [apiService, id]);
+
+    useEffect(() => {
+        fetchData(true);
+    }, [fetchData]);
+
+    useAutoRefresh(fetchData, Boolean(id));
 
   if (loading) {
     return (
@@ -175,10 +184,10 @@ const Profile: React.FC = () => {
                                   <span style={{
                                           color: "#555",
                                           fontSize: "12px"
-                                      }}> from {validRatings.length} reviews</span>
+                                      }}> from {validRatings.length} {validRatings.length === 1 ? "review" : "reviews"}</span>
                                 </div>
                               ) : (
-                                  <span style={{color: "#888", fontStyle: "italic"}}>No ratings yet</span>
+                                  <span style={{color: "#888", fontStyle: "italic"}}>No rating yet</span>
                               )}
                           </div>
                       </div>

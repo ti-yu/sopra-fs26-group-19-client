@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Spin, Empty } from "antd";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "@/components/navbar";
 import AuthWrapper from "@/components/AuthWrapper";
 import { Application } from "@/types/application";
+import { formatDuration, formatTimeRange } from "@/utils/inseratFormat";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import Link from "next/link";
 
 const formatDate = (dateStr: string) => {
@@ -32,28 +34,31 @@ const MyApplications: React.FC = () => {
   const [currentUsername, setCurrentUsername] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (!userId) return;
-    const fetchData = async () => {
-      try {
-        const profile = await apiService.get<{ username: string }>(`/profile/${userId}`);
-        setCurrentUsername(profile.username);
+    try {
+      const profile = await apiService.get<{ username: string }>(`/profile/${userId}`);
+      setCurrentUsername(profile.username);
 
-        const data = await apiService.get<Application[]>(`/users/${userId}/applications`);
-        const sorted = data.sort((a, b) => {
-          if (a.status === "DONE" && b.status !== "DONE") return 1;
-          if (a.status !== "DONE" && b.status === "DONE") return -1;
-          return new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime();
-        });
-        setInserats(sorted);
-      } catch (err) {
-        console.error("Failed to load applications", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const data = await apiService.get<Application[]>(`/users/${userId}/applications`);
+      const sorted = data.sort((a, b) => {
+        if (a.status === "DONE" && b.status !== "DONE") return 1;
+        if (a.status !== "DONE" && b.status === "DONE") return -1;
+        return new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime();
+      });
+      setInserats(sorted);
+    } catch (err) {
+      console.error("Failed to load applications", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [apiService, userId]);
+
+  useEffect(() => {
     fetchData();
-  }, [userId]);
+  }, [fetchData]);
+
+  useAutoRefresh(fetchData, Boolean(userId));
 
   if (loading) {
     return (
@@ -76,7 +81,11 @@ const MyApplications: React.FC = () => {
 
         <div style={{ padding: "16vh 16px 100px", maxWidth: 600, margin: "0 auto" }}>
           {inserats.length === 0 ? (
-            <Empty description="You haven't applied to any requests yet" style={{ marginTop: 40 }} />
+            <Empty
+              description="You haven't applied to any requests yet. Open the Map or Feed to find someone to help."
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              style={{ marginTop: 40 }}
+            />
           ) : (
             inserats.map((inserat) => {
               const isDone = inserat.status === "DONE";
@@ -128,10 +137,11 @@ const MyApplications: React.FC = () => {
                         📍 {inserat.location}
                       </>
                     )}
-                    {inserat.timeframe && (
+                    {(inserat.time || inserat.timeframe) && (
                       <>
                         <br />
-                        🕐 {inserat.timeframe}h
+                        {inserat.time ? <>🕒 {formatTimeRange(inserat.time, inserat.timeframe)} &nbsp;·&nbsp; </> : null}
+                        ⏳ {formatDuration(inserat.timeframe)}
                       </>
                     )}
                   </div>

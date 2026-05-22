@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Script from "next/script";
 import { ApiService } from '@/api/apiService';
 import AuthWrapper from "@/components/AuthWrapper";
-import { message, Form, Input, Button, Radio, Select, DatePicker } from "antd";
+import { App, Form, Input, Button, Radio, Select, DatePicker } from "antd";
 import dayjs from "dayjs";
 import imageCompression from 'browser-image-compression';
 import { useRole } from "@/components/ThemeProvider";
@@ -60,6 +60,7 @@ const api = new ApiService();
 export default function SettingsPage() {
     const router = useRouter();
     const [form] = Form.useForm<SettingsFormValues>();
+    const { message } = App.useApp();
 
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -268,6 +269,8 @@ export default function SettingsPage() {
                         form={form}
                         layout="vertical"
                         onFinish={handleFinish}
+                        onFinishFailed={() => message.error("Please fill out all required fields correctly.")}
+                        scrollToFirstError
                         size="large"
                         className="auth-form"
                         onKeyDown={(e) => {
@@ -349,19 +352,38 @@ export default function SettingsPage() {
 
                         {/* --- Field order mirrors the Registration page --- */}
 
-                        <Form.Item name="username" label="Username">
+                        <Form.Item
+                            name="username"
+                            label="Username"
+                            rules={[{ required: true, message: "Please input your username!" }]}
+                        >
                             <Input placeholder="Enter username" />
                         </Form.Item>
 
-                        <Form.Item name="surname" label="First Name">
+                        <Form.Item
+                            name="surname"
+                            label="First Name"
+                            rules={[{ required: true, message: "Please input your first name!" }]}
+                        >
                             <Input placeholder="Enter first name" />
                         </Form.Item>
 
-                        <Form.Item name="lastname" label="Last Name">
+                        <Form.Item
+                            name="lastname"
+                            label="Last Name"
+                            rules={[{ required: true, message: "Please input your last name!" }]}
+                        >
                             <Input placeholder="Enter last name" />
                         </Form.Item>
 
-                        <Form.Item name="emailAddress" label="Email Address">
+                        <Form.Item
+                            name="emailAddress"
+                            label="Email Address"
+                            rules={[
+                                { required: true, message: "Please input your email address!" },
+                                { type: "email", message: "Please enter a valid email address!" },
+                            ]}
+                        >
                             <Input type="email" placeholder="Enter email address" />
                         </Form.Item>
 
@@ -425,61 +447,9 @@ export default function SettingsPage() {
                             </Select>
                         </Form.Item>
 
-                        <Form.Item
-                            name="phoneNumber"
-                            label="Phone Number"
-                            rules={[
-                            {
-                                pattern: /^\+41\s\d{2}\s\d{3}\s\d{4}$/,
-                                message: "Use format: +41 76 123 4567",
-                            },
-                            ]}
-                        >
-                            <Input
-                            placeholder="+41 76 123 4567"
-                            onFocus={(e) => {
-                                if (!e.target.value) {
-                                form.setFieldValue("phoneNumber", "+41 ");
-                                }
-                            }}
-                            onBlur={(e) => {
-                                // Reset to empty if user didn't type a number
-                                if (e.target.value.trim() === "+41") {
-                                form.setFieldValue("phoneNumber", "");
-                                }
-                            }}
-                            onChange={(e) => {
-                                let value = e.target.value;
-
-                                // Always enforce +41 prefix
-                                if (!value.startsWith("+41 ")) {
-                                value = "+41 ";
-                                }
-
-                                // Remove everything except digits after +41
-                                const digits = value
-                                .replace("+41 ", "")
-                                .replace(/\D/g, "")
-                                .slice(0, 9);
-
-                                // Format as: 76 123 4567
-                                let formatted = "+41 ";
-
-                                if (digits.length > 0) {
-                                formatted += digits.slice(0, 2);
-                                }
-
-                                if (digits.length >= 3) {
-                                formatted += " " + digits.slice(2, 5);
-                                }
-
-                                if (digits.length >= 6) {
-                                formatted += " " + digits.slice(5, 9);
-                                }
-
-                                form.setFieldValue("phoneNumber", formatted);
-                            }}
-                            />
+                        <Form.Item name="phoneNumber" label="Phone Number">
+                            {/* International numbers welcome, +41 is just a placeholder hint. */}
+                            <Input placeholder="+41 76 123 45 67" />
                         </Form.Item>
 
                         <Form.Item name="dateOfBirth" label="Date of Birth">

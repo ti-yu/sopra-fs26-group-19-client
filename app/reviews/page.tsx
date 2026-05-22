@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ApiService } from '@/api/apiService';
 import AuthWrapper from "@/components/AuthWrapper";
-import { message, Card, Button, Input, Typography, Tag, Empty, Rate } from "antd";
+import { App, Card, Button, Input, Typography, Tag, Empty, Rate } from "antd";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { Review } from "@/types/review";
 
 const { Title, Text } = Typography;
@@ -22,14 +23,17 @@ export default function ReviewsPage() {
     const [stars, setStars] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+    const { message } = App.useApp();
 
     const { value: userId } = useLocalStorage<string>("userId", "");
     const { value: isVolunteer } = useLocalStorage<boolean>("isVolunteer", false);
 
-    const fetchReviews = async () => {
+    const fetchReviews = useCallback(async (showLoading = false) => {
         if (!userId) return;
         try {
-            setLoading(true);
+            if (showLoading) {
+                setLoading(true);
+            }
 
             try {
                 const pendingData = await api.get<Review>(`/profile/${userId}/pendingReview`);
@@ -51,14 +55,17 @@ export default function ReviewsPage() {
         } catch {
             message.error("Failed to load reviews.");
         } finally {
-            setLoading(false);
+            if (showLoading) {
+                setLoading(false);
+            }
         }
-    };
+    }, [message, userId]);
 
     useEffect(() => {
-        fetchReviews();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [userId]);
+        fetchReviews(true);
+    }, [fetchReviews]);
+
+    useAutoRefresh(fetchReviews, Boolean(userId));
 
     const handleDismissForNow = async () => {
         // #151. pushes reminder out by 24h server-side.
@@ -188,7 +195,11 @@ export default function ReviewsPage() {
                     ) : doneReviews.length === 0 ? (
                         <Card style={{ borderRadius: '12px' }}>
                             <Empty
-                                description="You have no review history yet. Finish some tasks to see them here!"
+                                description={
+                                    isVolunteer
+                                        ? "No reviews to show yet. After you finish helping someone, you'll be able to leave them a review when going to your profile page."
+                                        : "No reviews to show yet. After someone finishes helping you, you'll be able to leave them a review when going to your profile page."
+                                }
                                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                             />
                         </Card>

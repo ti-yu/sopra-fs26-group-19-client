@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import React, { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   UserOutlined,
@@ -11,6 +10,7 @@ import {
   StarOutlined,
 } from "@ant-design/icons";
 import { ApiService } from "@/api/apiService";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 
 interface IconConfig {
   icon: React.ReactNode;
@@ -62,25 +62,27 @@ const Navbar: React.FC<NavbarProps> = ({ id, isVolunteer }) => {
         router.refresh();   // Force Next.js to re-fetch server data!
     };
 
-  // Check for pending review whenever the path changes.
-  // When on the profile page the ReviewModal handles the popup, so we clear the dot.
-  useEffect(() => {
-    if (!safeId) return;
-
-    if (onProfilePage) {
+  const checkPendingReview = useCallback(async () => {
+    if (!safeId || onProfilePage) {
       setHasPendingReview(false);
       return;
     }
 
-    const api = new ApiService();
-    api.get<{ id?: string }>(`/profile/${safeId}/pendingReview`)
-      .then((res) => {
-        setHasPendingReview(!!(res as { id?: string })?.id);
-      })
-      .catch(() => {
-        setHasPendingReview(false);
-      });
-  }, [safeId, pathname]);
+    try {
+      const api = new ApiService();
+      const res = await api.get<{ id?: string }>(`/profile/${safeId}/pendingReview`);
+      setHasPendingReview(Boolean(res?.id));
+    } catch {
+      setHasPendingReview(false);
+    }
+  }, [onProfilePage, safeId]);
+
+  // The profile page has the review modal; other pages keep the nav dot fresh.
+  useEffect(() => {
+    checkPendingReview();
+  }, [checkPendingReview]);
+
+  useAutoRefresh(checkPendingReview, Boolean(safeId) && !onProfilePage);
 
   return (
     <nav style={{
