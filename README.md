@@ -1,392 +1,258 @@
-# Getting Started
+# Lend-a-Hand Server - Frontend
 
-### MacOS, Linux and WSL
+## Introduction
+In our society, many individuals (especially elderly people) wish to maintain their independence at home but frequently face small, everyday hurdles,such as grocery shopping, moving heavy items, or basic garden maintenance, that become difficult to manage alone due to missing strength or ilness.
+The goal of **Lend-a-Hand** is to bridge this gap by connecting individuals in need of assistance **Recipients**, with passionate local helpers **Volunteers** which help out with small everyday tasks.
+---
+## Technologies Used
 
-If you are using MacOS, Linux or WSL(Windows-Subsystem-Linux), you can skip
-directly to the
-[installation part](https://github.com/HASEL-UZH/sopra-fs26-template-client?tab=readme-ov-file#installation)
+* **TypeScript** - Statically typed superset of JavaScript used as the primary frontend programming language.
+* **React** - Component-based declarative UI library for building interactive user interfaces.
+* **Next.js** - Full-stack React framework providing routing, server-side rendering, and build optimization.
+* **Ant Design (antd)** - Enterprise-grade React UI component library for layout and interface elements.
+* **Google Maps API / Marker Clusterer** - Geospatial mapping and location visualization platform.
+* **Deno** - JavaScript/TypeScript runtime used for linting and formatting tooling.
+* **GitHub Actions** - Automated continuous integration build pipeline runner.
+* **SonarQube / SonarCloud** - Structural code checking analytics system.
+* **Vercel** - Production cloud deployment platform for Next.js frontend applications.
+---
+## High-Level Components - page.tsx
 
-### Windows
+### 1. Login Page
+* **Role**: The entry point for existing users. Collects credentials and starts the session.
+* **Core Files**:
+    * [`login/page.tsx`](./src/app/login/page.tsx) — Shows the login form, calls `POST /login`, and saves the token and userId to localStorage.
+* **Correlation**: Gets a token and role flag back from the backend, stores them, then sends the user to `/profile/{id}`.
 
-If you are using Windows, you first need to install
-WSL(Windows-Subsystem-Linux). You might need to reboot your computer for the
-installation, therefore, save and close all your other work and programs
+### 2. Registration Page
+* **Role**: The signup form for new users. Creates the account, logs the user in automatically, and previews the role color while filling it out.
+* **Core Files**:
+    * [`registration/page.tsx`](./src/app/registration/page.tsx) — Shows the full signup form with image upload, address autocomplete, and a role toggle. Calls `POST /register`.
+* **Correlation**: Sends the compressed profile picture, Google Places address, and all form fields in one request. After signup, follows the same session setup as login.
 
-1. Download the following [powershell script](./windows.ps1)\
-   ![downloadWindowsScript](https://github.com/user-attachments/assets/7372e029-8bed-41e4-80b7-b7079b0856be)
+### 3. Map Page
+* **Role**: The main browsing view for volunteers. Shows all open help requests on a map so they can apply or withdraw.
+* **Core Files**:
+    * [`map/page.tsx`](./src/app/map/page.tsx) — Loads all requests via `GET /help-requests-map`, draws Google Maps markers with clustering, and offers a filter panel plus a list-view toggle.
+* **Correlation**: Hides the volunteer's own requests, filters results on the client, and triggers apply/withdraw directly from the marker popup.
 
+### 4. Profile Page
+* **Role**: The public profile card for every user. Shows personal info, average rating, and received reviews, and pops up a pending review if one is waiting.
+* **Core Files**:
+    * [`profile/[id]/page.tsx`](./src/app/profile/[id]/page.tsx) — Loads user data via `GET /profile/{id}` and reviews via `GET /profile/{id}/reviews/received`.
+    * [`ReviewModal.tsx`](./src/app/components/ReviewModal.tsx) — Checks for a pending review on load, opens a modal, and handles submitting or dismissing it.
+* **Correlation**: Used by both roles and linked from the Navbar, My Applications, and My Requests. The modal handles reviews inline so no extra page is needed.
+
+### 5. Create Help Request Page
+* **Role**: Where recipients write new help requests. Captures all the request details and saves them.
+* **Core Files**:
+    * [`profile/[id]/CreateHelpRequest/page.tsx`](./src/app/profile/[id]/CreateHelpRequest/page.tsx) — Shows the request form (description, work type, date, time, duration, location) and calls `POST /help-requests`.
+* **Correlation**: The location must come from Google Places — plain text is rejected. Once saved, the request shows up on the volunteer Map Page right away.
+
+### 6. My Requests Page
+* **Role**: The recipient's dashboard for managing their own requests. Groups requests by status and lets the user accept or reject applicants.
+* **Core Files**:
+    * [`my-requests/page.tsx`](./src/app/my-requests/page.tsx) — Loads all requests and applicants, shows status badges, and offers accept/dismiss/delete buttons.
+* **Correlation**: Connects the recipient view to the volunteer's application flow. Once a volunteer is accepted, their contact info appears here so no outside messaging is needed.
+
+### 7. Edit Help Request Page
+* **Role**: Lets recipients edit a request as long as no volunteer has been accepted yet.
+* **Core Files**:
+    * [`my-requests/[id]/edit/page.tsx`](./src/app/my-requests/[id]/edit/page.tsx) — Loads the request via `GET /help-requests/{id}`, fills the form with the current values, and saves changes via `PUT /help-requests/{id}`.
+* **Correlation**: Uses the same form layout as the Create page. Disabled from My Requests once applicants exist, to avoid messing up the data.
+
+### 8. My Applications Page
+* **Role**: The volunteer's tracker for requests they've applied to. Shows the status of each one and reveals contact info once accepted.
+* **Core Files**:
+    * [`my-applications/page.tsx`](./src/app/my-applications/page.tsx) — Loads applications via `GET /users/{userId}/applications`, shows status badges, and only shows contact info when relevant.
+* **Correlation**: The volunteer-side mirror of My Requests. Finished (`DONE`) applications drop to the bottom so the active ones stay on top. Links out to recipient profiles.
+
+### 9. Settings Page
+* **Role**: Where users edit their profile and password. Also previews the new role color when the role toggle is flipped.
+* **Core Files**:
+    * [`settings/page.tsx`](./src/app/settings/page.tsx) — Loads the current profile via `GET /profile/{userId}`, saves edits via `PUT /profile/{userId}`, and changes the password via `POST /profile/{userId}/change-password`.
+* **Correlation**: Uses the same profile endpoint as the Profile Page. Switching roles updates the `ThemeProvider` right away, recoloring the whole app without a reload.
+
+### 10. Reviews Page
+* **Role**: The hub for post-task reviews. Asks users to rate finished requests and keeps a history of past reviews.
+* **Core Files**:
+    * [`reviews/page.tsx`](./src/app/reviews/page.tsx) — Loads any pending review via `GET /profile/{userId}/pendingReview`, submits ratings via `POST .../write`, and loads the history via `GET /profile/{userId}/reviews/done`.
+* **Correlation**: Pending reviews appear once the backend marks a request as `DONE`. Completed reviews feed the star rating shown on every Profile Page.
+
+
+### The Core Application Lifecycle — Frontend Session Bootstrap
+
+Here is how data flows across the entire client architecture during a common user event, such as a returning user logging in and landing on their protected dashboard:
+
+1. **Form Submission**: The **Login Page** captures the username and password from its input fields and fires a `POST /login` request to the backend with the credentials as a JSON payload.
+
+2. **Session Persistence**: On a successful response, the page extracts the returned `token`, `userId`, and `isVolunteer` flag and writes them into `localStorage` and `sessionStorage`, establishing the client-side session state that every subsequent page will rely on.
+
+3. **Programmatic Routing**: The Login Page invokes Next.js's router to redirect the user to `/profile/{id}`, handing control over to the protected zone of the app.
+
+4. **Auth Guard Check**: As the protected page mounts, the **`AuthWrapper`** component runs its `useEffect` hook, reads the token from sessionStorage, and either allows render to proceed or redirects back to `/login` if the token is absent — no backend round-trip required.
+
+5. **Theme Context Initialization**: In parallel, the **`ThemeProvider`** reads the `isVolunteer` flag from sessionStorage and feeds it into Ant Design's dynamic token system, switching the global primary color to teal or pink before any UI paints.
+
+6. **Navigation Hydration**: The **`Navbar`** consumes the same role context, renders the role-appropriate set of four destination icons, and fires `GET /profile/{userId}/pendingReview` to decide whether to display the red-dot badge on the profile icon.
+
+7. **Page Data Fetch**: Finally, the **Profile Page** itself fires `GET /profile/{id}` and `GET /profile/{id}/reviews/received`, populating the identity card and the received reviews list. If a pending review surfaces, the **`ReviewModal`** opens inline over the page rather than triggering a separate navigation — closing the bootstrap cycle with the user fully oriented inside the app.
 
 ---
-2. Open a new powershell terminal **with admin privileges** and run the following command and follow the instructions. Make sure that you open the powershell terminal at the path where you have downloaded the powershell script, otherwise the command will not work because it can not find the script. You can list currently accessible files in the powershell terminal with ```dir``` and you can use ```cd``` to navigate between directories
-   ```shell
-   C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File .\windows.ps1
-   ```
----
+## Launch & Deployment
 
-3. If you experience any issues, try re-running the script a couple of times. If
-   the installation remains unsuccessful, follow this
-   [youtube tutorial](https://youtu.be/GIYOoMDfmkM) or post your question in the
-   OLAT forum
+Our Next.js client uses npm as the package manager and includes a local `node_modules` ecosystem, meaning no external web server installations are required to run the frontend locally.
 
----
-4. After successful installation, you can open WSL/Ubuntu. You will need to choose a username and password, although no characters will be shown on the screen when typing the password but the system recognizes your input, no worries :) After these four steps your setup should look similar to this
-![initialUbuntuScreen](https://github.com/user-attachments/assets/ecd4d4c2-1239-4717-87af-a476e425d734)
+## Getting started with Next.js
 
-<br>
-<br>
-<br>
+- Documentation: <https://nextjs.org/docs>
+- Guides: <https://nextjs.org/learn>
+- Building your first Next.js app: <https://nextjs.org/docs/getting-started/project-structure>
 
-# Installation
-1. Open a new MacOS, Linux or WSL(Windows-Subsystem-Linux) terminal. Make sure you have git installed, you can check that by running
-   ```shell
-   git --version
-   ```
-   The output should be something similar to ```git version X.XX.X```, if not, try to install git in one of the following ways
-   #### MacOS
-   ```shell
-   brew install --formulae git
-   ```
-   #### Linux/WSL
-   ```shell
-   sudo apt-get install git
-   ```
-   If you are not using Ubuntu, you will need to install git with your package manager of choice
----
+## Prerequisites
 
-2. Clone the repository with git using the following command
-   ```shell
-   git clone https://github.com/YOUR_USERNAME/YOUR-CLIENT-REPO
-   ```
+Before launching, ensure your local workspace has:
 
----
-3. Navigate to the cloned directory in the terminal, in example with ```cd sopra-fs26-student-client```
----
+- **Node.js** (LTS version recommended — verify with `node -v`)
+- **npm** (bundled with Node.js — verify with `npm -v`)
 
-4. Inside the repository folder (with `ls` you can list files) there is a bash
-   script _setup.sh_ that will install everything you need, according to the
-   system you are using. Run the following command and follow the instructions
-   ```shell
-   source setup.sh
-   ```
+### Building with npm
 
-The screenshot below shows an example of how this looks
-![sourceScript](https://github.com/user-attachments/assets/9f804291-85b2-4a49-8da0-c6c95db390f3)
+#### Standard Next.js Execution
+1. Clone the repository and navigate to the project directory root.
+2. Install dependencies and compile the local `node_modules` tree:
+   You can use npm to install and run the application.
+-   macOS: `npm`
+-   Linux: `npm`
+-   Windows: `npm`
 
+### Install
 
-The installation script _setup.sh_ can take a few minutes, please be patient and
-do not abort the process. If you encounter any issues, please close the terminal
-and open a new one and try to run the command again
+```bash
+npm install
+```
 
-<br>
-<br>
-<br>
-
-# Troubleshooting the installation
-
-If the four steps above did not work for you and re-running the setup.sh script
-a couple of times did not help, try running the following steps manually
-
-1. Open a new MacOS, Linux or WSL(Windows-Subsystem-Linux) terminal and navigate
-   to the repository with `cd`. Then ensure that curl is installed
-   ```shell
-   curl --version
-   ```
-   The output should be something similar to `curl X.X.X`, if not, try to
-   install curl in one of the following ways
-   #### MacOS
-   ```shell
-   brew install --formulae curl
-   ```
-   #### Linux/WSL
-   ```shell
-   sudo apt-get install curl
-   ```
-   If you are not using Ubuntu, you will need to install curl with your package
-   manager of choice
-
----
-2. Download Determinate Nix
-   ```shell
-   curl --proto '=https' --tlsv1.2 -ssf --progress-bar -L https://install.determinate.systems/nix -o install-nix.sh
-   ```
----
-
-3. Install Determinate Nix
-   ```shell
-   sh install-nix.sh install --determinate --no-confirm --verbose
-   ```
-
----
-4. Install direnv using nix
-   ```shell
-   nix profile install nixpkgs#direnv
-   ```
-   If you encounter a permission error, try running with sudo
-   ```shell
-   sudo nix profile install nixpkgs#direnv
-   ```
----
-
-5. Find out what shell you are using
-   ```shell
-   echo $SHELL
-   ```
-
----
-6. Hook direnv into your shell according to [this guide](https://github.com/direnv/direnv/blob/master/docs/hook.md)
----
-
-7. Allow direnv to access the repository
-   ```shell
-   direnv allow
-   ```
-
-If all troubleshooting steps above still did not work for you, try the following
-as a **last resort**: Open a new terminal and navigate to the client repository
-with `cd`. Run the command. Close the terminal again and do this for each of the
-six commands above, running each one in its own terminal, one after the other.
-
-<br>
-<br>
-<br>
-
-# Available commands after successful installation
-
-With the installation steps above your system now has all necessary tools for
-developing and running the sopra frontend application. Amongst others, two
-javascript runtimes have been installed for running the app:
-
-- [NodeJS](https://nodejs.org)
-- [Deno](https://deno.com)
-
-Runtimes is what your system needs to compile
-[typescript](https://www.typescriptlang.org) code (used in this project) to
-javascript and execute the application. You can use either runtime for this
-project, according to your preference. Both come with an included package
-manager, `npm` for nodejs and `deno` for deno. Thereby, the
-[package.json](./package.json) file defines possible commands that can be
-executed (using either `deno` or `npm`). The following commands are available in
-this repository:
-
-1. **Running the development server** - This will start the application in
-   development mode, meaning that changes to the code are instantly visible live
-   on [http://localhost:3000](http://localhost:3000) in the browser
-   ```bash
-   deno task dev
-   ```
-2. **Building a production-ready application** - This will create an optimized
-   production build that is faster and takes up less space. It is a static
-   build, meaning that changes to the code will only be included when the
-   command is run again
-   ```bash
-   deno task build
-   ```
-3. **Running the production application** - This will start the optimized
-   production build and display it on
-   [http://localhost:3000](http://localhost:3000) in the browser. This command
-   can only be run _after_ a production build has been created with the command
-   above and will not preview live code changes
-   ```bash
-   deno task start
-   ```
-4. **Linting the entire codebase** - This command allows to check the entire
-   codebase for mistakes, errors and warnings
-   ```bash
-   deno task lint
-   ```
-5. **Formatting the entire codebase** - This command will ensure that proper
-   indentation, spacing and further styling is applied to the code. This ensures
-   that the code looks uniform and the same across your team members, it is best
-   to run this command _every time before pushing changes to your repository_!
-   ```bash
-   deno task fmt
-   ```
-
-All of the above mentioned commands can also be run using the nodejs runtime by
-substituting `deno task` with `npm run`, i.e
+### Run
 
 ```bash
 npm run dev
 ```
 
-<br>
-<br>
-<br>
+You can verify that the server is running by visiting `localhost:3000` in your browser.
 
-# Docker
+### Test
 
-### Introduction
-This year Docker will be used to ease the process of deployment.\
-Docker is a tool that uses containers as isolated environments, ensuring that the application runs consistently and uniformly across different devices.\
-Everything in this repository is already set up to minimize your effort for deployment.\
-All changes to the main branch will automatically be pushed to dockerhub and optimized for production.
-
-### Setup
-1. **One** member of the team should create an account on [dockerhub](https://hub.docker.com/), _incorporating the group number into the account name_, for example, `SoPra_group_XX`.\
-2. This account then creates a repository on dockerhub with the _same name as the group's Github repository name_.\
-3. Finally, the person's account details need to be added as [secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository) to the group's repository:
-    - dockerhub_username (the username of the dockerhub account from step 1, for example, `SoPra_group_XX`)
-    - dockerhub_password (a generated PAT([personal access token](https://docs.docker.com/docker-hub/access-tokens/)) of the account with read and write access)
-    - dockerhub_repo_name (the name of the dockerhub repository from step 2)
-
-### Pull and run
-Once the image is created and has been successfully pushed to dockerhub, the image can be run on any machine.\
-Ensure that [Docker](https://www.docker.com/) is installed on the machine you wish to run the container.\
-First, pull (download) the image with the following command, replacing your username and repository name accordingly.
-
-```docker pull <dockerhub_username>/<dockerhub_repo_name>```
-
-Then, run the image in a container with the following command, again replacing _<dockerhub_username>_ and _<dockerhub_repo_name>_ accordingly.
-
-```docker run -p 3000:3000 <dockerhub_username>/<dockerhub_repo_name>```
-
-<br>
-<br>
-<br>
-
-# Installing additional software by modifying [flake.nix](./flake.nix)
-
-As this project uses Determinate Nix for managing development software,
-installing additional tools you might need is straightforward. You only need to
-adjust the section `nativeBuildInputs = with pkgs;` in the
-[nix flake](./flake.nix) with the package you would like to install. For
-example, if you want to use docker (the [Dockerfile](./Dockerfile) and
-[.dockerignore](./.dockerignore) are already included in this repo) you can
-simply add:
-
-```nix
-nativeBuildInputs = with pkgs;
-  [
-    nodejs
-    git
-    deno
-    watchman
-    docker ### <- added docker here
-  ]
-  ++ lib.optionals stdenv.isDarwin [
-    xcodes
-  ]
-  ++ lib.optionals (system == "aarch64-linux") [
-    qemu
-  ];
+```bash
+npm test
 ```
 
-and add the package path to the `shellHook''` section
+### Development Mode
+You can start the frontend in development mode, this will automatically trigger a hot reload of the application
+once the content of a file has been changed.
 
-```nix
-        devShells.default = pkgs.mkShell {
-          inherit nativeBuildInputs;
+Open a terminal window and run:
 
-          shellHook = ''
-            export HOST_PROJECT_PATH="$(pwd)"
-            export COMPOSE_PROJECT_NAME=sopra-fs26-template-client
-            
-            export PATH="${pkgs.nodejs}/bin:$PATH"
-            export PATH="${pkgs.git}/bin:$PATH"
-            export PATH="${pkgs.deno}/bin:$PATH"
-            export PATH="${pkgs.watchman}/bin:$PATH"
-            export PATH="${pkgs.docker}/bin:$PATH" ### <- added docker path here
-            
-            ### rest of code ###
-        };
+`npm run dev`
+
+If you want to run the linter alongside development to catch issues as you code, open a second terminal and run:
+
+`npm run lint -- --watch`
+
+If you want to verify the production build behaves correctly instead, use the following commands:
+
+`npm run build`
+
+and then:
+
+`npm run start`
+
+## Debugging
+If something is not working and/or you don't know what is going on. We recommend using a debugger and step-through the process step-by-step.
+
+To configure a debugger for the Next.js dev server (i.e. the process you start with `npm run dev` command), do the following:
+
+1. Open Tab: **Run**/Edit Configurations
+2. Add a new **Node.js** (or **Attach to Node.js/Chrome**) configuration and name it properly
+3. Start the Server in Debug mode: `NODE_OPTIONS='--inspect' npm run dev`
+4. Press `Shift + F9` or use **Run**/Debug "Name of your task"
+5. Set breakpoints in the application where you need them (in your IDE or via Chrome DevTools at `chrome://inspect`)
+6. Step through the process one step at a time
+
+---
+
+## Git Workflow & Collaboration Guide
+
+To keep our codebase stable and prevent team members from accidentally overwriting each other's changes, **never write code or push commits directly to the `main` branch**. Always use the following **Feature-Branch Workflow** to isolate your work for each specific GitHub Issue:
+
+### 1. Sync Your Local Machine with the Cloud
+Before starting any new task or writing a single line of code, pull the latest, verified changes from your team to avoid merge conflicts later.
+```bash
+# Switch your local workspace to the main branch
+git checkout main
+
+# Download and merge the latest code from GitHub
+git pull origin main 
 ```
 
-and finally do `direnv reload` in your terminal inside the repository folder. If
-you need a specific version of a package, you can override it in the `overlays`
-section
+### 2. Create a Dedicated Branch for Your GitHub Issue
+Every feature, bug fix, or sub-task must live on its own separate branch. Name the branch clearly after the issue number or task you are tackling.
+```bash
+# Creates a new branch and immediately switches you onto it
+git checkout -b task-<issue-number>
 
-```nix
-overlays = [
-  (self: super: {
-    nodejs = super.nodejs_23; ### <- changed to nodejs 23
-  })
-];
+# Example:
+git checkout -b task-104-login-screen
 ```
+### 3. Monitor Your Work in Progress
+As you edit or add files, use diagnostic commands frequently to see exactly what changes are sitting in your workspace.
+```bash
+# Lists which files have been modified, deleted, or are currently untracked
+git status
 
-<br>
-<br>
-<br>
+# Shows a line-by-line comparison of your code changes since your last save
+git diff
+```
+### 4. Save and Upload Your Progress
+Once your feature is complete and working locally, bundle your changes, create a local snapshot, and publish your branch up to GitHub.
+```bash
+# 1. Stage all modified files to prepare them for a snapshot save
+git add .
 
-# Miscellaneous
+# 2. Commit the staged changes with a clear, descriptive message and the task number with a #
+git commit -m "implemented screenreader aria labels for request inputs #127"
 
-This project uses
-[`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts)
-to automatically optimize and load [Geist](https://vercel.com/font), a new font
-family for Vercel.
+# 3. Push your local branch up to the remote GitHub repository
+git push origin task-<issue-number>
+```
+### 5. Merge Your Code on GitHub via Pull Request
+1. Navigate to the project repository page on GitHub in your web browser.
 
-## Learn More
+2. Click the green "Compare & pull request" banner that automatically appears at the top of the page.
 
-To learn more about Next.js, take a look at the following resources:
+3. Link the Pull Request to your original task tracking card or issue.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Verify that the automated GitHub Actions continuous integration pipeline tests run successfully (turn green).
 
-You can check out
-[the Next.js GitHub repository](https://github.com/vercel/next.js) - your
-feedback and contributions are welcome!
+5. Once reviewed and approved by a team member, click "Squash and merge" to safely absorb your completed branch back into the stable main production codebase.
 
-## Deploy on Vercel
+---
+## Roadmap
+### 1. UI Polish
+* **Animations & Details**: Add animations when things are happening for a smoother UI experience. A "pulse" for the pin on the map can be considered, since mobjects with movement are easier for the eye to see. As well as more detailed animations when the user presses all sorts of buttons. But be careful to not overwhelm or confuse elderly users!
+* **Nightmode**: Implement Night mode, so Users have a better UX and better sleep.
 
-The easiest way to deploy your Next.js app is to use the
-[Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme)
-from the creators of Next.js.
+### 2. Accessibility
+* **Add proper Font-Size Change**: Even though Users can change the fot size via ctrl +, it would be good to have a proper, permanent font-size-change for each user.
 
-Check out our
-[Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying)
-for more details.
+---
+## Authors and Acknowledgment
 
-## Windows users
+This platform was designed, engineered, and maintained by:
 
-Please ensure that the repository folder is inside the WSL2 filesystem
-(otherwise, the disk IO performance will be horrible). If you followed the
-tutorial closely, this is already the case. If for whatever reason you deviated
-from the instructions, please take the time now to ensure the repo is on the WSL
-filesystem. You can do this either by
-
-1. _Cloning the repository again with git in a WSL/Ubuntu terminal using the
-   following command and deleting the repository on the windows filesystem_
-   ```shell
-   git clone https://github.com/HASEL-UZH/sopra-fs26-template-client
-   ```
-2. _Using the Windows explorer to move the repository from the windows
-   filesystem to WSL filesystem_ In the left overview of all folders and drives
-   there should be a new filesystem called Linux (also check in the network
-   tab). Open the Linux drive and open the folder named "home", followed by your
-   username. Copy the whole repository folder from your current location to the
-   Linux folder /home/your-username (note that the folder will initially be
-   empty). Finally, delete the folder from your current location such that you
-   only have the folder inside the Linux filesystem.
-3. _Using the command line in WSL to move the repo_ Open a new Ubuntu / WSL2
-   terminal window. This will automatically open your home folder of the Linux
-   file system. You then need to locate where the repository / folder that you
-   have downloaded resides. You can use the `cp -ar` command to copy the folder
-   from the Windows drive to the Linux filesystem. The command takes the
-   following arguments: cp **source_file** _target_file_. Thus we need to
-   specify **source_file** the folder we want to copy from Windows filesystem
-   and the _target_file_ where to copy the folder to in the Linux filesystem. As
-   visible in this screenshot
-   ![copyFolderToUbuntu](https://github.com/user-attachments/assets/363c2098-beca-48bc-bdff-582b83c96618)
-
-   the repository folder resides under the C drive in /mnt/c/. If your file is
-   not on your C drive, the folder path will be something like /mnt/d/. In the
-   screenshot, the downloaded repository folder is in the Downloads folder of
-   the current user on the C drive, thus the path for **source_file** is
-   `/mnt/c/Users/immol/Downloads`. The terminal in the screenshot is currently
-   in the home directory, indicated by ~ in the path in blue. As we want to copy
-   the folder to the home folder (/home/your-username) we can specify the
-   current directory (.) as the _target_file_, thus the dot at the end of the
-   command. If you happen to not be in the home folder, you can also run the
-   command with explicitly copying to the home folder as such:
-   ```bash
-   cp -ar /mnt/c/your-path /home/your-username
-   ```
-   Else you can run
-   ```bash
-   cp -ar /mnt/c/your-path .
-   ```
-   with . indicating to copy to the current path (in this case your home
-   folder). You can check if the repository was successfully copied over using
-   `ls` to list folders and files, as visible in the screenshot. You can then
-   delete the downloaded folder / repository from the Windows filesystem in the
-   explorer.
+* **Timur Yu** ([ti-yu](https://github.com/ti-yu))
+* **Lisa Gehrig** ([lisgeh2](https://github.com/lisgeh2))
+* **Jonathan Boggia** ([jonathanboggia](https://github.com/jonathanboggia))
+* **Romeo Pestalozzi** ([romevp](https://github.com/romevp))
+---
+## License
+MIT, APACHE
